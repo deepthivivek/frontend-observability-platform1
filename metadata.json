@@ -1,0 +1,6 @@
+{
+  "name": "Observability Dashboard Engine",
+  "description": "Enterprise-grade Frontend Observability & API Monitoring Dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
