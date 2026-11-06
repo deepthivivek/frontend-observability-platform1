@@ -42,24 +42,24 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div
           role="alert"
           aria-live="assertive"
-          className="rounded-xl border border-red-900/50 bg-red-950/20 p-5 text-red-200 backdrop-blur-sm"
+          className="rounded-2xl border border-rose-500/40 bg-[#1E1724]/90 p-5 text-rose-200 backdrop-blur-xl shadow-[0_0_30px_rgba(244,63,94,0.18)]"
         >
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-red-900/40 text-red-400">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/30 shadow-[0_0_12px_rgba(244,63,94,0.2)]">
               <AlertTriangle className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-base text-red-200">
+              <h3 className="font-semibold text-base text-white">
                 {this.props.fallbackTitle || 'Component Rendering Exception'}
               </h3>
-              <p className="mt-1 text-sm text-red-300/80">
+              <p className="mt-1 text-sm text-rose-300/80">
                 {this.props.fallbackMessage ||
                   this.state.error?.message ||
                   'An unexpected error occurred while rendering this module.'}
               </p>
               <button
                 onClick={this.handleReset}
-                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-900/40 hover:bg-red-800/60 border border-red-700/50 text-red-100 transition-colors"
+                className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-100 transition-colors shadow-[0_0_10px_rgba(244,63,94,0.2)]"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 Retry Component

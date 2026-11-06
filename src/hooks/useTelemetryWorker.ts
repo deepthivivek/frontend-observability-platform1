@@ -40,6 +40,7 @@ interface UseTelemetryWorkerReturn {
 
 export function useTelemetryWorker(): UseTelemetryWorkerReturn {
   const workerRef = useRef<Worker | null>(null);
+  const isWorkerReadyRef = useRef<boolean>(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [isIngesting, setIsIngesting] = useState(false);
   const [totalLogsCount, setTotalLogsCount] = useState(0);
@@ -149,19 +150,24 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
 
         worker.onerror = (err) => {
           console.warn('Worker runtime error, falling back to main-thread processing:', err);
+          isWorkerReadyRef.current = false;
           setStatus('error');
         };
 
+        isWorkerReadyRef.current = true;
         Promise.resolve().then(() => setStatus('ready'));
       } else {
+        isWorkerReadyRef.current = false;
         Promise.resolve().then(() => setStatus('error'));
       }
     } catch (e) {
       console.warn('Worker initialization failed, fallback active', e);
+      isWorkerReadyRef.current = false;
       Promise.resolve().then(() => setStatus('error'));
     }
 
     return () => {
+      isWorkerReadyRef.current = false;
       worker?.terminate();
       workerRef.current = null;
     };
@@ -179,7 +185,7 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
       for (let i = 0; i < total; i++) allIndices[i] = i;
       mainThreadFilteredIndices.current = allIndices;
 
-      if (workerRef.current && status === 'ready') {
+      if (workerRef.current && isWorkerReadyRef.current) {
         const totalChunks = Math.ceil(total / chunkSize);
         for (let i = 0; i < total; i += chunkSize) {
           const chunk = logs.slice(i, i + chunkSize);
@@ -201,7 +207,7 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
         setIsIngesting(false);
       }
     },
-    [status]
+    []
   );
 
   // Apply filters
@@ -209,7 +215,7 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
     async (filters: Partial<FilterState>): Promise<number> => {
       const reqId = getNextRequestId();
 
-      if (workerRef.current && status === 'ready') {
+      if (workerRef.current && isWorkerReadyRef.current) {
         return new Promise<number>((resolve, reject) => {
           activeRequests.current.set(reqId, { resolve, reject });
           const action: WorkerAction = {
@@ -232,14 +238,14 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
       setActiveMetrics(computeAggregatedMetrics(subset));
       return indices.length;
     },
-    [status, getNextRequestId]
+    [getNextRequestId]
   );
 
   // Refresh metrics
   const refreshMetrics = useCallback(async (): Promise<AggregatedMetrics> => {
     const reqId = getNextRequestId();
 
-    if (workerRef.current && status === 'ready') {
+    if (workerRef.current && isWorkerReadyRef.current) {
       return new Promise<AggregatedMetrics>((resolve, reject) => {
         activeRequests.current.set(reqId, { resolve, reject });
         const action: WorkerAction = {
@@ -259,14 +265,14 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
     const metrics = computeAggregatedMetrics(subset);
     setActiveMetrics(metrics);
     return metrics;
-  }, [status, getNextRequestId]);
+  }, [getNextRequestId]);
 
   // Compute time buckets
   const computeBuckets = useCallback(
     async (bucketSizeMinutes: number = 1): Promise<TimeBucket[]> => {
       const reqId = getNextRequestId();
 
-      if (workerRef.current && status === 'ready') {
+      if (workerRef.current && isWorkerReadyRef.current) {
         return new Promise<TimeBucket[]>((resolve, reject) => {
           activeRequests.current.set(reqId, { resolve, reject });
           const action: WorkerAction = {
@@ -287,7 +293,7 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
       setTimeBuckets(buckets);
       return buckets;
     },
-    [status, getNextRequestId]
+    [getNextRequestId]
   );
 
   // Evaluate anomalies
@@ -295,7 +301,7 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
     async (rules: AnomalyRule[]): Promise<DetectedAnomaly[]> => {
       const reqId = getNextRequestId();
 
-      if (workerRef.current && status === 'ready') {
+      if (workerRef.current && isWorkerReadyRef.current) {
         return new Promise<DetectedAnomaly[]>((resolve, reject) => {
           activeRequests.current.set(reqId, { resolve, reject });
           const action: WorkerAction = {
@@ -311,7 +317,7 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
       setAnomalies(detected);
       return detected;
     },
-    [status, getNextRequestId]
+    [getNextRequestId]
   );
 
   // Retrieve slice of filtered logs for virtualized views or table
@@ -335,10 +341,10 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
     setDeltas(null);
     setTimeBuckets([]);
     setAnomalies([]);
-    if (workerRef.current && status === 'ready') {
+    if (workerRef.current && isWorkerReadyRef.current) {
       workerRef.current.postMessage({ type: 'MEMORY_GUARD' });
     }
-  }, [status]);
+  }, []);
 
   return {
     status,

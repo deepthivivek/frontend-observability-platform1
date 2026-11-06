@@ -90,4 +90,4 @@ export interface DetectedAnomaly {
 export type TimeRangePreset = '15m' | '1h' | '24h' | '7d';
 export type TimezoneMode = 'local' | 'utc' | 'relative';
 export type DensityMode = 'comfortable' | 'compact';
-export type DashboardView = 'dashboard' | 'logs' | 'analytics' | 'anomalies' | 'settings';
+export type DashboardView = 'dashboard' | 'logs' | 'analytics' | 'anomalies' | 'rum' | 'governance' | 'settings' | 'metrics' | 'traces' | 'incidents' | 'compliance' | 'synthetic';
