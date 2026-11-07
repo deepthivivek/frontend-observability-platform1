@@ -110,7 +110,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
 
   if (!canViewIncidents) {
     return (
-      <div className="p-8 text-center bg-[#0F172A] border border-slate-800 rounded-2xl text-slate-400 space-y-3">
+      <div className="p-8 text-center bg-surface border border-subtleBorder rounded-2xl text-slate-400 space-y-3">
         <ShieldAlert className="w-8 h-8 text-rose-400 mx-auto" />
         <h3 className="font-semibold text-white">Access Restricted</h3>
         <p className="text-xs max-w-md mx-auto">
@@ -124,7 +124,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Incident Selector & Live Status Banner */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.2)]">
             <Flame className="w-6 h-6 animate-pulse" />
@@ -148,7 +148,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
           <select
             value={selectedIncidentId}
             onChange={(e) => setSelectedIncidentId(e.target.value)}
-            className="bg-[#0B0F17] border border-slate-700 text-slate-200 text-xs font-mono rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500 transition"
+            className="bg-canvas border border-subtleBorder text-slate-200 text-xs font-mono rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500 transition"
           >
             {incidents.map((inc) => (
               <option key={inc.id} value={inc.id}>
@@ -169,7 +169,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
 
       {/* 2. Active Incident Ribbon & Quick Status Controls */}
       {activeIncident && (
-        <div className="bg-[#0B0F17]/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+        <div className="bg-canvas/90 border border-subtleBorder rounded-2xl p-5 shadow-xl space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center space-x-3">
@@ -192,7 +192,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
             </div>
 
             {/* Lifecycle Phase Status Selector */}
-            <div className="flex items-center space-x-2 bg-[#0F172A] p-1.5 rounded-xl border border-slate-800 text-xs font-mono">
+            <div className="flex items-center space-x-2 bg-surface p-1.5 rounded-xl border border-subtleBorder text-xs font-mono">
               <span className="text-[10px] uppercase text-slate-500 px-2">Status:</span>
               {(['INVESTIGATING', 'IDENTIFIED', 'MITIGATING', 'RESOLVED'] as IncidentStatus[]).map((st) => (
                 <button
@@ -214,7 +214,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-800/80 font-mono text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-subtleBorder font-mono text-xs">
             <div>
               <span className="text-[10px] text-slate-500 block">Peak Error Rate</span>
               <span className="font-bold text-rose-400">{activeIncident.errorRatePeak}%</span>
@@ -238,7 +238,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
       )}
 
       {/* 3. Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-3 font-mono text-xs">
+      <div className="flex items-center space-x-2 border-b border-subtleBorder pb-3 font-mono text-xs">
         <button
           onClick={() => setActiveTab('overview')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition ${
@@ -297,18 +297,18 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
               {/* Left Column: Top Errors & Root Cause */}
               <div className="lg:col-span-7 space-y-5">
                 {/* Root Cause Card */}
-                <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-2">
+                <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl space-y-2">
                   <span className="text-xs font-mono font-bold uppercase tracking-wider text-rose-400 flex items-center space-x-1.5">
                     <Zap className="w-4 h-4" />
                     <span>Identified Root-Cause Bottleneck</span>
                   </span>
-                  <p className="text-xs text-slate-300 leading-relaxed bg-[#0B0F17] p-3.5 rounded-xl border border-slate-800 font-mono">
+                  <p className="text-xs text-slate-300 leading-relaxed bg-canvas p-3.5 rounded-xl border border-subtleBorder font-mono">
                     {activeIncident.rootCause || 'Root cause investigation in progress.'}
                   </p>
                 </div>
 
                 {/* Top Error Exceptions */}
-                <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+                <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
                       Top Correlated Exception Traces
@@ -322,7 +322,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
                     {activeIncident.topErrors.map((err, idx) => (
                       <div
                         key={idx}
-                        className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3.5 space-y-2 font-mono text-xs"
+                        className="bg-canvas border border-subtleBorder rounded-xl p-3.5 space-y-2 font-mono text-xs"
                       >
                         <div className="flex items-center justify-between">
                           <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-bold">
@@ -332,7 +332,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
                         </div>
                         <div className="text-slate-200 font-semibold">{err.message}</div>
                         {err.stack && (
-                          <pre className="text-[11px] text-slate-500 bg-slate-900/80 p-2.5 rounded-lg overflow-x-auto whitespace-pre leading-relaxed border border-slate-800/80">
+                          <pre className="text-[11px] text-slate-500 bg-elevated/80 p-2.5 rounded-lg overflow-x-auto whitespace-pre leading-relaxed border border-subtleBorder">
                             {err.stack}
                           </pre>
                         )}
@@ -343,7 +343,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
 
                 {/* Correlated Trace Links */}
                 {activeIncident.correlatedTraceIds.length > 0 && (
-                  <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+                  <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl space-y-3">
                     <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
                       Correlated Distributed Traces
                     </span>
@@ -352,7 +352,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
                         <button
                           key={traceId}
                           onClick={() => onNavigateToTraces && onNavigateToTraces(traceId)}
-                          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-xs font-mono text-cyan-300 hover:text-white transition"
+                          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-canvas hover:bg-slate-800 border border-subtleBorder text-xs font-mono text-cyan-300 hover:text-white transition"
                         >
                           <Layers className="w-3.5 h-3.5 text-cyan-400" />
                           <span>{traceId}</span>
@@ -365,8 +365,8 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
               </div>
 
               {/* Right Column: Incident Timeline */}
-              <div className="lg:col-span-5 bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="lg:col-span-5 bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-subtleBorder pb-3">
                   <span className="text-xs font-mono font-bold uppercase tracking-wider text-white flex items-center space-x-2">
                     <Clock className="w-4 h-4 text-indigo-400" />
                     <span>Incident Event Timeline</span>
@@ -377,7 +377,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
                 <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
                   {activeIncident.timeline.map((evt, idx) => (
                     <div key={idx} className="relative group">
-                      <div className="absolute -left-[29px] top-1 w-3.5 h-3.5 rounded-full bg-[#0F172A] border-2 border-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                      <div className="absolute -left-[29px] top-1 w-3.5 h-3.5 rounded-full bg-surface border-2 border-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-[10px] font-mono">
                           <span
@@ -415,7 +415,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
                 {activeIncident.suggestedRunbooks.map((rb) => (
                   <div
                     key={rb.actionId}
-                    className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4 hover:border-slate-700 transition"
+                    className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4 hover:border-subtleBorder transition"
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between">
@@ -434,7 +434,7 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
                       <p className="text-xs text-slate-400 leading-relaxed">{rb.description}</p>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                    <div className="pt-3 border-t border-subtleBorder flex items-center justify-between">
                       <span className="text-[10px] font-mono text-slate-500">
                         {rb.requiresHitlApproval ? 'Requires HITL' : 'Auto-Approvable'}
                       </span>

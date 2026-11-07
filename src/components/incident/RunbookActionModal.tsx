@@ -93,9 +93,9 @@ export const RunbookActionModal: React.FC<RunbookActionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="relative w-full max-w-2xl bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-100">
+      <div className="relative w-full max-w-2xl bg-surface border border-subtleBorder rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-100">
         {/* Header */}
-        <div className="p-5 border-b border-slate-800 bg-[#0B0F17]/90 flex items-center justify-between">
+        <div className="p-5 border-b border-subtleBorder bg-canvas/90 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div
               className={`p-2.5 rounded-xl border ${
@@ -145,9 +145,9 @@ export const RunbookActionModal: React.FC<RunbookActionModalProps> = ({
         {/* Content Body */}
         <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
           {/* Action Description */}
-          <div className="bg-[#0B0F17]/60 border border-slate-800/90 rounded-xl p-4 text-xs text-slate-300">
+          <div className="bg-canvas/60 border border-subtleBorder/90 rounded-xl p-4 text-xs text-slate-300">
             <p className="leading-relaxed">{runbook.description}</p>
-            <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <div className="mt-3 pt-3 border-t border-subtleBorder flex items-center justify-between text-[11px] font-mono text-slate-400">
               <span>Incident Link: <strong className="text-white">{incidentId}</strong></span>
               <span>Operator: <strong className="text-white">{currentUser.name}</strong> ({currentUser.role})</span>
             </div>
@@ -214,7 +214,7 @@ export const RunbookActionModal: React.FC<RunbookActionModalProps> = ({
               </div>
 
               {/* Terminal View */}
-              <div className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3 font-mono text-[11px] space-y-1 overflow-x-auto max-h-48 text-slate-300 shadow-inner">
+              <div className="bg-canvas border border-subtleBorder rounded-xl p-3 font-mono text-[11px] space-y-1 overflow-x-auto max-h-48 text-slate-300 shadow-inner">
                 {executionResult.stdout.map((line, idx) => (
                   <div key={idx} className="flex items-start space-x-2">
                     <span className="text-slate-600 select-none">&gt;</span>
@@ -230,7 +230,7 @@ export const RunbookActionModal: React.FC<RunbookActionModalProps> = ({
               </div>
 
               {/* Merkle Cryptographic Receipt Badge */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs font-mono">
+              <div className="bg-elevated/90 border border-subtleBorder rounded-xl p-3 flex items-center justify-between text-xs font-mono">
                 <div className="space-y-0.5 truncate mr-2">
                   <div className="flex items-center space-x-1.5 text-indigo-300">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
@@ -272,11 +272,11 @@ export const RunbookActionModal: React.FC<RunbookActionModalProps> = ({
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="p-4 border-t border-slate-800 bg-[#0B0F17]/90 flex items-center justify-between">
+        <div className="p-4 border-t border-subtleBorder bg-canvas/90 flex items-center justify-between">
           <button
             onClick={() => handleExecute(true)}
             disabled={isExecuting}
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-xs text-slate-200 font-mono transition disabled:opacity-50"
+            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl border border-subtleBorder bg-slate-800/80 hover:bg-slate-700 text-xs text-slate-200 font-mono transition disabled:opacity-50"
           >
             <RotateCw className={`w-3.5 h-3.5 ${isExecuting ? 'animate-spin' : ''}`} />
             <span>Simulate Dry Run</span>

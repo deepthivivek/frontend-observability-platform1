@@ -49,10 +49,10 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       role="menu"
       aria-label="Log Row Actions Menu"
       style={{ left: `${adjustedX}px`, top: `${adjustedY}px` }}
-      className="fixed z-50 w-56 rounded-xl border border-slate-800 bg-[#131B2E] shadow-[0_10px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl p-1.5 text-xs text-slate-200 font-sans animate-in fade-in zoom-in-95 duration-100"
+      className="fixed z-50 w-56 rounded-xl border border-white/10 bg-[#121318] shadow-[0_10px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl p-1.5 text-xs text-slate-200 font-sans animate-in fade-in zoom-in-95 duration-100"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="px-2.5 py-1.5 border-b border-slate-800/80 mb-1">
+      <div className="px-2.5 py-1.5 border-b border-white/10 mb-1">
         <div className="font-semibold text-white truncate max-w-[190px]">
           {log.method} {log.endpoint}
         </div>

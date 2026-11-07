@@ -58,7 +58,7 @@ export const SyntheticMonitors: React.FC<SyntheticMonitorsProps> = ({
     <div className="space-y-5 font-mono text-xs">
       {/* 1. Synthetic Status Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="p-4 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl">
+        <div className="p-4 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl">
           <div className="flex items-center justify-between text-slate-400 mb-1">
             <span className="font-bold text-[11px] uppercase">Active Synthetic Probes</span>
             <Activity className="h-4 w-4 text-indigo-400" />
@@ -91,8 +91,8 @@ export const SyntheticMonitors: React.FC<SyntheticMonitorsProps> = ({
       {/* 2. Scripted Flow Runner & Multi-Region Status Split */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left: Scripted Synthetic Monitors List (5 cols) */}
-        <div className="lg:col-span-5 rounded-2xl border border-slate-800 bg-[#131B2E] overflow-hidden flex flex-col shadow-xl">
-          <div className="p-3.5 bg-[#0B0F17] border-b border-slate-800 flex items-center justify-between text-slate-400 text-xs font-semibold">
+        <div className="lg:col-span-5 rounded-2xl border border-white/10 bg-[#121318] overflow-hidden flex flex-col shadow-xl">
+          <div className="p-3.5 bg-[#09090b] border-b border-white/10 flex items-center justify-between text-slate-400 text-xs font-semibold">
             <span className="text-white">Scripted Synthetic Workflows</span>
             <span>{monitors.length} Monitors</span>
           </div>
@@ -112,7 +112,7 @@ export const SyntheticMonitors: React.FC<SyntheticMonitorsProps> = ({
                       ? isPassing
                         ? 'border-emerald-500/50 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
                         : 'border-rose-500/50 bg-rose-950/30 shadow-[0_0_15px_rgba(244,63,94,0.2)]'
-                      : 'border-slate-800/80 bg-[#0B0F17]/80 hover:border-slate-700'
+                      : 'border-white/10 bg-[#09090b]/80 hover:border-white/10'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
@@ -144,7 +144,7 @@ export const SyntheticMonitors: React.FC<SyntheticMonitorsProps> = ({
                     {mon.targetUrl}
                   </p>
 
-                  <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-800/60 pt-2">
+                  <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-500 border-t border-white/10/60 pt-2">
                     <span>Freq: every {mon.frequencyMinutes}m</span>
                     <span>{mon.steps.length} Assertions</span>
                   </div>
@@ -155,8 +155,8 @@ export const SyntheticMonitors: React.FC<SyntheticMonitorsProps> = ({
         </div>
 
         {/* Right: Step Execution Breakdown & Regional Latency Matrix (7 cols) */}
-        <div className="lg:col-span-7 rounded-2xl border border-slate-800 bg-[#131B2E] overflow-hidden flex flex-col shadow-xl">
-          <div className="p-3.5 bg-[#0B0F17] border-b border-slate-800 flex items-center justify-between">
+        <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-[#121318] overflow-hidden flex flex-col shadow-xl">
+          <div className="p-3.5 bg-[#09090b] border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-2 text-white">
               <Terminal className="h-4 w-4 text-indigo-400" />
               <span className="font-semibold text-xs">
@@ -218,7 +218,7 @@ export const SyntheticMonitors: React.FC<SyntheticMonitorsProps> = ({
                       key={step.id}
                       className={`p-3 rounded-xl border transition-all ${
                         isPassed
-                          ? 'border-slate-800 bg-[#0B0F17]'
+                          ? 'border-white/10 bg-[#09090b]'
                           : 'border-rose-500/40 bg-rose-950/20 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
                       }`}
                     >

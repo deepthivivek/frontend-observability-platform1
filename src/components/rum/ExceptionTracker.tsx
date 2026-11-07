@@ -66,7 +66,7 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
           <p className="text-[11px] text-slate-400 mt-0.5">Clustered across 409 user sessions</p>
         </div>
 
-        <div className="p-4 rounded-2xl border border-indigo-500/30 bg-[#131B2E]/90 backdrop-blur-xl">
+        <div className="p-4 rounded-2xl border border-indigo-500/30 bg-[#121318]/90 backdrop-blur-xl">
           <div className="flex items-center justify-between text-indigo-400 mb-1">
             <span className="font-bold text-[11px] uppercase">Source-Map Resolution</span>
             <FileCode className="h-4 w-4" />
@@ -92,8 +92,8 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
       {/* 2. Exception Fingerprint Explorer & Source-Map View */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left: Exception Fingerprint List (5 cols) */}
-        <div className="lg:col-span-5 rounded-2xl border border-slate-800 bg-[#131B2E] overflow-hidden flex flex-col shadow-xl">
-          <div className="p-3.5 bg-[#0B0F17] border-b border-slate-800 flex items-center justify-between text-slate-400 text-xs font-semibold">
+        <div className="lg:col-span-5 rounded-2xl border border-white/10 bg-[#121318] overflow-hidden flex flex-col shadow-xl">
+          <div className="p-3.5 bg-[#09090b] border-b border-white/10 flex items-center justify-between text-slate-400 text-xs font-semibold">
             <span className="text-white">Grouped Exception Fingerprints</span>
             <span>{exceptions.length} Groups</span>
           </div>
@@ -108,7 +108,7 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
                   className={`p-3 rounded-xl cursor-pointer border transition-all ${
                     isSelected
                       ? 'border-rose-500/50 bg-rose-950/30 shadow-[0_0_15px_rgba(244,63,94,0.2)]'
-                      : 'border-slate-800/80 bg-[#0B0F17]/80 hover:border-slate-700 text-slate-300'
+                      : 'border-white/10 bg-[#09090b]/80 hover:border-white/10 text-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
@@ -135,8 +135,8 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
         </div>
 
         {/* Right: Unminified Source Stack Frame & Code Preview (7 cols) */}
-        <div className="lg:col-span-7 rounded-2xl border border-slate-800 bg-[#131B2E] overflow-hidden flex flex-col shadow-xl">
-          <div className="p-3.5 bg-[#0B0F17] border-b border-slate-800 flex items-center justify-between">
+        <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-[#121318] overflow-hidden flex flex-col shadow-xl">
+          <div className="p-3.5 bg-[#09090b] border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-2 text-white">
               <FileCode className="h-4 w-4 text-emerald-400" />
               <span className="font-semibold text-xs">Source-Mapped TypeScript Stack Trace</span>
@@ -153,7 +153,7 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
 
           <div className="p-4 space-y-4 overflow-y-auto max-h-[420px]">
             {/* Minified vs Unminified Comparison Banner */}
-            <div className="p-3 rounded-xl bg-[#0B0F17] border border-slate-800 space-y-1.5">
+            <div className="p-3 rounded-xl bg-[#09090b] border border-white/10 space-y-1.5">
               <span className="text-[10px] font-bold uppercase text-slate-500">
                 Original Minified Browser Frame:
               </span>
@@ -171,9 +171,9 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
               {activeException?.unminifiedFrames.map((frame, idx) => (
                 <div
                   key={idx}
-                  className="rounded-xl border border-slate-800 bg-[#0B0F17] overflow-hidden"
+                  className="rounded-xl border border-white/10 bg-[#09090b] overflow-hidden"
                 >
-                  <div className="px-3.5 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-[11px]">
+                  <div className="px-3.5 py-2 bg-slate-900 border-b border-white/10 flex items-center justify-between text-[11px]">
                     <span className="font-bold text-white">
                       {frame.functionName} <span className="text-slate-400 font-normal">at</span>{' '}
                       <span className="text-indigo-300">{frame.file}:{frame.line}</span>
@@ -184,7 +184,7 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
                   </div>
 
                   {frame.sourceSnippet && (
-                    <div className="p-3 bg-[#080C14] text-[11px] font-mono leading-relaxed overflow-x-auto">
+                    <div className="p-3 bg-[#09090b] text-[11px] font-mono leading-relaxed overflow-x-auto">
                       {frame.sourceSnippet.map((line, lIdx) => {
                         const isErrorLine = line.includes('CRASH');
                         return (
@@ -210,8 +210,8 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
       </div>
 
       {/* 3. Memory Leak & DOM Node Growth Tracker */}
-      <div className="p-5 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="p-5 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2 text-white">
             <TrendingUp className="h-4 w-4 text-amber-400" />
             <h3 className="font-semibold text-xs">
@@ -233,7 +233,7 @@ export const ExceptionTracker: React.FC<ExceptionTrackerProps> = ({
                 className={`p-3 rounded-xl border transition-all ${
                   isHigh
                     ? 'border-rose-500/40 bg-rose-950/20 text-rose-200 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
-                    : 'border-slate-800 bg-[#0B0F17]/80 text-slate-300'
+                    : 'border-white/10 bg-[#09090b]/80 text-slate-300'
                 }`}
               >
                 <div className="text-[10px] text-slate-500 mb-1">

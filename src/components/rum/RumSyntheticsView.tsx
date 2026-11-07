@@ -51,7 +51,7 @@ export const RumSyntheticsView: React.FC<RumSyntheticsViewProps> = ({
   return (
     <div className="space-y-5 font-sans">
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-800/80 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl shadow-xl">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
             <Users className="h-5 w-5" />
@@ -77,7 +77,7 @@ export const RumSyntheticsView: React.FC<RumSyntheticsViewProps> = ({
           <select
             value={selectedSessionId}
             onChange={(e) => onSelectSession(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-white text-xs font-mono font-semibold focus:outline-none focus:border-indigo-500"
+            className="px-3 py-2 rounded-xl border border-white/10 bg-[#09090b] text-white text-xs font-mono font-semibold focus:outline-none focus:border-indigo-500"
           >
             {sessions.map((s) => (
               <option key={s.id} value={s.id}>
@@ -89,7 +89,7 @@ export const RumSyntheticsView: React.FC<RumSyntheticsViewProps> = ({
       </div>
 
       {/* Sub-Tab Navigation Bar */}
-      <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-[#0B0F17] border border-slate-800 w-fit font-mono text-xs">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-[#09090b] border border-white/10 w-fit font-mono text-xs">
         <button
           onClick={() => setActiveTab('replay')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${

@@ -18,6 +18,8 @@ import {
   Flame,
   ShieldCheck,
   Globe,
+  Cpu,
+  Sparkles,
 } from 'lucide-react';
 import { DashboardView } from '../../types/telemetry';
 
@@ -179,6 +181,28 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       },
     },
     {
+      id: 'nav-self-healing',
+      title: 'Go to Autonomous Self-Healing Command Studio',
+      category: 'Navigation',
+      shortcut: 'H H',
+      icon: <Cpu className="h-4 w-4 text-emerald-400" />,
+      onSelect: () => {
+        onNavigate('self-healing');
+        onClose();
+      },
+    },
+    {
+      id: 'nav-capstone-ultimate',
+      title: 'Go to Ultimate Governance & Digital Twin Studio',
+      category: 'Navigation',
+      shortcut: 'D T',
+      icon: <Sparkles className="h-4 w-4 text-indigo-400" />,
+      onSelect: () => {
+        onNavigate('capstone-ultimate');
+        onClose();
+      },
+    },
+    {
       id: 'nav-settings',
       title: 'Go to Observability Settings',
       category: 'Navigation',
@@ -288,17 +312,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Global Command Palette"
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-28 bg-[#080C14]/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-28 bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
         ref={modalRef}
-        className="w-full max-w-xl rounded-2xl border border-slate-800 bg-[#131B2E] shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col text-slate-200 backdrop-blur-xl"
+        className="w-full max-w-xl rounded-2xl border border-subtleBorder bg-surface shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col text-slate-200 backdrop-blur-xl font-sans"
       >
         {/* Search Input Bar */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-800 bg-[#0B0F17]/90">
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-subtleBorder bg-canvas/90">
           <Search className="h-5 w-5 text-indigo-400 shrink-0" />
           <input
             ref={inputRef}
@@ -318,7 +342,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           <button
             onClick={onClose}
             aria-label="Close Command Palette"
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -342,8 +366,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   onMouseEnter={() => setSelectedIndex(idx)}
                   className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-indigo-600/25 text-indigo-200 border border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
-                      : 'text-slate-300 hover:bg-slate-800/40 border border-transparent'
+                      ? 'bg-indigo-600/20 text-indigo-200 border border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
+                      : 'text-slate-300 hover:bg-white/5 border border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -351,14 +375,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       {action.icon}
                     </span>
                     <span className="font-medium text-white">{action.title}</span>
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-mono px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-mono px-2 py-0.5 rounded-full bg-canvas border border-subtleBorder">
                       {action.category}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     {action.shortcut && (
-                      <kbd className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800">
+                      <kbd className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-canvas text-slate-400 border border-subtleBorder">
                         {action.shortcut}
                       </kbd>
                     )}
@@ -373,19 +397,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         {/* Footer shortcuts helper */}
-        <div className="px-4 py-2.5 border-t border-slate-800 bg-[#0B0F17]/80 flex items-center justify-between text-xs text-slate-500">
+        <div className="px-4 py-2.5 border-t border-subtleBorder bg-canvas/80 flex items-center justify-between text-xs text-slate-500">
           <div className="flex items-center gap-3 font-mono">
             <span>
-              <kbd className="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-400">↑↓</kbd> navigate
+              <kbd className="bg-canvas px-1.5 py-0.5 rounded border border-subtleBorder text-slate-400">↑↓</kbd> navigate
             </span>
             <span>
-              <kbd className="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-400">↵</kbd> select
+              <kbd className="bg-canvas px-1.5 py-0.5 rounded border border-subtleBorder text-slate-400">↵</kbd> select
             </span>
             <span>
-              <kbd className="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-400">esc</kbd> close
+              <kbd className="bg-canvas px-1.5 py-0.5 rounded border border-subtleBorder text-slate-400">esc</kbd> close
             </span>
           </div>
-          <span className="font-mono text-[11px] text-indigo-400">Neon Chasm OS</span>
+          <span className="font-mono text-[11px] text-indigo-400 font-semibold">Neon Chasm OS</span>
         </div>
       </div>
     </div>

@@ -41,9 +41,9 @@ export const TrafficHeatmap: React.FC<TrafficHeatmapProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* 1. Traffic Density Heatmap */}
-      <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+      <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+          <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
             <div className="flex items-center gap-2">
               <Flame className="h-4 w-4 text-amber-400" />
               <h3 className="text-sm font-semibold text-white">Traffic Density Heatmap</h3>
@@ -81,7 +81,7 @@ export const TrafficHeatmap: React.FC<TrafficHeatmapProps> = ({
                               ? 'bg-indigo-500 text-white shadow-[0_0_8px_rgba(99,102,241,0.4)]'
                               : isMed
                               ? 'bg-indigo-900/60 text-indigo-200 border border-indigo-700/50'
-                              : 'bg-slate-900/80 text-slate-600 hover:bg-slate-800'
+                              : 'bg-elevated/80 text-slate-600 hover:bg-slate-800'
                           }`}
                         >
                           {count > 0 ? count : ''}
@@ -95,10 +95,10 @@ export const TrafficHeatmap: React.FC<TrafficHeatmapProps> = ({
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono text-slate-400">
+        <div className="mt-4 pt-3 border-t border-subtleBorder/60 flex items-center justify-between text-xs font-mono text-slate-400">
           <span>Click any cell to isolate latency bracket in log stream</span>
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-sm bg-slate-900" /> Low
+            <span className="h-2 w-2 rounded-sm bg-elevated" /> Low
             <span className="h-2 w-2 rounded-sm bg-indigo-500" /> High
             <span className="h-2 w-2 rounded-sm bg-rose-500" /> Errors
           </div>
@@ -106,9 +106,9 @@ export const TrafficHeatmap: React.FC<TrafficHeatmapProps> = ({
       </div>
 
       {/* 2. "BubbleUp" Outlier Scatter Plot */}
-      <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+      <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+          <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-rose-400" />
               <h3 className="text-sm font-semibold text-white">&quot;BubbleUp&quot; Outlier Analysis</h3>
@@ -123,7 +123,7 @@ export const TrafficHeatmap: React.FC<TrafficHeatmapProps> = ({
           </p>
 
           {/* Scatter Canvas Simulator */}
-          <div className="mt-4 h-44 rounded-xl border border-slate-800 bg-[#0B0F17] relative p-3 overflow-hidden">
+          <div className="mt-4 h-44 rounded-xl border border-subtleBorder bg-canvas relative p-3 overflow-hidden">
             {outliers.map((outlier, idx) => {
               const xPct = 10 + (idx * 2.2) % 80;
               const yPct = Math.max(10, Math.min(85, (outlier.latencyMs / 1200) * 80));

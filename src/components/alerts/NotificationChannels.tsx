@@ -39,9 +39,9 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 font-mono text-xs">
       {/* 1. Notification Dispatch Channels & Synthetic Canary Probes */}
-      <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+      <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+          <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
             <div className="flex items-center gap-2">
               <Radio className="h-4 w-4 text-emerald-400" />
               <h3 className="text-sm font-semibold text-white">Notification Canaries &amp; Webhooks</h3>
@@ -58,7 +58,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
               return (
                 <div
                   key={chan.id}
-                  className="flex items-center justify-between p-3 rounded-xl border border-slate-800/80 bg-[#0B0F17]/80 hover:border-slate-700 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-xl border border-subtleBorder bg-canvas/80 hover:border-subtleBorder transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
                     <span
@@ -80,7 +80,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
                     <button
                       onClick={() => handleTest(chan.id)}
                       disabled={isTesting}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-subtleBorder bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs transition-colors disabled:opacity-50"
                     >
                       <Send className="h-3 w-3 text-indigo-400" />
                       <span>{isTesting ? 'Pinging...' : hasTested ? (testResult?.success ? '200 OK' : 'Failed') : 'Test Canary'}</span>
@@ -92,16 +92,16 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
+        <div className="mt-4 pt-3 border-t border-subtleBorder/60 flex items-center justify-between text-xs text-slate-400">
           <span>Continuous webhook synthetic probes run every 60 seconds</span>
           <span className="text-emerald-400 font-medium">SLAs 100% reachable</span>
         </div>
       </div>
 
       {/* 2. On-Call Rotation Schedule & Roster */}
-      <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+      <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+          <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-indigo-400" />
               <h3 className="text-sm font-semibold text-white">Active On-Call Rotation</h3>
@@ -122,7 +122,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17]/80 flex items-center justify-between">
+            <div className="p-3.5 rounded-xl border border-subtleBorder bg-canvas/80 flex items-center justify-between">
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">
                   Secondary Escalation Responder
@@ -134,7 +134,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
+        <div className="mt-4 pt-3 border-t border-subtleBorder/60 flex items-center justify-between text-xs text-slate-400">
           <span>Shift handoff: {new Date(onCall.untilIso).toLocaleDateString()} at 09:00 UTC</span>
           <span className="text-indigo-400 font-medium">PagerDuty Synced</span>
         </div>

@@ -26,7 +26,7 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
       {/* 1. Top High-Level Impact Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Affected User Sessions */}
-        <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+        <div className="bg-surface border border-subtleBorder rounded-2xl p-4 shadow-xl relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-slate-400">Affected User Sessions</span>
             <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
@@ -43,7 +43,7 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
         </div>
 
         {/* Card 2: User Frustration Score */}
-        <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+        <div className="bg-surface border border-subtleBorder rounded-2xl p-4 shadow-xl relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-slate-400">UX Frustration Index</span>
             <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
@@ -60,7 +60,7 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
         </div>
 
         {/* Card 3: SLO Burn Rate */}
-        <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+        <div className="bg-surface border border-subtleBorder rounded-2xl p-4 shadow-xl relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-slate-400">SLO Error Budget Burn</span>
             <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400">
@@ -77,7 +77,7 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
         </div>
 
         {/* Card 4: Estimated Revenue Exposure */}
-        <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+        <div className="bg-surface border border-subtleBorder rounded-2xl p-4 shadow-xl relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-slate-400">Est. Revenue at Risk</span>
             <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
@@ -95,8 +95,8 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
       </div>
 
       {/* 2. Cascading Microservice Dependency Blast Radius Tree */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl space-y-4">
+        <div className="flex items-center justify-between border-b border-subtleBorder pb-3">
           <div className="flex items-center space-x-2.5">
             <Server className="w-4 h-4 text-cyan-400" />
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">
@@ -121,7 +121,7 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
               {blastRadius.directServices.map((svc) => (
                 <div
                   key={svc}
-                  className="bg-[#0B0F17] border border-rose-500/30 rounded-lg p-2.5 flex items-center justify-between text-xs font-mono"
+                  className="bg-canvas border border-rose-500/30 rounded-lg p-2.5 flex items-center justify-between text-xs font-mono"
                 >
                   <span className="text-white font-semibold">{svc}</span>
                   <span className="text-rose-400 font-bold">{incident.errorRatePeak}% err</span>
@@ -150,7 +150,7 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
               {blastRadius.downstreamServices.map((svc) => (
                 <div
                   key={svc}
-                  className="bg-[#0B0F17] border border-amber-500/30 rounded-lg p-2.5 flex items-center justify-between text-xs font-mono"
+                  className="bg-canvas border border-amber-500/30 rounded-lg p-2.5 flex items-center justify-between text-xs font-mono"
                 >
                   <span className="text-white">{svc}</span>
                   <span className="text-amber-400 font-semibold">P99: {Math.round(incident.p99LatencyMs * 0.75)}ms</span>
@@ -162,7 +162,7 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
       </div>
 
       {/* 3. Real-Time Telemetry Correlation Chart Mock */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3 font-mono text-xs">
+      <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl space-y-3 font-mono text-xs">
         <div className="flex items-center justify-between">
           <span className="font-bold text-white uppercase tracking-wider flex items-center space-x-2">
             <Activity className="w-4 h-4 text-cyan-400" />
@@ -171,7 +171,7 @@ export const BlastRadiusVisualizer: React.FC<BlastRadiusVisualizerProps> = ({ in
           <span className="text-slate-400 text-[11px]">Time Window: Last 60 Minutes</span>
         </div>
 
-        <div className="h-32 bg-[#0B0F17] rounded-xl border border-slate-800 p-4 flex items-end space-x-2 relative overflow-hidden">
+        <div className="h-32 bg-canvas rounded-xl border border-subtleBorder p-4 flex items-end space-x-2 relative overflow-hidden">
           {/* Simulated Bars */}
           {[1.2, 1.4, 1.1, 1.8, 3.2, 5.8, 12.4, 19.4, 18.2, 16.5, 14.2, 12.0, 9.5].map((val, idx) => {
             const heightPercent = Math.min(100, (val / 20) * 100);

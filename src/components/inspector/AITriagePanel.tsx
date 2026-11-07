@@ -58,8 +58,8 @@ export const AITriagePanel: React.FC<AITriagePanelProps> = ({ log }) => {
   };
 
   return (
-    <div className="p-4 rounded-2xl border border-indigo-500/40 bg-[#0B0F17]/90 text-slate-200 font-mono space-y-4 shadow-xl">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+    <div className="p-4 rounded-2xl border border-indigo-500/40 bg-canvas/90 text-slate-200 font-mono space-y-4 shadow-xl">
+      <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
             <Sparkles className="h-4 w-4" />
@@ -75,7 +75,7 @@ export const AITriagePanel: React.FC<AITriagePanelProps> = ({ log }) => {
         {/* Root Cause Hypothesis */}
         <div>
           <span className="text-[10px] uppercase font-bold text-slate-500">Root Cause Hypothesis</span>
-          <div className="mt-1 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-200 font-sans leading-relaxed">
+          <div className="mt-1 p-2.5 rounded-xl bg-elevated/80 border border-subtleBorder text-slate-200 font-sans leading-relaxed">
             {diagnosis.hypothesis}
           </div>
         </div>
@@ -83,7 +83,7 @@ export const AITriagePanel: React.FC<AITriagePanelProps> = ({ log }) => {
         {/* Impact Assessment */}
         <div>
           <span className="text-[10px] uppercase font-bold text-slate-500">Impact Assessment</span>
-          <div className="mt-1 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 font-sans leading-relaxed">
+          <div className="mt-1 p-2.5 rounded-xl bg-elevated/80 border border-subtleBorder text-slate-300 font-sans leading-relaxed">
             {diagnosis.impactAssessment}
           </div>
         </div>
@@ -91,7 +91,7 @@ export const AITriagePanel: React.FC<AITriagePanelProps> = ({ log }) => {
         {/* Recommended Fix */}
         <div>
           <span className="text-[10px] uppercase font-bold text-slate-500">Remediation Strategy</span>
-          <div className="mt-1 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-200 font-sans leading-relaxed">
+          <div className="mt-1 p-2.5 rounded-xl bg-elevated/80 border border-subtleBorder text-slate-200 font-sans leading-relaxed">
             {diagnosis.recommendedFix}
           </div>
         </div>
@@ -110,7 +110,7 @@ export const AITriagePanel: React.FC<AITriagePanelProps> = ({ log }) => {
               {copied ? 'Copied' : 'Copy Snippet'}
             </button>
           </div>
-          <pre className="p-3 rounded-xl bg-[#080C14] border border-slate-800 text-emerald-300 text-xs overflow-x-auto">
+          <pre className="p-3 rounded-xl bg-canvas border border-subtleBorder text-emerald-300 text-xs overflow-x-auto">
             {diagnosis.suggestedSnippet}
           </pre>
         </div>

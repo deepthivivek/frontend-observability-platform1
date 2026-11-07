@@ -88,9 +88,9 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
   ];
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col space-y-4 font-sans">
       {/* Tab Navigation Pill Bar */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-800/80 font-mono text-xs">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-white/10 font-mono text-xs">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -99,8 +99,8 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl whitespace-nowrap transition-all ${
                 isActive
-                  ? 'bg-indigo-600/25 text-indigo-300 font-semibold border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  ? 'bg-indigo-600/20 text-indigo-300 font-semibold border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               {tab.icon}
@@ -121,14 +121,14 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
       {/* Tab 2: Custom Attributes & Tags */}
       {activeTab === 'tags' && (
         <div className="space-y-3 font-mono text-xs">
-          <div className="text-slate-400 text-xs">
+          <div className="text-slate-400 text-xs font-sans">
             Click any tag to instantly dispatch an active filter to the Web Worker pipeline.
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {Object.entries(customTags).map(([k, v]) => (
               <div
                 key={k}
-                className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-[#0B0F17]/80 hover:border-slate-700 transition-colors"
+                className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-[#09090b] hover:border-white/20 transition-colors"
               >
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase font-bold text-slate-500">{k}</span>
@@ -137,7 +137,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
                 <button
                   onClick={() => onFilterTag(k, v)}
                   title={`Filter by ${k}=${v}`}
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 transition-colors"
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 border border-white/10 transition-colors"
                 >
                   <Filter className="h-3.5 w-3.5" />
                 </button>
@@ -150,13 +150,13 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
       {/* Tab 3: Context Logs (±5s Window) */}
       {activeTab === 'context' && (
         <div className="space-y-3 font-mono text-xs">
-          <div className="text-slate-400 text-xs">
-            Showing requests within ±5 seconds from IP: <strong className="text-white">{log.clientIp}</strong>
+          <div className="text-slate-400 text-xs font-sans">
+            Showing requests within ±5 seconds from IP: <strong className="text-white font-mono">{log.clientIp}</strong>
           </div>
 
           <div className="space-y-2">
             {surroundingLogs.length === 0 ? (
-              <div className="p-6 text-center text-slate-500 bg-[#0B0F17] rounded-xl border border-slate-800">
+              <div className="p-6 text-center text-slate-500 bg-[#09090b] rounded-xl border border-white/10">
                 No adjacent logs found in the surrounding window.
               </div>
             ) : (
@@ -168,7 +168,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
                     className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                       isCurrent
                         ? 'border-indigo-500/60 bg-indigo-950/20 shadow-md'
-                        : 'border-slate-800 bg-[#0B0F17]/80'
+                        : 'border-white/10 bg-[#09090b]'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -189,7 +189,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
                       >
                         {sLog.statusCode}
                       </span>
-                      <span className="text-slate-400">{sLog.latencyMs}ms</span>
+                      <span className="text-slate-400 tabular-nums">{sLog.latencyMs}ms</span>
                     </div>
                   </div>
                 );
@@ -204,21 +204,21 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
         <div className="space-y-4 font-mono text-xs">
           <div>
             <div className="text-[11px] uppercase font-bold text-slate-400 mb-1.5">Request Headers</div>
-            <pre className="p-3.5 rounded-xl bg-[#080C14] border border-slate-800 text-indigo-300 overflow-x-auto max-h-48">
+            <pre className="p-3.5 rounded-xl bg-[#09090b] border border-white/10 text-indigo-300 overflow-x-auto max-h-48">
               {JSON.stringify(log.requestHeaders, null, 2)}
             </pre>
           </div>
 
           <div>
             <div className="text-[11px] uppercase font-bold text-slate-400 mb-1.5">Response Headers</div>
-            <pre className="p-3.5 rounded-xl bg-[#080C14] border border-slate-800 text-slate-300 overflow-x-auto max-h-48">
+            <pre className="p-3.5 rounded-xl bg-[#09090b] border border-white/10 text-slate-300 overflow-x-auto max-h-48">
               {JSON.stringify(log.responseHeaders, null, 2)}
             </pre>
           </div>
 
           <div>
             <div className="text-[11px] uppercase font-bold text-slate-400 mb-1.5">Request & Response Payloads</div>
-            <pre className="p-3.5 rounded-xl bg-[#080C14] border border-slate-800 text-emerald-300 overflow-x-auto max-h-48">
+            <pre className="p-3.5 rounded-xl bg-[#09090b] border border-white/10 text-emerald-300 overflow-x-auto max-h-48">
               {JSON.stringify(
                 {
                   requestBody: log.requestBody,
@@ -236,7 +236,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
       {/* Tab 5: Micro-REPL Sandbox */}
       {activeTab === 'repl' && (
         <div className="space-y-3 font-mono text-xs">
-          <div className="text-slate-400 text-xs">
+          <div className="text-slate-400 text-xs font-sans">
             Interactive SQL & payload query sandbox running directly against in-memory worker buffers.
           </div>
 
@@ -245,7 +245,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
               value={replQuery}
               onChange={(e) => setReplQuery(e.target.value)}
               rows={4}
-              className="w-full p-3 rounded-xl border border-slate-800 bg-[#080C14] text-emerald-300 font-mono text-xs focus:outline-none focus:border-indigo-500/60 shadow-inner"
+              className="w-full p-3 rounded-xl border border-white/10 bg-[#09090b] text-emerald-300 font-mono text-xs focus:outline-none focus:border-indigo-500/60 shadow-inner"
             />
             <button
               onClick={handleRunRepl}
@@ -259,7 +259,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
           {replOutput && (
             <div>
               <div className="text-[11px] uppercase font-bold text-slate-400 mb-1.5">Query Output</div>
-              <pre className="p-3.5 rounded-xl bg-[#080C14] border border-slate-800 text-indigo-300 whitespace-pre-wrap">
+              <pre className="p-3.5 rounded-xl bg-[#09090b] border border-white/10 text-indigo-300 whitespace-pre-wrap">
                 {replOutput}
               </pre>
             </div>
@@ -272,7 +272,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
         <div className="space-y-4 font-mono text-xs">
           <div className="space-y-2.5">
             {notes.map((note) => (
-              <div key={note.id} className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17]/80 space-y-1">
+              <div key={note.id} className="p-3.5 rounded-xl border border-white/10 bg-[#09090b] space-y-1">
                 <div className="flex items-center justify-between text-slate-500 text-[10px]">
                   <span className="font-bold text-indigo-400">{note.author}</span>
                   <span>{new Date(note.timestamp).toLocaleTimeString()}</span>
@@ -282,7 +282,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+          <div className="flex items-center gap-2 pt-2 border-t border-white/10">
             <input
               type="text"
               placeholder="Add an incident note or hypothesis..."
@@ -291,7 +291,7 @@ export const PayloadViewer: React.FC<PayloadViewerProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAddNote();
               }}
-              className="flex-1 px-3 py-2 rounded-xl border border-slate-800 bg-[#080C14] text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/60 font-sans"
+              className="flex-1 px-3 py-2 rounded-xl border border-white/10 bg-[#09090b] text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/60 font-sans"
             />
             <button
               onClick={handleAddNote}

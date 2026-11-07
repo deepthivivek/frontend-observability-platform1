@@ -55,7 +55,7 @@ export const AlertsIncidentsView: React.FC<AlertsIncidentsViewProps> = ({
   return (
     <div className="space-y-6 font-sans">
       {/* View Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-800/80 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl border border-subtleBorder bg-surface/90 backdrop-blur-xl shadow-xl">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
             <ShieldAlert className="h-5 w-5" />
@@ -86,7 +86,7 @@ export const AlertsIncidentsView: React.FC<AlertsIncidentsViewProps> = ({
       </div>
 
       {/* Sub-tab navigation */}
-      <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0B0F17] border border-slate-800 w-fit font-mono text-xs">
+      <div className="flex items-center gap-1.5 p-1 rounded-xl bg-canvas border border-subtleBorder w-fit font-mono text-xs">
         <button
           onClick={() => setActiveTab('incidents')}
           className={`px-4 py-1.5 rounded-lg transition-all ${
@@ -134,8 +134,8 @@ export const AlertsIncidentsView: React.FC<AlertsIncidentsViewProps> = ({
 
       {/* Tab 2: Configured Alert Rules */}
       {activeTab === 'rules' && (
-        <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl space-y-4 font-mono text-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+        <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl space-y-4 font-mono text-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
             <span className="font-semibold text-white text-sm">Configured Metric Detection Rules</span>
             <span className="text-slate-400 text-xs">{rules.length} active monitors</span>
           </div>
@@ -145,7 +145,7 @@ export const AlertsIncidentsView: React.FC<AlertsIncidentsViewProps> = ({
               return (
                 <div
                   key={rule.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-slate-800/80 bg-[#0B0F17]/80 hover:border-slate-700 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-subtleBorder bg-canvas/80 hover:border-subtleBorder transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <button

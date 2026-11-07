@@ -71,7 +71,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Header Toolbar */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
           <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
             <FileText className="w-5 h-5 text-indigo-400" />
@@ -91,7 +91,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
 
         {/* View Mode & Actions */}
         <div className="flex items-center space-x-3">
-          <div className="flex items-center bg-[#0B0F17] p-1 rounded-xl border border-slate-800 text-xs">
+          <div className="flex items-center bg-canvas p-1 rounded-xl border border-subtleBorder text-xs">
             <button
               onClick={() => setViewMode('preview')}
               className={`px-3 py-1.5 rounded-lg transition ${
@@ -117,7 +117,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
           <button
             onClick={() => fetchPostMortem()}
             disabled={isLoading}
-            className="flex items-center space-x-1.5 bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-mono transition disabled:opacity-50"
+            className="flex items-center space-x-1.5 bg-canvas hover:bg-slate-800 border border-subtleBorder text-slate-300 px-3 py-1.5 rounded-xl text-xs font-mono transition disabled:opacity-50"
           >
             <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             <span>Re-Generate</span>
@@ -125,7 +125,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
 
           <button
             onClick={copyToClipboard}
-            className="flex items-center space-x-1.5 bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-mono transition"
+            className="flex items-center space-x-1.5 bg-canvas hover:bg-slate-800 border border-subtleBorder text-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-mono transition"
           >
             {copied ? (
               <>
@@ -152,7 +152,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
 
       {/* 2. Main Content Area */}
       {isLoading ? (
-        <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-3">
+        <div className="bg-surface border border-subtleBorder rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-3">
           <RotateCw className="w-8 h-8 text-indigo-400 animate-spin" />
           <h4 className="font-semibold text-sm text-white">Synthesizing Incident Post-Mortem...</h4>
           <p className="text-xs text-slate-400 max-w-sm">
@@ -162,9 +162,9 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
       ) : report ? (
         viewMode === 'preview' ? (
           /* Formatted Preview Mode */
-          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-6 shadow-xl space-y-8 text-slate-200">
+          <div className="bg-surface border border-subtleBorder rounded-2xl p-6 shadow-xl space-y-8 text-slate-200">
             {/* Header Metadata */}
-            <div className="border-b border-slate-800 pb-5 space-y-2">
+            <div className="border-b border-subtleBorder pb-5 space-y-2">
               <div className="flex items-center space-x-3">
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
                   {incident.severity}
@@ -191,7 +191,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
               <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400">
                 1. Executive Summary
               </h4>
-              <div className="bg-[#0B0F17] border border-slate-800/90 rounded-xl p-4 text-xs leading-relaxed text-slate-300">
+              <div className="bg-canvas border border-subtleBorder/90 rounded-xl p-4 text-xs leading-relaxed text-slate-300">
                 {report.sections.executiveSummary}
               </div>
             </div>
@@ -201,7 +201,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
               <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
                 2. Blast Radius & Business Impact
               </h4>
-              <div className="bg-[#0B0F17] border border-slate-800/90 rounded-xl p-4 text-xs font-mono space-y-1.5 text-slate-300 whitespace-pre-line">
+              <div className="bg-canvas border border-subtleBorder/90 rounded-xl p-4 text-xs font-mono space-y-1.5 text-slate-300 whitespace-pre-line">
                 {report.sections.impact}
               </div>
             </div>
@@ -211,7 +211,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
               <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-rose-400">
                 3. Root Cause Analysis
               </h4>
-              <div className="bg-[#0B0F17] border border-slate-800/90 rounded-xl p-4 text-xs leading-relaxed text-slate-300">
+              <div className="bg-canvas border border-subtleBorder/90 rounded-xl p-4 text-xs leading-relaxed text-slate-300">
                 <p>{report.sections.rootCause}</p>
               </div>
             </div>
@@ -221,9 +221,9 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
               <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
                 4. Preventative Action Items (Jira-Ready)
               </h4>
-              <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#0B0F17]">
+              <div className="overflow-x-auto rounded-xl border border-subtleBorder bg-canvas">
                 <table className="w-full text-left text-xs font-mono">
-                  <thead className="border-b border-slate-800 bg-slate-900/80 text-[11px] text-slate-400 uppercase">
+                  <thead className="border-b border-subtleBorder bg-elevated/80 text-[11px] text-slate-400 uppercase">
                     <tr>
                       <th className="py-2.5 px-4">Priority</th>
                       <th className="py-2.5 px-4">Action Item</th>
@@ -231,7 +231,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
                       <th className="py-2.5 px-4">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-subtleBorder/60">
                     {report.sections.actionItems.map((item, idx) => (
                       <tr key={idx} className="hover:bg-slate-800/30 transition">
                         <td className="py-2.5 px-4 font-bold">
@@ -248,7 +248,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
                         <td className="py-2.5 px-4 text-slate-200">{item.task}</td>
                         <td className="py-2.5 px-4 text-slate-400">{item.owner}</td>
                         <td className="py-2.5 px-4">
-                          <span className="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-slate-700">
+                          <span className="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-subtleBorder">
                             {item.status}
                           </span>
                         </td>
@@ -261,7 +261,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
 
             {/* Section 5: Lessons Learned */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-              <div className="bg-[#0B0F17] border border-emerald-500/30 rounded-xl p-4 space-y-2">
+              <div className="bg-canvas border border-emerald-500/30 rounded-xl p-4 space-y-2">
                 <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>What Went Well</span>
@@ -273,7 +273,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
                 </ul>
               </div>
 
-              <div className="bg-[#0B0F17] border border-rose-500/30 rounded-xl p-4 space-y-2">
+              <div className="bg-canvas border border-rose-500/30 rounded-xl p-4 space-y-2">
                 <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-rose-400 flex items-center space-x-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
                   <span>What Went Poorly</span>
@@ -285,7 +285,7 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
                 </ul>
               </div>
 
-              <div className="bg-[#0B0F17] border border-cyan-500/30 rounded-xl p-4 space-y-2">
+              <div className="bg-canvas border border-cyan-500/30 rounded-xl p-4 space-y-2">
                 <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center space-x-1.5">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Where We Got Lucky</span>
@@ -300,8 +300,8 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
           </div>
         ) : (
           /* Raw Markdown Mode */
-          <div className="bg-[#0B0F17] border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-3 font-mono">
-            <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-2">
+          <div className="bg-canvas border border-subtleBorder rounded-2xl p-5 shadow-2xl space-y-3 font-mono">
+            <div className="flex items-center justify-between text-xs text-slate-400 border-b border-subtleBorder pb-2">
               <span>Source Markdown (CommonMark Compatible)</span>
               <span>{report.markdown.length} characters</span>
             </div>

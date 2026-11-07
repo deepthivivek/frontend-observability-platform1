@@ -14,7 +14,7 @@ export const HistogramHeader: React.FC<HistogramHeaderProps> = ({
 }) => {
   if (!buckets || buckets.length === 0) {
     return (
-      <div className="h-10 border-b border-slate-800/80 bg-[#0B0F17]/60 flex items-center justify-between px-4 text-xs font-mono text-slate-500">
+      <div className="h-10 border-b border-white/10 bg-[#09090b]/60 flex items-center justify-between px-4 text-xs font-mono text-slate-500">
         <span>Density Distribution</span>
         <span>Awaiting telemetry samples...</span>
       </div>
@@ -25,7 +25,7 @@ export const HistogramHeader: React.FC<HistogramHeaderProps> = ({
   const totalErrors = buckets.reduce((acc, b) => acc + b.errorCount, 0);
 
   return (
-    <div className="border-b border-slate-800/80 bg-[#0B0F17]/90 px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="border-b border-white/10 bg-[#09090b]/90 px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div className="flex items-center gap-3">
         <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
           Density Histogram

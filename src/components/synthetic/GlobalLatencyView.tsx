@@ -134,20 +134,20 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
 
   if (!canViewSynthetic) {
     return (
-      <div className="p-8 text-center bg-[#0F172A] border border-slate-800 rounded-2xl text-slate-400 space-y-3">
+      <div className="p-8 text-center bg-[#121318] border border-white/10 rounded-2xl text-slate-400 space-y-3 font-sans">
         <ShieldAlert className="w-8 h-8 text-rose-400 mx-auto" />
         <h3 className="font-semibold text-white">Synthetic Monitoring Access Restricted</h3>
         <p className="text-xs max-w-md mx-auto">
-          Your current role does not have <code className="text-cyan-300">canViewSynthetic</code> permission.
+          Your current role does not have <code className="text-cyan-300 font-mono">canViewSynthetic</code> permission.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* 1. Header Banner */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-[#121318] border border-white/10 rounded-2xl p-5 shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
             <Globe className="w-6 h-6" />
@@ -155,7 +155,7 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
           <div>
             <div className="flex items-center space-x-3">
               <h2 className="text-lg font-bold text-white tracking-wide">Global Synthetic & Latency Map</h2>
-              <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+              <span className="text-xs font-mono tabular-nums px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
                 99.98% GLOBAL SLO UPTIME
               </span>
             </div>
@@ -169,7 +169,7 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
           <button
             onClick={fetchProbeData}
             disabled={isLoading}
-            className="flex items-center space-x-1.5 bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-mono transition disabled:opacity-50"
+            className="flex items-center space-x-1.5 bg-[#09090b] hover:bg-white/5 border border-white/10 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-mono transition disabled:opacity-50"
           >
             <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             <span>Run All Probes</span>
@@ -188,7 +188,7 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
       </div>
 
       {/* 2. Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-3 font-mono text-xs">
+      <div className="flex items-center space-x-2 border-b border-white/10 pb-3 font-mono text-xs">
         <button
           onClick={() => setActiveTab('regions')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition ${
@@ -245,7 +245,7 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
             {probeResults.map((res) => (
               <div
                 key={res.region}
-                className="bg-[#0F172A] border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3 hover:border-slate-700 transition"
+                className="bg-[#121318] border border-white/10 hover:border-white/20 rounded-2xl p-4 shadow-xl space-y-3 transition"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-white uppercase font-mono">{res.region}</span>
@@ -261,11 +261,11 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
                 </div>
 
                 <div className="mt-2">
-                  <div className="text-2xl font-bold font-mono text-cyan-300">{res.timings.totalDurationMs}ms</div>
-                  <span className="text-[10px] font-mono text-slate-500">TTFB: {res.timings.ttfbMs}ms</span>
+                  <div className="text-2xl font-bold font-mono text-cyan-300 tabular-nums">{res.timings.totalDurationMs}ms</div>
+                  <span className="text-[10px] font-mono text-slate-500 tabular-nums">TTFB: {res.timings.ttfbMs}ms</span>
                 </div>
 
-                <div className="pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-400 truncate">
+                <div className="pt-2 border-t border-white/10 text-[10px] font-mono text-slate-400 truncate">
                   IP: <span className="text-slate-200">{res.resolvedIp}</span>
                 </div>
               </div>
@@ -278,14 +278,14 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* SSL/TLS Certificate Monitor Card */}
           {sslInfo && (
-            <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 font-mono text-xs">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-[#121318] border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center space-x-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
                   <h4 className="font-bold text-white uppercase tracking-wider">SSL/TLS Certificate Inspection</h4>
                 </div>
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border tabular-nums ${
                     sslInfo.warningAlertTriggered
                       ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
                       : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
@@ -310,7 +310,7 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Key Strength:</span>
-                  <span className="text-slate-200">{sslInfo.keyStrengthBits} bits RSA</span>
+                  <span className="text-slate-200 tabular-nums">{sslInfo.keyStrengthBits} bits RSA</span>
                 </div>
               </div>
             </div>
@@ -318,8 +318,8 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
 
           {/* DNS Integrity & BGP Hijack Inspector Card */}
           {dnsReport && (
-            <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 font-mono text-xs">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-[#121318] border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center space-x-2">
                   <Globe className="w-4 h-4 text-cyan-400" />
                   <h4 className="font-bold text-white uppercase tracking-wider">Global DNS & BGP Parity</h4>
@@ -337,10 +337,10 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
 
               <div className="space-y-2 text-slate-300">
                 {dnsReport.regionalResolutions.map((res) => (
-                  <div key={res.region} className="flex items-center justify-between bg-[#0B0F17] p-2.5 rounded-lg border border-slate-800">
+                  <div key={res.region} className="flex items-center justify-between bg-[#09090b] p-2.5 rounded-lg border border-white/10">
                     <span className="font-bold text-white uppercase">{res.region}</span>
                     <span className="text-cyan-300">{res.ip}</span>
-                    <span className="text-emerald-400 font-bold">{res.dnsLatencyMs}ms</span>
+                    <span className="text-emerald-400 font-bold tabular-nums">{res.dnsLatencyMs}ms</span>
                   </div>
                 ))}
               </div>
@@ -350,15 +350,15 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
       )}
 
       {activeTab === 'journey' && activeProbeConfig && (
-        <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 font-mono text-xs">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="bg-[#121318] border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 font-mono text-xs">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <h4 className="font-bold text-white uppercase tracking-wider">{activeProbeConfig.name}</h4>
-            <span className="text-slate-400">{activeProbeConfig.journeySteps?.length || 0} Scripted Steps</span>
+            <span className="text-slate-400 tabular-nums">{activeProbeConfig.journeySteps?.length || 0} Scripted Steps</span>
           </div>
 
           <div className="space-y-3">
             {activeProbeConfig.journeySteps?.map((step, idx) => (
-              <div key={step.id} className="bg-[#0B0F17] border border-slate-800 rounded-xl p-3.5 space-y-2">
+              <div key={step.id} className="bg-[#09090b] border border-white/10 rounded-xl p-3.5 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold text-[10px]">
@@ -375,8 +375,8 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
       )}
 
       {activeTab === 'waterfall' && (
-        <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 font-mono text-xs">
-          <div className="border-b border-slate-800 pb-3 font-bold text-white uppercase tracking-wider">
+        <div className="bg-[#121318] border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 font-mono text-xs">
+          <div className="border-b border-white/10 pb-3 font-bold text-white uppercase tracking-wider">
             Probe Latency Phase Breakdown (US-East Edge Agent)
           </div>
 
@@ -390,9 +390,9 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
               <div key={phase.label} className="space-y-1">
                 <div className="flex justify-between text-slate-400 text-[11px]">
                   <span>{phase.label}</span>
-                  <span className="text-white font-bold">{phase.value}</span>
+                  <span className="text-white font-bold tabular-nums">{phase.value}</span>
                 </div>
-                <div className="w-full bg-[#0B0F17] h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-[#09090b] h-2 rounded-full overflow-hidden">
                   <div className={`h-full ${phase.color}`} style={{ width: '40%' }} />
                 </div>
               </div>
@@ -403,16 +403,16 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
 
       {/* Configure Probe Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-6 w-full max-w-lg space-y-4 text-white font-mono text-xs">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md font-sans">
+          <div className="bg-[#121318] border border-white/10 rounded-2xl p-6 w-full max-w-lg space-y-4 text-white text-xs">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 font-mono">
               <h3 className="font-bold text-sm">Configure Synthetic Probe</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateProbe} className="space-y-4 font-sans text-xs">
+            <form onSubmit={handleCreateProbe} className="space-y-4 text-xs">
               <div className="space-y-1">
                 <label className="text-slate-400 font-mono">Probe Name</label>
                 <input
@@ -421,7 +421,7 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
                   onChange={(e) => setNewProbeName(e.target.value)}
                   placeholder="e.g. EU Regional Health Check"
                   required
-                  className="w-full bg-[#0B0F17] border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  className="w-full bg-[#09090b] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
                 />
               </div>
 
@@ -432,11 +432,11 @@ export const GlobalLatencyView: React.FC<GlobalLatencyViewProps> = ({
                   value={newProbeUrl}
                   onChange={(e) => setNewProbeUrl(e.target.value)}
                   required
-                  className="w-full bg-[#0B0F17] border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  className="w-full bg-[#09090b] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500 font-mono"
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-white/10 font-mono">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

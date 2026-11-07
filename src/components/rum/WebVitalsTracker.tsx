@@ -97,7 +97,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
       {/* 1. Core Web Vitals Key Scorecards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {/* LCP */}
-        <div className="p-4 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl space-y-1">
+        <div className="p-4 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl space-y-1">
           <div className="flex items-center justify-between text-slate-400">
             <span className="font-bold text-[11px] uppercase">LCP (P75)</span>
             <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${lcpRating.color}`}>
@@ -109,7 +109,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
         </div>
 
         {/* INP */}
-        <div className="p-4 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl space-y-1">
+        <div className="p-4 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl space-y-1">
           <div className="flex items-center justify-between text-slate-400">
             <span className="font-bold text-[11px] uppercase">INP (P75)</span>
             <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${inpRating.color}`}>
@@ -121,7 +121,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
         </div>
 
         {/* CLS */}
-        <div className="p-4 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl space-y-1">
+        <div className="p-4 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl space-y-1">
           <div className="flex items-center justify-between text-slate-400">
             <span className="font-bold text-[11px] uppercase">CLS (P75)</span>
             <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${clsRating.color}`}>
@@ -133,7 +133,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
         </div>
 
         {/* FCP */}
-        <div className="p-4 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl space-y-1">
+        <div className="p-4 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl space-y-1">
           <div className="flex items-center justify-between text-slate-400">
             <span className="font-bold text-[11px] uppercase">FCP (P75)</span>
             <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${fcpRating.color}`}>
@@ -145,7 +145,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
         </div>
 
         {/* TTFB */}
-        <div className="p-4 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl space-y-1 col-span-2 sm:col-span-1">
+        <div className="p-4 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl space-y-1 col-span-2 sm:col-span-1">
           <div className="flex items-center justify-between text-slate-400">
             <span className="font-bold text-[11px] uppercase">TTFB (P75)</span>
             <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${ttfbRating.color}`}>
@@ -158,8 +158,8 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
       </div>
 
       {/* 2. Network-to-RUM Attribution & LoAF Breakdown */}
-      <div className="p-5 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="p-5 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2 text-white">
             <Activity className="h-4 w-4 text-indigo-400" />
             <h3 className="font-semibold text-xs">
@@ -173,11 +173,11 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* LCP Element Attribution */}
-          <div className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-2">
+          <div className="p-3.5 rounded-xl border border-white/10 bg-[#09090b] space-y-2">
             <span className="text-[10px] font-bold uppercase text-slate-400 block">
               Slowest LCP DOM Element
             </span>
-            <code className="text-xs text-amber-300 block truncate font-mono bg-slate-900 p-2 rounded-lg border border-slate-800">
+            <code className="text-xs text-amber-300 block truncate font-mono bg-slate-900 p-2 rounded-lg border border-white/10">
               {activeSession.webVitals.slowElement || '<button id="btn-place-order">'}
             </code>
             <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1">
@@ -189,7 +189,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
           </div>
 
           {/* LoAF Main Thread Blocking */}
-          <div className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-2">
+          <div className="p-3.5 rounded-xl border border-white/10 bg-[#09090b] space-y-2">
             <span className="text-[10px] font-bold uppercase text-slate-400 block">
               Main Thread Long Animation Frame (LoAF)
             </span>
@@ -209,8 +209,8 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
       </div>
 
       {/* 3. Outlier Clustering Matrix */}
-      <div className="p-5 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+      <div className="p-5 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
           <div>
             <h3 className="font-semibold text-white text-xs">
               Real User Outlier Clustering Matrix
@@ -220,7 +220,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0B0F17] border border-slate-800 text-[11px]">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#09090b] border border-white/10 text-[11px]">
             <button
               onClick={() => setFilterCluster('all')}
               className={`px-3 py-1 rounded-lg transition-colors ${
@@ -259,7 +259,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
         {/* Sessions Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-[#0B0F17] text-slate-400 uppercase text-[10px] border-b border-slate-800">
+            <thead className="bg-[#09090b] text-slate-400 uppercase text-[10px] border-b border-white/10">
               <tr>
                 <th className="py-2.5 px-4">Session / User</th>
                 <th className="py-2.5 px-4">Device &amp; OS</th>
@@ -271,7 +271,7 @@ export const WebVitalsTracker: React.FC<WebVitalsTrackerProps> = ({
                 <th className="py-2.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-white/10/60 text-slate-300">
               {filteredSessions.map((s) => {
                 const isSelected = s.id === activeSession.id;
                 return (

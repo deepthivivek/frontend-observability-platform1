@@ -22,7 +22,7 @@ export const LatencyPercentileChart: React.FC<LatencyPercentileChartProps> = ({
 
   if (!timeBuckets || timeBuckets.length === 0) {
     return (
-      <div className="flex items-center justify-center h-60 rounded-2xl border border-slate-800 bg-[#131B2E]/60 text-slate-500 font-mono text-xs">
+      <div className="flex items-center justify-center h-60 rounded-2xl border border-subtleBorder bg-surface/60 text-slate-500 font-mono text-xs">
         Awaiting time-series telemetry data...
       </div>
     );
@@ -77,9 +77,9 @@ export const LatencyPercentileChart: React.FC<LatencyPercentileChartProps> = ({
   const p50Area = `${p50Path} L ${p50Points[p50Points.length - 1].x},${height - paddingY} L ${paddingX},${height - paddingY} Z`;
 
   return (
-    <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl flex flex-col space-y-4">
+    <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col space-y-4">
       {/* Top Chart Header & Dimension Split */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-subtleBorder">
         <div>
           <h3 className="text-sm font-semibold text-white">Latency Distribution Percentiles</h3>
           <p className="text-xs text-slate-400 mt-0.5 font-mono">
@@ -93,7 +93,7 @@ export const LatencyPercentileChart: React.FC<LatencyPercentileChartProps> = ({
           <select
             value={splitDimension}
             onChange={(e) => setSplitDimension(e.target.value as SplitDimension)}
-            className="px-2.5 py-1.5 rounded-xl border border-slate-700 bg-[#0B0F17] text-indigo-300 font-medium focus:outline-none focus:border-indigo-500"
+            className="px-2.5 py-1.5 rounded-xl border border-subtleBorder bg-canvas text-indigo-300 font-medium focus:outline-none focus:border-indigo-500"
           >
             <option value="overall">All Traffic (Overall)</option>
             <option value="region">Region (us-east, eu-west)</option>
@@ -207,7 +207,7 @@ export const LatencyPercentileChart: React.FC<LatencyPercentileChartProps> = ({
       </div>
 
       {/* Legend & Tooltip Summary Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/60 text-xs font-mono">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-subtleBorder/60 text-xs font-mono">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" />

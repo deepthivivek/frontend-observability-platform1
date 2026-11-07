@@ -192,11 +192,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080C14]/85 backdrop-blur-md p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#09090b]/85 backdrop-blur-md p-4 animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-3xl rounded-2xl border border-slate-800 bg-[#131B2E] shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col text-slate-200 backdrop-blur-xl max-h-[90vh]">
+      <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-[#121318] shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col text-slate-200 backdrop-blur-xl max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#0B0F17]/90">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#09090b]/90">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
               <Download className="h-5 w-5" />
@@ -220,7 +220,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         </div>
 
         {/* Tab Switching: Export Studio vs Payload Diff Viewer */}
-        <div className="flex items-center gap-1 px-6 pt-3 border-b border-slate-800/80 bg-[#0B0F17]/40 font-mono text-xs">
+        <div className="flex items-center gap-1 px-6 pt-3 border-b border-white/10 bg-[#09090b]/40 font-mono text-xs">
           <button
             onClick={() => setActiveTab('export')}
             className={`px-4 py-2 border-b-2 font-bold transition-all ${
@@ -259,7 +259,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   className={`p-3 rounded-xl border text-left transition-all ${
                     scope === 'filtered'
                       ? 'border-indigo-500 bg-indigo-500/15 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
-                      : 'border-slate-800 bg-[#0B0F17]/80 hover:border-slate-700'
+                      : 'border-white/10 bg-[#09090b]/80 hover:border-white/10'
                   }`}
                 >
                   <span className="font-bold text-white block">Filtered View</span>
@@ -275,7 +275,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   className={`p-3 rounded-xl border text-left transition-all disabled:opacity-40 ${
                     scope === 'selected'
                       ? 'border-indigo-500 bg-indigo-500/15 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
-                      : 'border-slate-800 bg-[#0B0F17]/80 hover:border-slate-700'
+                      : 'border-white/10 bg-[#09090b]/80 hover:border-white/10'
                   }`}
                 >
                   <span className="font-bold text-white block">Selected Rows</span>
@@ -290,7 +290,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   className={`p-3 rounded-xl border text-left transition-all ${
                     scope === 'all'
                       ? 'border-indigo-500 bg-indigo-500/15 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
-                      : 'border-slate-800 bg-[#0B0F17]/80 hover:border-slate-700'
+                      : 'border-white/10 bg-[#09090b]/80 hover:border-white/10'
                   }`}
                 >
                   <span className="font-bold text-white block">Entire Buffer</span>
@@ -314,7 +314,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       className={`p-3 rounded-xl border cursor-pointer transition-all ${
                         isSelected
                           ? 'border-indigo-500/80 bg-indigo-500/10 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
-                          : 'border-slate-800 bg-[#0B0F17]/80 hover:border-slate-700'
+                          : 'border-white/10 bg-[#09090b]/80 hover:border-white/10'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
@@ -401,7 +401,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
                         isChecked
                           ? 'border-indigo-500/50 bg-indigo-950/20 text-white'
-                          : 'border-slate-800 bg-[#0B0F17]/60 text-slate-400 hover:text-slate-200'
+                          : 'border-white/10 bg-[#09090b]/60 text-slate-400 hover:text-slate-200'
                       }`}
                     >
                       <input
@@ -422,13 +422,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         {/* Tab 2: Payload Diff Viewer */}
         {activeTab === 'diff' && (
           <div className="p-6 space-y-4 overflow-y-auto font-mono text-xs">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-xl bg-[#0B0F17]/90 border border-slate-800">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-xl bg-[#09090b]/90 border border-white/10">
               <div className="flex items-center gap-2 w-full sm:w-1/2">
                 <span className="text-slate-400 text-[11px]">Baseline:</span>
                 <select
                   value={baselineIndex}
                   onChange={(e) => setBaselineIndex(Number(e.target.value))}
-                  className="w-full px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px]"
+                  className="w-full px-2 py-1 rounded-lg bg-slate-900 border border-white/10 text-white text-[11px]"
                 >
                   {filteredLogs.slice(0, 10).map((l, i) => (
                     <option key={l.id} value={i}>
@@ -443,7 +443,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 <select
                   value={targetIndex}
                   onChange={(e) => setTargetIndex(Number(e.target.value))}
-                  className="w-full px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px]"
+                  className="w-full px-2 py-1 rounded-lg bg-slate-900 border border-white/10 text-white text-[11px]"
                 >
                   {filteredLogs.slice(0, 10).map((l, i) => (
                     <option key={l.id} value={i}>
@@ -455,14 +455,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
 
             {/* Structural Delta View */}
-            <div className="rounded-xl border border-slate-800 bg-[#0B0F17] overflow-hidden">
-              <div className="grid grid-cols-12 bg-slate-900/80 px-4 py-2 border-b border-slate-800 text-[10px] text-slate-400 uppercase font-bold">
+            <div className="rounded-xl border border-white/10 bg-[#09090b] overflow-hidden">
+              <div className="grid grid-cols-12 bg-slate-900/80 px-4 py-2 border-b border-white/10 text-[10px] text-slate-400 uppercase font-bold">
                 <span className="col-span-4">Payload Key / Path</span>
                 <span className="col-span-4">Baseline Value</span>
                 <span className="col-span-4">Target Value</span>
               </div>
 
-              <div className="divide-y divide-slate-800/60 max-h-80 overflow-y-auto">
+              <div className="divide-y divide-white/10/60 max-h-80 overflow-y-auto">
                 {diffEntries.length === 0 ? (
                   <div className="p-8 text-center text-slate-500">
                     No structural payload differences detected between selected requests.
@@ -519,7 +519,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         )}
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-[#0B0F17]/90 font-mono text-xs">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-white/10 bg-[#09090b]/90 font-mono text-xs">
           <div className="text-slate-400">
             Exporting <strong className="text-white">{targetLogs.length}</strong> log records as{' '}
             <strong className="text-indigo-400 uppercase">.{format}</strong>

@@ -197,7 +197,7 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
       />
 
       {/* 3. Smart Syntax Query Bar & Curated SRE Snippet Library */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 backdrop-blur-xl">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 rounded-2xl border border-white/10 bg-[#121318]/80 backdrop-blur-xl">
         <div className="flex-1">
           <RegexLibrary
             query={searchInput}
@@ -211,7 +211,7 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
           {hasActiveFilters && (
             <button
               onClick={handleClearAllFilters}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-mono transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-mono transition-colors"
             >
               <RotateCcw className="h-3 w-3" />
               Reset Filters
@@ -279,7 +279,7 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
           )}
 
           {activeEndpointFilter && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-slate-800 text-slate-300 border border-white/10">
               Endpoint: {activeEndpointFilter}
               <button onClick={() => setActiveEndpointFilter(null)} className="hover:text-white">
                 <X className="h-3 w-3" />
@@ -291,7 +291,7 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
 
       {/* Virtualized Table or Smart Empty State */}
       {filteredLogs.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-12 rounded-2xl border border-slate-800/80 bg-[#131B2E]/50 text-center backdrop-blur-xl">
+        <div className="flex-1 flex flex-col items-center justify-center p-12 rounded-2xl border border-white/10 bg-[#121318]/50 text-center backdrop-blur-xl">
           <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-4 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
             <Filter className="h-8 w-8" />
           </div>
@@ -303,7 +303,7 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
           <div className="mt-5 flex items-center gap-3">
             <button
               onClick={handleClearAllFilters}
-              className="px-4 py-2 rounded-xl text-xs font-mono font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+              className="px-4 py-2 rounded-xl text-xs font-mono font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 transition-colors"
             >
               Clear Active Filters
             </button>
@@ -350,7 +350,7 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
 
       {/* Floating Bulk Selection Action Banner */}
       {selectedLogIds.size > 0 && (
-        <div className="sticky bottom-4 z-40 flex items-center justify-between px-5 py-3 rounded-2xl border border-indigo-500/40 bg-[#0B0F17]/95 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.8)] text-white animate-in slide-in-from-bottom-3 duration-150">
+        <div className="sticky bottom-4 z-40 flex items-center justify-between px-5 py-3 rounded-2xl border border-indigo-500/40 bg-[#09090b]/95 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.8)] text-white animate-in slide-in-from-bottom-3 duration-150">
           <div className="flex items-center gap-3">
             <CheckSquare className="h-4 w-4 text-indigo-400" />
             <span className="text-xs font-mono font-semibold">

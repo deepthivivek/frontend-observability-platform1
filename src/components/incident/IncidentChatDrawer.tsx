@@ -139,9 +139,9 @@ export const IncidentChatDrawer: React.FC<IncidentChatDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-[#0F172A] border-l border-slate-800 shadow-2xl flex flex-col text-slate-100 animate-in slide-in-from-right duration-200">
+    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-surface border-l border-subtleBorder shadow-2xl flex flex-col text-slate-100 animate-in slide-in-from-right duration-200">
       {/* Drawer Header */}
-      <div className="p-4 border-b border-slate-800 bg-[#0B0F17] flex items-center justify-between">
+      <div className="p-4 border-b border-subtleBorder bg-canvas flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
             <Sparkles className="w-5 h-5 text-indigo-400" />
@@ -168,14 +168,14 @@ export const IncidentChatDrawer: React.FC<IncidentChatDrawerProps> = ({
       </div>
 
       {/* Quick Prompt Chips */}
-      <div className="px-4 py-2.5 border-b border-slate-800/80 bg-[#0B0F17]/60 flex items-center space-x-2 overflow-x-auto no-scrollbar text-xs">
+      <div className="px-4 py-2.5 border-b border-subtleBorder bg-canvas/60 flex items-center space-x-2 overflow-x-auto no-scrollbar text-xs">
         <span className="text-[10px] uppercase font-mono text-slate-500 shrink-0">Prompts:</span>
         {QUICK_PROMPTS.map((prompt) => (
           <button
             key={prompt}
             onClick={() => handleSendPrompt(prompt)}
             disabled={isLoading}
-            className="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-slate-300 text-xs shrink-0 transition font-mono hover:text-white disabled:opacity-50"
+            className="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-subtleBorder/80 text-slate-300 text-xs shrink-0 transition font-mono hover:text-white disabled:opacity-50"
           >
             {prompt}
           </button>
@@ -201,7 +201,7 @@ export const IncidentChatDrawer: React.FC<IncidentChatDrawerProps> = ({
               className={`p-3.5 rounded-2xl max-w-[90%] space-y-2 leading-relaxed relative group ${
                 msg.role === 'user'
                   ? 'bg-indigo-600 text-white rounded-tr-none shadow-md'
-                  : 'bg-[#0B0F17] border border-slate-800 text-slate-200 rounded-tl-none shadow-lg'
+                  : 'bg-canvas border border-subtleBorder text-slate-200 rounded-tl-none shadow-lg'
               }`}
             >
               {/* Message Content */}
@@ -210,7 +210,7 @@ export const IncidentChatDrawer: React.FC<IncidentChatDrawerProps> = ({
               {/* Action Cards inside Assistant Response */}
               {msg.structuredInsight?.recommendedRunbooks &&
                 msg.structuredInsight.recommendedRunbooks.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-slate-800 space-y-2">
+                  <div className="mt-3 pt-3 border-t border-subtleBorder space-y-2">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-400 block">
                       Suggested Runbook Mitigations
                     </span>
@@ -219,7 +219,7 @@ export const IncidentChatDrawer: React.FC<IncidentChatDrawerProps> = ({
                       {msg.structuredInsight.recommendedRunbooks.map((rb) => (
                         <div
                           key={rb.actionId}
-                          className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs"
+                          className="bg-elevated/90 border border-subtleBorder rounded-xl p-2.5 flex items-center justify-between text-xs"
                         >
                           <div className="space-y-0.5 truncate mr-2">
                             <div className="font-semibold text-white flex items-center space-x-1.5 truncate">
@@ -275,7 +275,7 @@ export const IncidentChatDrawer: React.FC<IncidentChatDrawerProps> = ({
       </div>
 
       {/* Input Bar */}
-      <div className="p-3 border-t border-slate-800 bg-[#0B0F17]">
+      <div className="p-3 border-t border-subtleBorder bg-canvas">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -289,7 +289,7 @@ export const IncidentChatDrawer: React.FC<IncidentChatDrawerProps> = ({
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Ask AI Copilot (e.g. Why did checkout fail at 14:32 UTC?)"
             disabled={isLoading}
-            className="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition disabled:opacity-50"
+            className="flex-1 bg-elevated border border-subtleBorder/80 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition disabled:opacity-50"
           />
           <button
             type="submit"

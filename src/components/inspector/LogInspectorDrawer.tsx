@@ -138,14 +138,14 @@ export const LogInspectorDrawer: React.FC<LogInspectorDrawerProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Trace and Log Inspector Drawer"
-      className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-2xl h-full bg-[#0D1322]/95 backdrop-blur-2xl border-l border-slate-800/80 shadow-2xl flex flex-col text-slate-100 animate-in slide-in-from-right duration-200 overflow-hidden">
+      <div className="w-full max-w-2xl h-full bg-[#121318] backdrop-blur-2xl border-l border-white/10 shadow-2xl flex flex-col text-slate-100 animate-in slide-in-from-right duration-200 overflow-hidden font-sans">
         {/* Header Bar */}
-        <div className="p-5 border-b border-slate-800/80 bg-[#0B0F17]/80 flex flex-col gap-3">
+        <div className="p-5 border-b border-white/10 bg-[#09090b]/80 flex flex-col gap-3">
           {/* Top navigation controls */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -153,7 +153,7 @@ export const LogInspectorDrawer: React.FC<LogInspectorDrawerProps> = ({
                 onClick={onPrevLog}
                 title="Previous Log [K]"
                 aria-label="Previous Log"
-                className="p-1.5 rounded-lg border border-slate-800 bg-[#080C14] hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg border border-white/10 bg-[#09090b] hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -161,7 +161,7 @@ export const LogInspectorDrawer: React.FC<LogInspectorDrawerProps> = ({
                 onClick={onNextLog}
                 title="Next Log [J]"
                 aria-label="Next Log"
-                className="p-1.5 rounded-lg border border-slate-800 bg-[#080C14] hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg border border-white/10 bg-[#09090b] hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -173,7 +173,7 @@ export const LogInspectorDrawer: React.FC<LogInspectorDrawerProps> = ({
             <button
               onClick={onClose}
               aria-label="Close Inspector Drawer"
-              className="p-2 rounded-xl border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-xl border border-white/10 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -190,7 +190,7 @@ export const LogInspectorDrawer: React.FC<LogInspectorDrawerProps> = ({
             <span className={`px-2 py-0.5 rounded-md font-bold font-mono text-xs border ${statusBadgeClass}`}>
               {log.statusCode}
             </span>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-mono text-slate-400 tabular-nums">
               {log.latencyMs}ms • {new Date(log.timestamp).toLocaleTimeString()}
             </span>
           </div>
@@ -200,7 +200,7 @@ export const LogInspectorDrawer: React.FC<LogInspectorDrawerProps> = ({
             {/* Share Permalink */}
             <button
               onClick={handleCopyPermalink}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#080C14] hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-[#09090b] hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
             >
               {copiedLink ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Share2 className="h-3.5 w-3.5 text-sky-400" />}
               {copiedLink ? 'Link Copied' : 'Share Trace'}
@@ -209,7 +209,7 @@ export const LogInspectorDrawer: React.FC<LogInspectorDrawerProps> = ({
             {/* Export Diagnostic Bundle */}
             <button
               onClick={handleExportBundle}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#080C14] hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-[#09090b] hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
             >
               <Download className="h-3.5 w-3.5 text-indigo-400" />
               Export Bundle
@@ -228,7 +228,7 @@ export const LogInspectorDrawer: React.FC<LogInspectorDrawerProps> = ({
             {/* Escalate Menu */}
             <button
               onClick={() => handleEscalate('slack')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#080C14] hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-[#09090b] hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
             >
               <MessageSquare className="h-3.5 w-3.5 text-emerald-400" />
               {escalatedState === 'slack' ? 'Sent to #oncall' : 'Escalate to Slack'}

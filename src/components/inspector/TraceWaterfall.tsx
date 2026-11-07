@@ -22,8 +22,8 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ log }) => {
   return (
     <div className="flex flex-col space-y-4">
       {/* Top View Mode Switcher */}
-      <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0B0F17] border border-slate-800/80 font-mono text-xs">
+      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#09090b] border border-white/10 font-mono text-xs">
           <button
             onClick={() => setViewMode('waterfall')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
@@ -91,14 +91,14 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ log }) => {
                   onClick={() => setSelectedSpan(selectedSpan?.id === span.id ? null : span)}
                   className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                     selectedSpan?.id === span.id
-                      ? 'border-indigo-500/60 bg-[#131B2E] shadow-lg'
-                      : 'border-slate-800/80 bg-[#0B0F17]/70 hover:border-slate-700'
+                      ? 'border-indigo-500/60 bg-[#121318] shadow-lg'
+                      : 'border-white/10 bg-[#09090b]/70 hover:border-white/10'
                   }`}
                 >
                   <div className="flex items-center justify-between text-xs font-mono mb-1.5">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-white truncate max-w-xs">{span.name}</span>
-                      <span className="text-[10px] text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                      <span className="text-[10px] text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-white/10">
                         {span.service}
                       </span>
                     </div>
@@ -124,7 +124,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ log }) => {
 
       {/* 2. FLAMEGRAPH VIEW */}
       {viewMode === 'flamegraph' && (
-        <div className="space-y-2 p-4 rounded-xl border border-slate-800 bg-[#0B0F17]/90 font-mono">
+        <div className="space-y-2 p-4 rounded-xl border border-white/10 bg-[#09090b]/90 font-mono">
           <div className="text-xs text-slate-400 mb-2 flex items-center gap-1.5">
             <Flame className="h-4 w-4 text-amber-400" />
             <span>Interactive Call Hierarchy (Width represents latency weight)</span>
@@ -171,7 +171,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ log }) => {
               return (
                 <div
                   key={span.id}
-                  className="flex items-center justify-between p-3 rounded-xl border border-slate-800/80 bg-[#0B0F17]/80 text-xs"
+                  className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-[#09090b]/80 text-xs"
                 >
                   <div className="flex flex-col">
                     <span className="font-semibold text-white">{span.name}</span>
@@ -208,8 +208,8 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ log }) => {
 
       {/* Selected Span Metadata Details Drawer */}
       {selectedSpan && (
-        <div className="p-4 rounded-xl border border-slate-800 bg-[#0B0F17] font-mono text-xs space-y-2 animate-in fade-in duration-100">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div className="p-4 rounded-xl border border-white/10 bg-[#09090b] font-mono text-xs space-y-2 animate-in fade-in duration-100">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2">
             <span className="font-semibold text-white">{selectedSpan.name} Attributes</span>
             <span className="text-slate-400 text-[10px]">{selectedSpan.id}</span>
           </div>

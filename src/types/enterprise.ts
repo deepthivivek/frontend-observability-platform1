@@ -27,6 +27,7 @@ export interface RoleDefinition {
     canManageSynthetic?: boolean;
     canViewGovernance?: boolean;
     canManageGovernance?: boolean;
+    canManageInfra?: boolean;
   };
 }
 

@@ -143,7 +143,7 @@ export const StreamTimeTravel: React.FC<StreamTimeTravelProps> = ({
       </div>
 
       {/* Preset Quick Scrub Buttons & Replay Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] uppercase font-bold text-slate-500 mr-1">Presets:</span>
           {PRESETS.map((p) => {
@@ -155,7 +155,7 @@ export const StreamTimeTravel: React.FC<StreamTimeTravelProps> = ({
                 className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                   isActive
                     ? 'bg-purple-600 text-white border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.3)]'
-                    : 'bg-[#0B0F17] text-slate-400 border-slate-800 hover:text-white hover:border-slate-700'
+                    : 'bg-[#09090b] text-slate-400 border-white/10 hover:text-white hover:border-white/10'
                 }`}
               >
                 {p.label}

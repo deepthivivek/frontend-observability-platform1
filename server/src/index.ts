@@ -135,6 +135,11 @@ import { incidentsRouter } from './routes/incidents';
 import { complianceRouter } from './routes/compliance';
 import { syntheticRouter } from './routes/synthetic';
 import { governanceRouter } from './routes/governance';
+import { logsRouter } from './routes/logs';
+import { selfHealingRouter } from './routes/selfHealing';
+import { capstoneUltimateRouter } from './routes/capstoneUltimate';
+import { immuneSystemRouter } from './routes/immuneSystem';
+import { neuromorphicMeshRouter } from './routes/neuromorphicMesh';
 import { setupWebSocketGateway } from './ws/gateway';
 
 // Mount Dashboard Presets API
@@ -154,6 +159,26 @@ app.use('/api/v1/synthetic', syntheticRouter);
 
 // Mount Governance, FinOps, eBPF, ZKP, Chaos & FHE API
 app.use('/api/v1/governance', governanceRouter);
+
+// Mount Multi-Region Logs & LogQL AST API
+app.use('/api/v1/logs', logsRouter);
+
+// Mount Autonomous Self-Healing, Canary Rollbacks, RL Loop & GitOps API (Day 18)
+app.use('/api/v1/self-healing', selfHealingRouter);
+
+// Mount Capstone Ultimate Digital Twin & Federated Anomaly Sync API (Day 20)
+app.use('/api/v1/capstone-ultimate', capstoneUltimateRouter);
+app.use('/api/v1', capstoneUltimateRouter);
+
+// Mount Autonomous Immune, Neural-Symbolic, Lattice PQC, ZKP & Quantum Annealing API (Day 20 Supercharged)
+app.use('/api/v1/immune', immuneSystemRouter);
+app.use('/api/v1/lattice', immuneSystemRouter);
+app.use('/api/v1/mesh', immuneSystemRouter);
+app.use('/api/v1', immuneSystemRouter);
+
+// Mount Neuromorphic SNN, Slime-Mould & Biophotonic Entanglement Sync API (Day 21)
+app.use('/api/v1', neuromorphicMeshRouter);
+app.use('/api/v1/neuromorphic-mesh', neuromorphicMeshRouter);
 
 // PromQL / LogQL Metric Query API
 app.post('/api/v1/metrics/query', (req: Request, res: Response) => {
@@ -187,7 +212,7 @@ app.post('/api/v1/metrics/alerts', (req: Request, res: Response) => {
 const server = http.createServer(app);
 setupWebSocketGateway(server);
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
   server.listen(PORT, () => {
     console.log(`[Neon Chasm] Backend Node.js Ingestion Gateway running on port ${PORT}`);
   });

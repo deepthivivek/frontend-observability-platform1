@@ -102,14 +102,14 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Alert Rule Builder Modal"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080C14]/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-canvas/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-xl rounded-2xl border border-slate-800 bg-[#131B2E] shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col text-slate-200 backdrop-blur-xl max-h-[90vh]">
+      <div className="w-full max-w-xl rounded-2xl border border-subtleBorder bg-surface shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col text-slate-200 backdrop-blur-xl max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-[#0B0F17]/90">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-subtleBorder bg-canvas/90">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
               <Bell className="h-4 w-4" />
@@ -142,7 +142,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
               placeholder="e.g. Critical P99 Payment Latency Degradation"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+              className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
               required
             />
           </div>
@@ -156,7 +156,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
               <select
                 value={metric}
                 onChange={(e) => setMetric(e.target.value as AlertMetricType)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-indigo-300 font-semibold focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-indigo-300 font-semibold focus:outline-none focus:border-indigo-500"
               >
                 <option value="latency">P99 Latency (ms)</option>
                 <option value="error_rate">Error Rate (%)</option>
@@ -172,7 +172,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
               <select
                 value={operator}
                 onChange={(e) => setOperator(e.target.value as AlertOperator)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-white font-semibold focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-white font-semibold focus:outline-none focus:border-indigo-500"
               >
                 <option value=">">Greater than (&gt;)</option>
                 <option value="<">Less than (&lt;)</option>
@@ -188,7 +188,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
                 type="number"
                 value={threshold}
                 onChange={(e) => setThreshold(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-amber-300 font-bold focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-amber-300 font-bold focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
@@ -203,7 +203,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
               <select
                 value={environment}
                 onChange={(e) => setEnvironment(e.target.value as 'Production' | 'Staging' | 'All')}
-                className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-white focus:outline-none focus:border-indigo-500"
               >
                 <option value="Production">Production Cluster</option>
                 <option value="Staging">Staging Environment</option>
@@ -218,7 +218,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
               <select
                 value={severity}
                 onChange={(e) => setSeverity(e.target.value as AlertSeverity)}
-                className={`w-full px-3 py-2 rounded-xl border bg-[#0B0F17] font-bold focus:outline-none ${
+                className={`w-full px-3 py-2 rounded-xl border bg-canvas font-bold focus:outline-none ${
                   severity === 'P1-Critical'
                     ? 'border-rose-500/50 text-rose-400'
                     : severity === 'P2-Warning'
@@ -245,7 +245,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
                 max={10}
                 value={flappingDampingCount}
                 onChange={(e) => setFlappingDampingCount(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-white focus:outline-none focus:border-indigo-500"
               />
               <span className="text-[10px] text-slate-500 mt-0.5 block">
                 Suppresses noisy alert toggling until sustained for {flappingDampingCount} intervals.
@@ -262,7 +262,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
                 max={60}
                 value={autoEscalateMinutes}
                 onChange={(e) => setAutoEscalateMinutes(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-white focus:outline-none focus:border-indigo-500"
               />
               <span className="text-[10px] text-slate-500 mt-0.5 block">
                 Escalates to Secondary On-Call if unacknowledged after {autoEscalateMinutes}m.
@@ -279,7 +279,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
             <select
               value={remediationAction}
               onChange={(e) => setRemediationAction(e.target.value as any)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-emerald-300 font-semibold focus:outline-none focus:border-indigo-500"
+              className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-emerald-300 font-semibold focus:outline-none focus:border-indigo-500"
             >
               <option value="None">None (Manual Investigation Only)</option>
               <option value="Flush Redis Cache">Execute Webhook: Flush Redis L2 Cache</option>
@@ -289,7 +289,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
           </div>
 
           {/* Maintenance Silencing Windows */}
-          <div className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17]/80 space-y-2">
+          <div className="p-3.5 rounded-xl border border-subtleBorder bg-canvas/80 space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5 cursor-pointer">
                 <Calendar className="h-3.5 w-3.5 text-indigo-400" />
@@ -299,18 +299,18 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
                 type="checkbox"
                 checked={silencingEnabled}
                 onChange={(e) => setSilencingEnabled(e.target.checked)}
-                className="rounded border-slate-700 bg-slate-900 text-indigo-500 cursor-pointer"
+                className="rounded border-subtleBorder bg-elevated text-indigo-500 cursor-pointer"
               />
             </div>
 
             {silencingEnabled && (
-              <div className="pt-2 border-t border-slate-800/80">
+              <div className="pt-2 border-t border-subtleBorder">
                 <input
                   type="text"
                   placeholder="Reason for silence (e.g. DB Migration v3.2)"
                   value={silencingReason}
                   onChange={(e) => setSilencingReason(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-700 bg-[#080C14] text-xs text-slate-200"
+                  className="w-full px-3 py-1.5 rounded-lg border border-subtleBorder bg-canvas text-xs text-slate-200"
                 />
                 <span className="text-[10px] text-amber-400/80 mt-1 block">
                   Alerts will be suppressed for the next 2 hours.
@@ -320,7 +320,7 @@ export const AlertRuleBuilder: React.FC<AlertRuleBuilderProps> = ({
           </div>
 
           {/* Footer Submit Actions */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-subtleBorder flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}

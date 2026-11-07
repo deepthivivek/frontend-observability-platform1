@@ -215,7 +215,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
   return (
     <div className="space-y-6 text-slate-100">
       {/* TOOLBAR & HEADER */}
-      <div className="bg-[#0F172A]/90 backdrop-blur border border-slate-800 rounded-xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-surface/90 backdrop-blur border border-subtleBorder rounded-xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-4">
         {/* Preset Selector */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2 text-cyan-400">
@@ -225,7 +225,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
           <select
             value={activePresetId}
             onChange={(e) => selectPreset(e.target.value)}
-            className="bg-[#0B0F17] border border-slate-700 text-cyan-300 text-xs font-mono rounded-lg px-3 py-2 outline-none focus:border-cyan-500"
+            className="bg-canvas border border-subtleBorder text-cyan-300 text-xs font-mono rounded-lg px-3 py-2 outline-none focus:border-cyan-500"
           >
             {presets.map((p) => (
               <option key={p.id} value={p.id}>
@@ -238,7 +238,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
         {/* Refresh Rate & Studio Actions */}
         <div className="flex flex-wrap items-center space-x-2.5">
           {/* Refresh Selector */}
-          <div className="flex items-center bg-[#0B0F17] border border-slate-800 rounded-lg p-1 text-xs">
+          <div className="flex items-center bg-canvas border border-subtleBorder rounded-lg p-1 text-xs">
             <button
               onClick={() => fetchMetricData()}
               className="p-1 text-slate-400 hover:text-cyan-400 transition"
@@ -265,7 +265,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 border ${
               isAiBuilderOpen
                 ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
-                : 'bg-[#0B0F17] text-slate-300 border-slate-800 hover:border-cyan-500/40'
+                : 'bg-canvas text-slate-300 border-subtleBorder hover:border-cyan-500/40'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
@@ -284,7 +284,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
           {/* Save Preset Button */}
           <button
             onClick={() => setIsSavePresetOpen(true)}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1 border border-slate-700"
+            className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1 border border-subtleBorder"
           >
             <Save className="w-3.5 h-3.5 text-emerald-400" />
             <span>Save Preset</span>
@@ -293,13 +293,13 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
           {/* Export / Import JSON */}
           <button
             onClick={exportPresetsJSON}
-            className="p-1.5 bg-[#0B0F17] hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg border border-slate-800 transition"
+            className="p-1.5 bg-canvas hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg border border-subtleBorder transition"
             title="Export Presets JSON"
           >
             <Download className="w-3.5 h-3.5" />
           </button>
           <label
-            className="p-1.5 bg-[#0B0F17] hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg border border-slate-800 transition cursor-pointer"
+            className="p-1.5 bg-canvas hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg border border-subtleBorder transition cursor-pointer"
             title="Import Presets JSON"
           >
             <Upload className="w-3.5 h-3.5" />
@@ -347,15 +347,15 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
               ? 'border-red-500/60 shadow-red-950/40 shadow-xl'
               : data.status === 'warning'
               ? 'border-amber-500/60 shadow-amber-950/40 shadow-xl'
-              : 'border-slate-800 hover:border-slate-700';
+              : 'border-subtleBorder hover:border-subtleBorder';
 
           return (
             <div
               key={w.id}
-              className={`bg-[#0F172A] border ${statusBorder} rounded-xl p-5 relative group flex flex-col justify-between transition-all`}
+              className={`bg-surface border ${statusBorder} rounded-xl p-5 relative group flex flex-col justify-between transition-all`}
             >
               {/* Card Header */}
-              <div className="flex items-start justify-between border-b border-slate-800/80 pb-3 mb-4">
+              <div className="flex items-start justify-between border-b border-subtleBorder pb-3 mb-4">
                 <div>
                   <div className="flex items-center space-x-2">
                     <h4 className="font-semibold text-sm text-slate-200">{w.title}</h4>
@@ -375,7 +375,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                 </div>
 
                 <div className="flex items-center space-x-1.5">
-                  <span className="text-[10px] font-mono text-slate-500 bg-[#0B0F17] px-2 py-0.5 rounded border border-slate-800">
+                  <span className="text-[10px] font-mono text-slate-500 bg-canvas px-2 py-0.5 rounded border border-subtleBorder">
                     {data.executionTimeMs}ms {data.cached && '(cached)'}
                   </span>
                   <button
@@ -413,7 +413,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                       {data.currentValue} <span className="text-xs text-slate-400">{w.unit}</span>
                     </span>
                   </div>
-                  <div className="h-28 w-full bg-[#0B0F17] border border-slate-800/80 rounded-lg p-2 flex items-end space-x-1.5 overflow-hidden">
+                  <div className="h-28 w-full bg-canvas border border-subtleBorder rounded-lg p-2 flex items-end space-x-1.5 overflow-hidden">
                     {data.dataPoints.map((pt, i) => {
                       const maxVal = Math.max(...data.dataPoints.map((p) => p.value), 1);
                       const heightPct = Math.max(10, Math.min(100, (pt.value / maxVal) * 100));
@@ -434,7 +434,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
               {w.type === 'heatmap' && (
                 <div className="space-y-3">
                   <div className="text-xs font-mono text-slate-400">Latency Bucket Density (P95/P99 Matrix)</div>
-                  <div className="grid grid-cols-10 gap-1 bg-[#0B0F17] p-2.5 rounded-lg border border-slate-800">
+                  <div className="grid grid-cols-10 gap-1 bg-canvas p-2.5 rounded-lg border border-subtleBorder">
                     {Array.from({ length: 40 }).map((_, i) => {
                       const opacity = Math.sin(i * 1.7) * 0.5 + 0.5;
                       return (
@@ -472,7 +472,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                           <span>{row.label}</span>
                           <span>{row.val}%</span>
                         </div>
-                        <div className="h-2 bg-[#0B0F17] rounded-full overflow-hidden border border-slate-800">
+                        <div className="h-2 bg-canvas rounded-full overflow-hidden border border-subtleBorder">
                           <div className={`h-full ${row.color}`} style={{ width: `${row.val}%` }} />
                         </div>
                       </div>
@@ -483,7 +483,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
 
               {/* Threshold Status Bar Footnote */}
               {w.threshold && (
-                <div className="mt-4 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                <div className="mt-4 pt-2 border-t border-subtleBorder flex items-center justify-between text-[11px] font-mono text-slate-500">
                   <span>Threshold: {w.threshold.operator} {w.threshold.warning || w.threshold.critical}</span>
                   <span className={data.status === 'ok' ? 'text-emerald-400' : 'text-amber-400'}>
                     Status: {data.status.toUpperCase()}
@@ -498,8 +498,8 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
       {/* ADD WIDGET MODAL */}
       {isAddWidgetOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] border border-cyan-500/40 rounded-xl p-6 max-w-lg w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="bg-surface border border-cyan-500/40 rounded-xl p-6 max-w-lg w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-subtleBorder pb-3">
               <h3 className="font-semibold text-slate-100 flex items-center space-x-2">
                 <Plus className="w-4 h-4 text-cyan-400" />
                 <span>Add Custom Metric Widget</span>
@@ -516,7 +516,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                   type="text"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-slate-200 outline-none focus:border-cyan-500"
+                  className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-slate-200 outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -526,7 +526,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                   <select
                     value={newType}
                     onChange={(e) => setNewType(e.target.value as WidgetType)}
-                    className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-slate-200 outline-none"
+                    className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-slate-200 outline-none"
                   >
                     <option value="line">Line / Area Chart</option>
                     <option value="stat">Single Stat Gauge</option>
@@ -540,7 +540,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                   <select
                     value={newWidth}
                     onChange={(e) => setNewWidth(Number(e.target.value))}
-                    className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-slate-200 outline-none"
+                    className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-slate-200 outline-none"
                   >
                     <option value={3}>1/4 Width (3 cols)</option>
                     <option value={6}>1/2 Width (6 cols)</option>
@@ -556,7 +556,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                     type="number"
                     value={newWarnThreshold}
                     onChange={(e) => setNewWarnThreshold(e.target.value)}
-                    className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-slate-200 outline-none"
+                    className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-slate-200 outline-none"
                   />
                 </div>
                 <div>
@@ -565,13 +565,13 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                     type="number"
                     value={newCritThreshold}
                     onChange={(e) => setNewCritThreshold(e.target.value)}
-                    className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-slate-200 outline-none"
+                    className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-slate-200 outline-none"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-800">
+            <div className="flex justify-end space-x-3 pt-3 border-t border-subtleBorder">
               <button
                 onClick={() => setIsAddWidgetOpen(false)}
                 className="px-4 py-2 text-xs text-slate-400 hover:text-slate-200"
@@ -592,8 +592,8 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
       {/* SAVE PRESET MODAL */}
       {isSavePresetOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] border border-emerald-500/40 rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="bg-surface border border-emerald-500/40 rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-subtleBorder pb-3">
               <h3 className="font-semibold text-slate-100 flex items-center space-x-2">
                 <Save className="w-4 h-4 text-emerald-400" />
                 <span>Save Dashboard Preset</span>
@@ -611,7 +611,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                   value={presetNameInput}
                   onChange={(e) => setPresetNameInput(e.target.value)}
                   placeholder="e.g. Production Edge Gateway & Latency"
-                  className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-slate-200 outline-none focus:border-emerald-500"
+                  className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-slate-200 outline-none focus:border-emerald-500"
                 />
               </div>
               <div>
@@ -621,12 +621,12 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                   onChange={(e) => setPresetDescInput(e.target.value)}
                   rows={3}
                   placeholder="Summary of metrics monitored in this preset layout..."
-                  className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-slate-200 outline-none resize-none"
+                  className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-slate-200 outline-none resize-none"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-800">
+            <div className="flex justify-end space-x-3 pt-3 border-t border-subtleBorder">
               <button
                 onClick={() => setIsSavePresetOpen(false)}
                 className="px-4 py-2 text-xs text-slate-400 hover:text-slate-200"

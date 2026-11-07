@@ -55,7 +55,7 @@ export const TailStreamControls: React.FC<TailStreamControlsProps> = ({
   pausedQueuedCount = 0,
 }) => {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border border-slate-800/80 bg-[#131B2E]/90 backdrop-blur-xl shadow-lg font-mono text-xs">
+    <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl shadow-lg font-mono text-xs">
       {/* Left section: Stream Toggle & Auto-Scroll Lock */}
       <div className="flex flex-wrap items-center gap-2">
         {/* Stream Status Toggle Button */}
@@ -95,7 +95,7 @@ export const TailStreamControls: React.FC<TailStreamControlsProps> = ({
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
             isAutoScrollLocked
               ? 'bg-indigo-600/25 text-indigo-300 border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
-              : 'bg-slate-800/80 text-slate-400 border-slate-700/60 hover:text-slate-200'
+              : 'bg-slate-800/80 text-slate-400 border-white/10/60 hover:text-slate-200'
           }`}
           title="Toggle auto-scrolling to newest log events"
         >
@@ -113,7 +113,7 @@ export const TailStreamControls: React.FC<TailStreamControlsProps> = ({
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
             isTimeTraveling
               ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.25)]'
-              : 'bg-slate-800/80 text-slate-400 border-slate-700/60 hover:text-white hover:border-slate-600'
+              : 'bg-slate-800/80 text-slate-400 border-white/10/60 hover:text-white hover:border-slate-600'
           }`}
           title="Open zero-copy time scrubber to inspect historical buffer windows"
         >
@@ -137,7 +137,7 @@ export const TailStreamControls: React.FC<TailStreamControlsProps> = ({
         )}
 
         {/* Live Throughput Counter */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0B0F17]/80 border border-slate-800 text-slate-300">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#09090b]/80 border border-white/10 text-slate-300">
           <Activity className="h-3.5 w-3.5 text-indigo-400 animate-pulse" />
           <span>
             <strong className="text-white">{ingestionRate}</strong> logs/sec
@@ -150,7 +150,7 @@ export const TailStreamControls: React.FC<TailStreamControlsProps> = ({
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
             samplingMode === 'sampled'
               ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-              : 'bg-[#0B0F17]/80 text-slate-300 border-slate-800 hover:border-slate-700'
+              : 'bg-[#09090b]/80 text-slate-300 border-white/10 hover:border-white/10'
           }`}
           title="Toggle between Full Stream (1:1) and Backpressure Sampling (1:10)"
         >

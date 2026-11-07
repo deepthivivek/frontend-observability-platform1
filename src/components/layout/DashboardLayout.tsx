@@ -19,6 +19,11 @@ import {
   Layers,
   Flame,
   ShieldCheck,
+  Sun,
+  Moon,
+  Cpu,
+  Sparkles,
+  BrainCircuit,
 } from 'lucide-react';
 import {
   DashboardView,
@@ -71,7 +76,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return true;
+  });
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const toggleTheme = () => {
+    const nextDark = !isDarkMode;
+    setIsDarkMode(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add('dark');
+      try { localStorage.setItem('theme', 'dark'); } catch (_) {}
+    } else {
+      document.documentElement.classList.remove('dark');
+      try { localStorage.setItem('theme', 'light'); } catch (_) {}
+    }
+  };
 
   // Keyboard navigation shortcuts: '/' for search, 'G + ...' for views
   useEffect(() => {
@@ -101,7 +124,35 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       const now = Date.now();
       const currentKey = e.key.toLowerCase();
 
-      // Two-key quick-jump sequence (G then D/R/A/N/S)
+      // Two-key quick-jump sequence (L L for logs, D T for capstone, G then D/R/A/N/S/G)
+      if (lastKey === 'l' && currentKey === 'l' && now - lastKeyTime < 800) {
+        e.preventDefault();
+        onNavigate('logs');
+        lastKey = '';
+        return;
+      }
+
+      if (lastKey === 'd' && currentKey === 't' && now - lastKeyTime < 800) {
+        e.preventDefault();
+        onNavigate('capstone-ultimate');
+        lastKey = '';
+        return;
+      }
+
+      if (lastKey === 'i' && currentKey === 's' && now - lastKeyTime < 800) {
+        e.preventDefault();
+        onNavigate('immune-system');
+        lastKey = '';
+        return;
+      }
+
+      if (lastKey === 'n' && currentKey === 'm' && now - lastKeyTime < 800) {
+        e.preventDefault();
+        onNavigate('neuromorphic-mesh');
+        lastKey = '';
+        return;
+      }
+
       if (lastKey === 'g' && now - lastKeyTime < 800) {
         if (currentKey === 'd') {
           e.preventDefault();
@@ -136,9 +187,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         } else if (currentKey === 'g') {
           e.preventDefault();
           onNavigate('governance');
+        } else if (currentKey === 'h') {
+          e.preventDefault();
+          onNavigate('self-healing');
         }
         lastKey = '';
         return;
+      }
+
+      if (lastKey === 'h') {
+        if (currentKey === 'h') {
+          e.preventDefault();
+          onNavigate('self-healing');
+          lastKey = '';
+          return;
+        }
       }
 
       lastKey = currentKey;
@@ -221,6 +284,27 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       badge: 'SOC2',
     },
     {
+      id: 'self-healing' as DashboardView,
+      label: 'Self-Healing Studio',
+      shortcut: 'H H',
+      icon: <Cpu className="h-4 w-4 text-emerald-400" />,
+      badge: 'eBPF',
+    },
+    {
+      id: 'capstone-ultimate' as DashboardView,
+      label: 'Ultimate Governance',
+      shortcut: 'D T',
+      icon: <Sparkles className="h-4 w-4 text-indigo-400" />,
+      badge: 'Twin',
+    },
+    {
+      id: 'neuromorphic-mesh' as DashboardView,
+      label: 'Neuromorphic Mesh',
+      shortcut: 'N M',
+      icon: <BrainCircuit className="h-4 w-4 text-violet-400" />,
+      badge: 'Day 21',
+    },
+    {
       id: 'settings' as DashboardView,
       label: 'Settings',
       shortcut: 'G ,',
@@ -229,7 +313,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div className="min-h-screen bg-canvas text-customText flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200 transition-colors duration-200">
       {/* Central ARIA Live Region for accessibility announcements */}
       <div
         aria-live="polite"
@@ -241,25 +325,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar Desktop - Deep Ocean Navy Container */}
+        {/* Sidebar Desktop - Clean Container */}
         <aside
-          className={`hidden md:flex flex-col border-r border-slate-800/80 bg-[#0B0F17] transition-all duration-200 z-20 ${
+          className={`hidden md:flex flex-col border-r border-subtleBorder bg-canvas transition-all duration-200 z-20 ${
             isSidebarCollapsed ? 'w-16' : 'w-64'
           }`}
         >
           {/* Logo & Brand Header with glowing accent */}
-          <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800/80">
+          <div className="h-16 flex items-center justify-between px-4 border-b border-subtleBorder">
             {!isSidebarCollapsed ? (
               <div className="flex items-center gap-3 overflow-hidden">
                 <div className="h-8 w-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-mono font-bold text-sm shadow-[0_0_15px_rgba(99,102,241,0.2)]">
                   Ω
                 </div>
                 <div className="truncate">
-                  <div className="font-semibold text-sm tracking-tight text-white flex items-center gap-1.5">
+                  <div className="font-semibold text-sm tracking-tight text-customText flex items-center gap-1.5">
                     Neon Chasm
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
                   </div>
-                  <div className="text-[10px] font-mono text-slate-400 leading-none">
+                  <div className="text-[10px] font-mono text-mutedText leading-none">
                     Observability Engine
                   </div>
                 </div>
@@ -273,7 +357,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               aria-label={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors"
+              className="p-1.5 rounded-lg text-mutedText hover:text-customText hover:bg-elevated transition-colors"
             >
               {isSidebarCollapsed ? (
                 <ChevronRight className="h-4 w-4" />
@@ -294,12 +378,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   title={isSidebarCollapsed ? `${item.label} (${item.shortcut})` : undefined}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/40 shadow-[0_0_18px_rgba(99,102,241,0.18)]'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                      ? 'bg-indigo-600/20 text-indigo-400 dark:text-indigo-300 border border-indigo-500/40 shadow-[0_0_18px_rgba(99,102,241,0.18)]'
+                      : 'text-mutedText hover:text-customText hover:bg-elevated'
                   } ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}
                 >
                   <div className="flex items-center gap-3 truncate">
-                    <span className={isActive ? 'text-indigo-400' : 'text-slate-400'}>
+                    <span className={isActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-mutedText'}>
                       {item.icon}
                     </span>
                     {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
@@ -308,11 +392,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   {!isSidebarCollapsed && (
                     <div className="flex items-center gap-2">
                       {item.badge !== undefined && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-[0_0_10px_rgba(244,63,94,0.3)]">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/20 text-rose-400 dark:text-rose-300 border border-rose-500/40 shadow-[0_0_10px_rgba(244,63,94,0.3)]">
                           {item.badge}
                         </span>
                       )}
-                      <kbd className="text-[10px] font-mono text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                      <kbd className="text-[10px] font-mono text-mutedText bg-surface px-1.5 py-0.5 rounded border border-subtleBorder">
                         {item.shortcut}
                       </kbd>
                     </div>
@@ -323,10 +407,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </nav>
 
           {/* Sidebar Footer Command Trigger */}
-          <div className="p-3 border-t border-slate-800/80">
+          <div className="p-3 border-t border-subtleBorder">
             <button
               onClick={onOpenCommandPalette}
-              className={`w-full flex items-center gap-2 py-2.5 px-3 rounded-xl border border-slate-800 hover:border-indigo-500/40 bg-[#131B2E] text-slate-400 hover:text-slate-200 transition-all text-xs ${
+              className={`w-full flex items-center gap-2 py-2.5 px-3 rounded-xl border border-subtleBorder hover:border-indigo-500/40 bg-surface text-mutedText hover:text-customText transition-all text-xs ${
                 isSidebarCollapsed ? 'justify-center' : 'justify-between'
               }`}
             >
@@ -335,7 +419,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 {!isSidebarCollapsed && <span>Quick Actions</span>}
               </div>
               {!isSidebarCollapsed && (
-                <kbd className="font-mono text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-slate-400 border border-slate-800">
+                <kbd className="font-mono text-[10px] bg-elevated px-1.5 py-0.5 rounded text-mutedText border border-subtleBorder">
                   ⌘K
                 </kbd>
               )}
@@ -344,30 +428,30 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </aside>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0B0F17]">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-canvas">
           {/* Sticky Frosted Header */}
-          <header className="h-16 border-b border-slate-800/80 bg-[#0B0F17]/80 backdrop-blur-md sticky top-0 z-10 px-4 sm:px-6 flex items-center justify-between gap-3">
+          <header className="h-16 border-b border-subtleBorder bg-canvas/80 backdrop-blur-md sticky top-0 z-10 px-4 sm:px-6 flex items-center justify-between gap-3 transition-colors duration-200">
             {/* Left: Mobile hamburger & Global search input */}
             <div className="flex items-center gap-3 flex-1 max-w-xl">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                className="md:hidden p-2 rounded-xl text-mutedText hover:text-customText hover:bg-elevated"
                 aria-label="Toggle Mobile Navigation"
               >
                 <Menu className="h-5 w-5" />
               </button>
 
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-mutedText" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search endpoint, IP, trace, error... Press '/' to focus"
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-10 pr-9 py-2 rounded-xl border border-slate-800/80 bg-[#131B2E]/90 text-xs sm:text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-all font-mono shadow-inner"
+                  className="w-full pl-10 pr-9 py-2 rounded-xl border border-subtleBorder bg-surface text-xs sm:text-sm text-customText placeholder:text-mutedText focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-all font-mono shadow-inner"
                 />
-                <kbd className="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                <kbd className="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-mutedText bg-elevated px-1.5 py-0.5 rounded border border-subtleBorder">
                   /
                 </kbd>
               </div>
@@ -385,10 +469,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* AI Incident Assistant Quick Trigger */}
               <button
                 onClick={() => onNavigate('incidents')}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-mono text-rose-300 transition-all shadow-[0_0_12px_rgba(244,63,94,0.2)]"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-mono text-rose-500 dark:text-rose-300 transition-all shadow-[0_0_12px_rgba(244,63,94,0.2)]"
                 title="AI Incident Command Center (G I)"
               >
-                <Flame className="h-3.5 w-3.5 text-rose-400 animate-pulse" />
+                <Flame className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400 animate-pulse" />
                 <span className="font-bold">AI Incident</span>
                 <span className="px-1.5 py-0.2 rounded-full bg-rose-500/30 text-[10px] text-white">Active</span>
               </button>
@@ -396,10 +480,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Compliance Health Quick Trigger */}
               <button
                 onClick={() => onNavigate('compliance')}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-mono text-emerald-300 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-300 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)]"
                 title="SOC2 & GDPR Compliance Studio (G C)"
               >
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
                 <span className="font-bold">Compliance</span>
                 <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/30 text-[10px] text-white">100%</span>
               </button>
@@ -407,10 +491,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Global Edge Synthetic Probers Quick Trigger */}
               <button
                 onClick={() => onNavigate('synthetic')}
-                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-mono text-sky-300 transition-all shadow-[0_0_12px_rgba(14,165,233,0.2)]"
+                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-mono text-sky-600 dark:text-sky-300 transition-all shadow-[0_0_12px_rgba(14,165,233,0.2)]"
                 title="Global Edge Synthetic Probers & Latency Map (G S)"
               >
-                <Globe className="h-3.5 w-3.5 text-sky-400" />
+                <Globe className="h-3.5 w-3.5 text-sky-500 dark:text-sky-400" />
                 <span className="font-bold">Edge SLO</span>
                 <span className="px-1.5 py-0.2 rounded-full bg-sky-500/30 text-[10px] text-white">99.98%</span>
               </button>
@@ -418,24 +502,68 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* FinOps & System Resilience Quick Trigger */}
               <button
                 onClick={() => onNavigate('governance')}
-                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-mono text-indigo-300 transition-all shadow-[0_0_12px_rgba(99,102,241,0.2)]"
+                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-mono text-indigo-600 dark:text-indigo-300 transition-all shadow-[0_0_12px_rgba(99,102,241,0.2)]"
                 title="FinOps, Cardinality & Chaos Governance (G G)"
               >
-                <Shield className="h-3.5 w-3.5 text-indigo-400" />
+                <Shield className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
                 <span className="font-bold">FinOps</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-white">$3.4k/mo · 94% Resil</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-white">$3.4k/mo · Resil</span>
+              </button>
+
+              {/* Active Log Stream & Causal Health Quick Trigger */}
+              <button
+                onClick={() => onNavigate('logs')}
+                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-xs font-mono text-cyan-600 dark:text-cyan-300 transition-all shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                title="Multi-Region LogQL & Causal AI Explorer (L L)"
+              >
+                <FileText className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
+                <span className="font-bold">Log Stream</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/30 text-[10px] text-white">4.2 GB/s · Causal AI</span>
+              </button>
+
+              {/* Active Self-Healing Status Badge */}
+              <button
+                onClick={() => onNavigate('self-healing')}
+                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-300 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                title="Autonomous Self-Healing Command Studio (H H)"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400 animate-pulse" />
+                <span className="font-bold">Autonomous Defense, RL &amp; GitOps:</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/30 text-[10px] text-white font-semibold">Active</span>
+              </button>
+
+              {/* Active Capstone Status Badge */}
+              <button
+                onClick={() => onNavigate('capstone-ultimate')}
+                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-mono text-indigo-600 dark:text-indigo-300 transition-all shadow-[0_0_12px_rgba(99,102,241,0.2)]"
+                title="Ultimate Governance Studio (D T)"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 animate-pulse" />
+                <span className="font-bold">Digital Twin Chaos &amp; Federated AI:</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-white font-semibold">Active</span>
+              </button>
+
+              {/* Active Day 21 Status Badge */}
+              <button
+                onClick={() => onNavigate('neuromorphic-mesh')}
+                className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-violet-500/40 bg-violet-500/10 hover:bg-violet-500/20 text-xs font-mono text-violet-600 dark:text-violet-300 transition-all shadow-[0_0_12px_rgba(139,92,246,0.2)]"
+                title="Neuromorphic Mesh Studio (N M)"
+              >
+                <BrainCircuit className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400 animate-pulse" />
+                <span className="font-bold">Neuromorphic SNN, Slime-Mould &amp; Biophotonic Sync:</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-violet-500/30 text-[10px] text-white font-semibold">Active</span>
               </button>
 
               {/* Time Range Selector */}
-              <div className="flex items-center rounded-xl border border-slate-800/80 bg-[#131B2E] p-1 text-xs font-mono">
+              <div className="flex items-center rounded-xl border border-subtleBorder bg-surface p-1 text-xs font-mono">
                 {(['15m', '1h', '24h', '7d'] as TimeRangePreset[]).map((preset) => (
                   <button
                     key={preset}
                     onClick={() => onTimeRangeChange(preset)}
                     className={`px-2.5 py-1 rounded-lg transition-all ${
                       timeRange === preset
-                        ? 'bg-indigo-600/25 text-indigo-300 font-semibold border border-indigo-500/30 shadow-[0_0_10px_rgba(99,102,241,0.15)]'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-indigo-600/20 text-indigo-600 dark:text-indigo-300 font-semibold border border-indigo-500/30 shadow-[0_0_10px_rgba(99,102,241,0.15)]'
+                        : 'text-mutedText hover:text-customText'
                     }`}
                   >
                     {preset}
@@ -451,9 +579,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   )
                 }
                 title={`Timezone mode: ${timezone.toUpperCase()} (Click to cycle)`}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-800/80 bg-[#131B2E] hover:border-slate-700 text-xs font-mono text-slate-300 transition-colors"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-subtleBorder bg-surface hover:bg-elevated text-xs font-mono text-customText transition-colors"
               >
-                <Globe className="h-3.5 w-3.5 text-indigo-400" />
+                <Globe className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
                 <span className="uppercase text-[11px] font-medium">{timezone}</span>
               </button>
 
@@ -461,17 +589,31 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <button
                 onClick={onToggleDensity}
                 title={`Layout density: ${density} (Click to toggle)`}
-                className="p-2 rounded-xl border border-slate-800/80 bg-[#131B2E] hover:border-slate-700 text-slate-300 transition-colors"
+                className="p-2 rounded-xl border border-subtleBorder bg-surface hover:bg-elevated text-customText transition-colors"
                 aria-label="Toggle layout density"
               >
-                <Sliders className="h-4 w-4 text-slate-400" />
+                <Sliders className="h-4 w-4 text-mutedText" />
+              </button>
+
+              {/* Seamless Light/Dark Mode Switcher */}
+              <button
+                onClick={toggleTheme}
+                title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                aria-label="Toggle theme mode"
+                className="p-2 rounded-xl border border-subtleBorder bg-surface hover:bg-elevated text-customText transition-colors"
+              >
+                {isDarkMode ? (
+                  <Sun className="h-4 w-4 text-amber-400" />
+                ) : (
+                  <Moon className="h-4 w-4 text-indigo-600" />
+                )}
               </button>
             </div>
           </header>
 
           {/* Mobile Navigation Drawer */}
           {isMobileMenuOpen && (
-            <div className="md:hidden border-b border-slate-800/80 bg-[#0B0F17] p-4 space-y-2">
+            <div className="md:hidden border-b border-subtleBorder bg-canvas p-4 space-y-2">
               {navItems.map((item) => (
                 <button
                   key={item.id}
@@ -481,8 +623,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   }}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium ${
                     activeView === item.id
-                      ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/40'
-                      : 'text-slate-300 hover:bg-slate-800/50'
+                      ? 'bg-indigo-600/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/40'
+                      : 'text-customText hover:bg-elevated'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -490,7 +632,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     <span>{item.label}</span>
                   </div>
                   {item.badge !== undefined && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-rose-500/20 text-rose-500 dark:text-rose-300 border border-rose-500/40">
                       {item.badge}
                     </span>
                   )}
@@ -512,3 +654,4 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     </div>
   );
 };
+

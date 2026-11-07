@@ -50,7 +50,7 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
   return (
     <div className="space-y-6 font-mono text-xs">
       {/* Sub-Navigation */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-[#0B0F17] border border-slate-800 w-fit">
+      <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-canvas border border-subtleBorder w-fit">
         <button
           onClick={() => setSelectedTab('rbac')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
@@ -96,8 +96,8 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
       {/* Tab 1: RBAC Matrix */}
       {selectedTab === 'rbac' && (
         <div className="space-y-4">
-          <div className="p-5 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div className="p-5 rounded-2xl border border-subtleBorder bg-surface/90 backdrop-blur-xl shadow-xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
               <div>
                 <h3 className="font-semibold text-white text-sm">Fine-Grained Role Access Control (RBAC)</h3>
                 <p className="text-[11px] text-slate-400 mt-0.5">
@@ -111,7 +111,7 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {roles.map((role) => (
-                <div key={role.id} className="p-4 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-3 flex flex-col justify-between">
+                <div key={role.id} className="p-4 rounded-xl border border-subtleBorder bg-canvas space-y-3 flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white text-sm">{role.name}</span>
@@ -122,7 +122,7 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
                     <p className="text-[11px] text-slate-400">{role.description}</p>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-800/80 text-[11px]">
+                  <div className="space-y-2 pt-2 border-t border-subtleBorder text-[11px]">
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400">View Logs:</span>
                       <span className={role.permissions.canViewLogs ? 'text-emerald-400' : 'text-slate-600'}>
@@ -158,8 +158,8 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
       {/* Tab 2: JIT Break-Glass Access */}
       {selectedTab === 'breakglass' && (
         <div className="space-y-4">
-          <div className="p-5 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div className="p-5 rounded-2xl border border-subtleBorder bg-surface/90 backdrop-blur-xl shadow-xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
               <div>
                 <h3 className="font-semibold text-white text-sm">Just-In-Time (JIT) Break-Glass Escalation</h3>
                 <p className="text-[11px] text-slate-400 mt-0.5">
@@ -175,7 +175,7 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
               </button>
             </div>
 
-            <div className="divide-y divide-slate-800">
+            <div className="divide-y divide-subtleBorder">
               {breakGlassRequests.length === 0 ? (
                 <div className="py-8 text-center text-slate-500">No JIT Break-Glass requests recorded.</div>
               ) : (
@@ -190,7 +190,7 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
                               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                               : req.status === 'pending'
                               ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
-                              : 'bg-slate-800 text-slate-400 border-slate-700'
+                              : 'bg-slate-800 text-slate-400 border-subtleBorder'
                           }`}
                         >
                           {req.status.toUpperCase()}
@@ -224,8 +224,8 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
       {/* Tab 3: Zero-Knowledge Vault */}
       {selectedTab === 'vault' && (
         <div className="space-y-4">
-          <div className="p-5 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div className="p-5 rounded-2xl border border-subtleBorder bg-surface/90 backdrop-blur-xl shadow-xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
               <div>
                 <h3 className="font-semibold text-white text-sm">Zero-Knowledge Tenant Vault &amp; Envelope Encryption</h3>
                 <p className="text-[11px] text-slate-400 mt-0.5">
@@ -238,14 +238,14 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-3">
+              <div className="p-4 rounded-xl border border-subtleBorder bg-canvas space-y-3">
                 <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">
                   Plaintext Tenant Envelope (Client-Side)
                 </span>
                 <textarea
                   value={plaintextEnvelope}
                   onChange={(e) => setPlaintextEnvelope(e.target.value)}
-                  className="w-full h-32 bg-slate-900 border border-slate-800 rounded-xl p-3 text-white font-mono text-xs focus:outline-none focus:border-indigo-500"
+                  className="w-full h-32 bg-elevated border border-subtleBorder rounded-xl p-3 text-white font-mono text-xs focus:outline-none focus:border-indigo-500"
                 />
                 <button
                   onClick={handleSimulateVaultEncryption}
@@ -256,11 +256,11 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
                 </button>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-3">
+              <div className="p-4 rounded-xl border border-subtleBorder bg-canvas space-y-3">
                 <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">
                   Zero-Knowledge Ciphertext (In Transit / Storage)
                 </span>
-                <div className="w-full h-32 bg-slate-900 border border-slate-800 rounded-xl p-3 text-emerald-400 font-mono text-xs overflow-y-auto">
+                <div className="w-full h-32 bg-elevated border border-subtleBorder rounded-xl p-3 text-emerald-400 font-mono text-xs overflow-y-auto">
                   {ciphertextResult || '// Awaiting client-side envelope encryption seal...'}
                 </div>
                 <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[11px]">
@@ -275,7 +275,7 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
       {/* JIT Request Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-[#131B2E] p-6 shadow-2xl space-y-4">
+          <div className="w-full max-w-lg rounded-2xl border border-subtleBorder bg-surface p-6 shadow-2xl space-y-4">
             <h3 className="text-base font-bold text-white">Request Just-In-Time (JIT) Break-Glass Access</h3>
             <p className="text-xs text-slate-400">
               Provide an emergency justification. Access automatically revokes after 15 minutes.
@@ -287,7 +287,7 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
                 <select
                   value={scope}
                   onChange={(e) => setScope(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-white text-xs font-mono"
+                  className="w-full px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-white text-xs font-mono"
                 >
                   <option value="Production DB Core Vault">Production DB Core Vault</option>
                   <option value="AWS IAM Master Administrator">AWS IAM Master Administrator</option>
@@ -301,12 +301,12 @@ export const RBACManager: React.FC<RBACManagerProps> = ({
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="e.g. Incident #9941: Resolving cascading gateway timeout in payment checkout cluster."
-                  className="w-full h-24 px-3 py-2 rounded-xl border border-slate-800 bg-[#0B0F17] text-white text-xs font-mono focus:outline-none focus:border-indigo-500"
+                  className="w-full h-24 px-3 py-2 rounded-xl border border-subtleBorder bg-canvas text-white text-xs font-mono focus:outline-none focus:border-indigo-500"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-subtleBorder">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold"

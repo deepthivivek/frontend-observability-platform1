@@ -27,7 +27,7 @@ interface DeltaBadgeProps {
 const DeltaBadge: React.FC<DeltaBadgeProps> = ({ value, reverseColor = false, suffix = '%' }) => {
   if (value === 0 || isNaN(value)) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-xs font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700/60">
+      <span className="inline-flex items-center gap-0.5 text-xs font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-full border border-subtleBorder/60">
         <Minus className="h-3 w-3" />
         0.0{suffix}
       </span>
@@ -69,7 +69,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="h-40 rounded-2xl border border-slate-800/80 bg-[#131B2E]/70 p-5 animate-pulse flex flex-col justify-between backdrop-blur-xl"
+            className="h-40 rounded-2xl border border-subtleBorder bg-surface/70 p-5 animate-pulse flex flex-col justify-between backdrop-blur-xl"
           >
             <div className="flex justify-between items-start">
               <div className="h-4 w-28 bg-slate-800 rounded-md" />
@@ -99,7 +99,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* 1. Total Requests Card - Electric Indigo Accent */}
-      <div className="group relative overflow-hidden rounded-2xl border border-slate-800/80 hover:border-indigo-500/40 bg-[#131B2E]/80 p-5 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_25px_rgba(99,102,241,0.12)]">
+      <div className="group relative overflow-hidden rounded-2xl border border-subtleBorder hover:border-indigo-500/40 bg-surface/80 p-5 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_25px_rgba(99,102,241,0.12)]">
         {/* Ambient Top Glow */}
         <div className="absolute top-0 right-0 -mr-8 -mt-8 h-28 w-28 rounded-full bg-indigo-500/10 blur-2xl group-hover:bg-indigo-500/15 transition-all" />
 
@@ -119,7 +119,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
           {deltas && <DeltaBadge value={deltas.totalRequestsDelta} />}
         </div>
 
-        <div className="relative mt-4 flex items-center justify-between pt-2 border-t border-slate-800/60">
+        <div className="relative mt-4 flex items-center justify-between pt-2 border-t border-subtleBorder/60">
           <span className="text-xs text-slate-400 font-mono">
             {metrics.errorCount} total errors
           </span>
@@ -135,7 +135,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       </div>
 
       {/* 2. Success & Error Rates - Neon Teal/Emerald Accent */}
-      <div className="group relative overflow-hidden rounded-2xl border border-slate-800/80 hover:border-emerald-500/40 bg-[#131B2E]/80 p-5 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_25px_rgba(16,185,129,0.12)]">
+      <div className="group relative overflow-hidden rounded-2xl border border-subtleBorder hover:border-emerald-500/40 bg-surface/80 p-5 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_25px_rgba(16,185,129,0.12)]">
         {/* Ambient Top Glow */}
         <div className="absolute top-0 right-0 -mr-8 -mt-8 h-28 w-28 rounded-full bg-emerald-500/10 blur-2xl group-hover:bg-emerald-500/15 transition-all" />
 
@@ -157,7 +157,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
           )}
         </div>
 
-        <div className="relative mt-4 flex items-center justify-between pt-2 border-t border-slate-800/60">
+        <div className="relative mt-4 flex items-center justify-between pt-2 border-t border-subtleBorder/60">
           <span
             className={`inline-flex items-center text-xs font-mono font-medium px-2 py-0.5 rounded-full border ${successBadgeClass}`}
           >
@@ -175,7 +175,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       </div>
 
       {/* 3. Latency Percentiles (p95 / p99) - Vibrant Amber Accent */}
-      <div className="group relative overflow-hidden rounded-2xl border border-slate-800/80 hover:border-amber-500/40 bg-[#131B2E]/80 p-5 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_25px_rgba(245,158,11,0.12)]">
+      <div className="group relative overflow-hidden rounded-2xl border border-subtleBorder hover:border-amber-500/40 bg-surface/80 p-5 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_25px_rgba(245,158,11,0.12)]">
         {/* Ambient Top Glow */}
         <div className="absolute top-0 right-0 -mr-8 -mt-8 h-28 w-28 rounded-full bg-amber-500/10 blur-2xl group-hover:bg-amber-500/15 transition-all" />
 
@@ -198,7 +198,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
           </span>
         </div>
 
-        <div className="relative mt-4 flex items-center justify-between pt-2 border-t border-slate-800/60">
+        <div className="relative mt-4 flex items-center justify-between pt-2 border-t border-subtleBorder/60">
           <span className="text-xs text-slate-400 font-mono">
             avg: {metrics.avgLatency}ms
           </span>
@@ -218,7 +218,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
         className={`group relative overflow-hidden rounded-2xl border p-5 backdrop-blur-xl transition-all duration-300 ${
           metrics.activeAnomaliesCount > 0
             ? 'border-rose-500/50 bg-[#1E1724]/90 shadow-[0_0_25px_rgba(244,63,94,0.2)]'
-            : 'border-slate-800/80 hover:border-slate-700 bg-[#131B2E]/80'
+            : 'border-subtleBorder hover:border-subtleBorder bg-surface/80'
         }`}
       >
         {/* Ambient Top Glow */}
@@ -236,7 +236,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
             className={`p-2.5 rounded-xl border ${
               metrics.activeAnomaliesCount > 0
                 ? 'bg-rose-500/15 text-rose-400 border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.25)] animate-pulse'
-                : 'bg-slate-800/80 text-slate-400 border-slate-700/60'
+                : 'bg-slate-800/80 text-slate-400 border-subtleBorder/60'
             }`}
           >
             <AlertTriangle className="h-4 w-4" />
@@ -256,7 +256,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
           </span>
         </div>
 
-        <div className="relative mt-4 flex items-center justify-between pt-2 border-t border-slate-800/60">
+        <div className="relative mt-4 flex items-center justify-between pt-2 border-t border-subtleBorder/60">
           <span className="text-xs text-slate-400">
             {metrics.activeAnomaliesCount > 0
               ? 'Immediate action recommended'

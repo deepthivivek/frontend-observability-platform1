@@ -77,7 +77,7 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
   return (
     <div className="space-y-6 text-slate-100">
       {/* Topology Header Controls */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-[#121318] border border-white/10 rounded-2xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
           <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
             <Network className="w-5 h-5" />
@@ -99,7 +99,7 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
           {selectedNodeId && (
             <button
               onClick={() => setSelectedNodeId(null)}
-              className="text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 transition"
+              className="text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800/80 transition"
             >
               Reset Filter
             </button>
@@ -108,7 +108,7 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
           {onRefresh && (
             <button
               onClick={onRefresh}
-              className="flex items-center space-x-1.5 bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-300 px-3.5 py-1.5 rounded-lg text-xs font-mono transition"
+              className="flex items-center space-x-1.5 bg-[#09090b] hover:bg-slate-800 border border-white/10 text-slate-300 px-3.5 py-1.5 rounded-lg text-xs font-mono transition"
             >
               <RotateCw className="w-3.5 h-3.5" />
               <span>Refresh Map</span>
@@ -126,7 +126,7 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
               ? 'border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
               : node.status === 'degraded'
               ? 'border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
-              : 'border-slate-800 hover:border-slate-700';
+              : 'border-white/10 hover:border-white/10';
 
           return (
             <div
@@ -135,13 +135,13 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
                 setSelectedNodeId(isSelected ? null : node.id);
                 if (onSelectService) onSelectService(node.id);
               }}
-              className={`bg-[#0F172A] border ${statusBorder} rounded-xl p-4 transition-all cursor-pointer select-none relative group ${
+              className={`bg-[#121318] border ${statusBorder} rounded-xl p-4 transition-all cursor-pointer select-none relative group ${
                 isSelected ? 'ring-2 ring-cyan-500/60 bg-slate-900/90' : ''
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-2.5">
-                  <div className="p-2 rounded-lg bg-[#0B0F17] border border-slate-800">
+                  <div className="p-2 rounded-lg bg-[#09090b] border border-white/10">
                     {getNodeIcon(node.type)}
                   </div>
                   <div>
@@ -155,7 +155,7 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
                 {getStatusBadge(node.status)}
               </div>
 
-              <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800/80 font-mono text-xs">
+              <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/10 font-mono text-xs">
                 <div>
                   <span className="text-[10px] text-slate-500 block">Throughput</span>
                   <span className="font-bold text-slate-200">{node.requestCount} calls</span>
@@ -187,7 +187,7 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
       </div>
 
       {/* Cross-Service Dependency Edge Matrix */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+      <div className="bg-[#121318] border border-white/10 rounded-2xl p-5 shadow-xl space-y-4">
         <h4 className="font-semibold text-xs text-slate-300 uppercase tracking-wider flex items-center space-x-2">
           <Activity className="w-4 h-4 text-cyan-400" />
           <span>Cross-Service Edge Call Volumes &amp; Degradation Status</span>
@@ -195,7 +195,7 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-[#0B0F17] text-slate-400 uppercase text-[10px] border-b border-slate-800">
+            <thead className="bg-[#09090b] text-slate-400 uppercase text-[10px] border-b border-white/10">
               <tr>
                 <th className="py-2.5 px-4">Source Service</th>
                 <th className="py-2.5 px-4">Direction</th>
@@ -206,7 +206,7 @@ export const ServiceTopologyMap: React.FC<ServiceTopologyMapProps> = ({
                 <th className="py-2.5 px-4">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-white/10/60 text-slate-300">
               {activeEdges.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-6 text-center text-slate-500">

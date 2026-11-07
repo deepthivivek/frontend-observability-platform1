@@ -88,9 +88,9 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ trace, onClose }
   };
 
   return (
-    <div className="bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-100">
+    <div className="bg-[#121318] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-100">
       {/* Header Bar */}
-      <div className="p-5 border-b border-slate-800 bg-[#0B0F17]/80 flex flex-wrap items-center justify-between gap-4">
+      <div className="p-5 border-b border-white/10 bg-[#09090b]/80 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-3">
             <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
@@ -123,7 +123,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ trace, onClose }
         {onClose && (
           <button
             onClick={onClose}
-            className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 transition"
+            className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 transition"
           >
             Close View
           </button>
@@ -153,11 +153,11 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ trace, onClose }
       )}
 
       {/* Main Waterfall Grid & Inspector Pane */}
-      <div className="grid grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-800 flex-1 min-h-[480px]">
+      <div className="grid grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-white/10 flex-1 min-h-[480px]">
         {/* Waterfall Tree View (8 Cols) */}
         <div className="col-span-12 lg:col-span-8 flex flex-col overflow-x-auto">
           {/* Timeline Scale Ruler */}
-          <div className="h-8 border-b border-slate-800 bg-[#0B0F17] flex items-center px-4 font-mono text-[10px] text-slate-500 select-none">
+          <div className="h-8 border-b border-white/10 bg-[#09090b] flex items-center px-4 font-mono text-[10px] text-slate-500 select-none">
             <div className="w-64 shrink-0">Microservice &amp; Span Name</div>
             <div className="flex-1 flex justify-between pr-4">
               <span>0ms</span>
@@ -169,7 +169,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ trace, onClose }
           </div>
 
           {/* Span Rows */}
-          <div className="divide-y divide-slate-800/60 overflow-y-auto max-h-[560px]">
+          <div className="divide-y divide-white/10/60 overflow-y-auto max-h-[560px]">
             {visibleSpans.map((span) => {
               const isSelected = selectedSpan.spanId === span.spanId;
               const hasChildren = span.children && span.children.length > 0;
@@ -217,7 +217,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ trace, onClose }
 
                   {/* Right: Waterfall Duration Bar Canvas */}
                   <div className="flex-1 relative h-6 flex items-center pr-4">
-                    <div className="w-full h-1.5 bg-[#0B0F17] rounded-full overflow-hidden absolute inset-y-2" />
+                    <div className="w-full h-1.5 bg-[#09090b] rounded-full overflow-hidden absolute inset-y-2" />
 
                     <div
                       className={`h-4 rounded-md border text-[10px] text-white font-bold flex items-center px-1.5 shadow-md transition-all relative ${getBarColor(span)}`}
@@ -241,8 +241,8 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ trace, onClose }
         </div>
 
         {/* Selected Span Inspector Drawer (4 Cols) */}
-        <div className="col-span-12 lg:col-span-4 p-5 space-y-4 bg-[#0B0F17]/50 overflow-y-auto max-h-[600px]">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="col-span-12 lg:col-span-4 p-5 space-y-4 bg-[#09090b]/50 overflow-y-auto max-h-[600px]">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center space-x-2">
               <Layers className="w-4 h-4 text-cyan-400" />
               <h4 className="font-semibold text-xs tracking-wide uppercase text-slate-200">Span Inspector</h4>
@@ -296,7 +296,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ trace, onClose }
 
             {/* Anomaly & Z-Score Info */}
             {selectedSpan.zScore !== undefined && (
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400 text-[11px]">Rolling Z-Score:</span>
                   <span
@@ -318,7 +318,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ trace, onClose }
             {/* Span Attributes Table */}
             <div className="space-y-1.5 pt-2">
               <span className="text-[10px] text-slate-500 uppercase block">OpenTelemetry Attributes</span>
-              <div className="bg-[#0B0F17] rounded-xl border border-slate-800/80 p-3 space-y-1.5 max-h-48 overflow-y-auto">
+              <div className="bg-[#09090b] rounded-xl border border-white/10 p-3 space-y-1.5 max-h-48 overflow-y-auto">
                 {Object.entries(selectedSpan.attributes || {}).length === 0 ? (
                   <span className="text-slate-500 text-[11px]">No attributes attached to this span.</span>
                 ) : (

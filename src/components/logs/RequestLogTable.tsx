@@ -117,7 +117,7 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
   const rowPaddingClass = density === 'compact' ? 'py-1.5 px-3 text-xs' : 'py-3 px-4 text-xs';
 
   return (
-    <div className="relative flex flex-col h-full rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 backdrop-blur-xl shadow-xl overflow-hidden">
+    <div className="relative flex flex-col h-full rounded-2xl border border-white/10 bg-[#121318]/80 backdrop-blur-xl shadow-xl overflow-hidden">
       {/* Time-Bucket Density Histogram Bar */}
       <HistogramHeader buckets={timeBuckets} totalLogsCount={totalLogsCount} />
 
@@ -128,26 +128,26 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
       >
         <table className="w-full border-collapse text-left min-w-[900px]">
           {/* Table Header */}
-          <thead className="sticky top-0 z-20 bg-[#0B0F17]/95 border-b border-slate-800/80 text-[10px] uppercase tracking-wider text-slate-400 backdrop-blur-md">
+          <thead className="sticky top-0 z-20 bg-[#09090b]/95 border-b border-white/10 text-[10px] uppercase tracking-wider text-slate-400 backdrop-blur-md">
             <tr>
               {/* Pinned Checkbox & Method & Endpoint */}
-              <th className="py-2.5 px-3 sticky left-0 z-30 bg-[#0B0F17] w-10 text-center">
+              <th className="py-2.5 px-3 sticky left-0 z-30 bg-[#09090b] w-10 text-center">
                 <input
                   type="checkbox"
                   aria-label="Select all visible logs"
                   checked={logs.length > 0 && selectedLogIds.size === logs.length}
                   onChange={onToggleSelectAll}
-                  className="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                  className="rounded border-white/10 bg-slate-900 text-indigo-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
                 />
               </th>
 
-              <th className="py-2.5 px-3 sticky left-10 z-30 bg-[#0B0F17] w-12 text-center">
+              <th className="py-2.5 px-3 sticky left-10 z-30 bg-[#09090b] w-12 text-center">
                 <span className="sr-only">Expand</span>
               </th>
 
               <th
                 onClick={() => onSort('method')}
-                className="py-2.5 px-3 sticky left-[88px] z-30 bg-[#0B0F17] cursor-pointer group select-none w-24"
+                className="py-2.5 px-3 sticky left-[88px] z-30 bg-[#09090b] cursor-pointer group select-none w-24"
               >
                 <div className="flex items-center gap-1.5">
                   <span>Method</span>
@@ -157,7 +157,7 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
 
               <th
                 onClick={() => onSort('endpoint')}
-                className="py-2.5 px-4 sticky left-[184px] z-30 bg-[#0B0F17] cursor-pointer group select-none min-w-[220px] shadow-[4px_0_12px_rgba(0,0,0,0.5)] border-r border-slate-800/60"
+                className="py-2.5 px-4 sticky left-[184px] z-30 bg-[#09090b] cursor-pointer group select-none min-w-[220px] shadow-[4px_0_12px_rgba(0,0,0,0.5)] border-r border-white/10/60"
               >
                 <div className="flex items-center gap-1.5">
                   <span>Endpoint</span>
@@ -203,7 +203,7 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
           </thead>
 
           {/* Table Rows */}
-          <tbody className="divide-y divide-slate-800/60 font-mono">
+          <tbody className="divide-y divide-white/10/60 font-mono">
             {logs.map((log) => {
               const isSelected = selectedLogIds.has(log.id);
               const isExpanded = expandedLogIds.has(log.id);
@@ -247,19 +247,19 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
                     {/* Pinned Checkbox */}
                     <td
                       onClick={(e) => e.stopPropagation()}
-                      className={`${rowPaddingClass} sticky left-0 z-10 bg-[#0B0F17] text-center w-10`}
+                      className={`${rowPaddingClass} sticky left-0 z-10 bg-[#09090b] text-center w-10`}
                     >
                       <input
                         type="checkbox"
                         aria-label={`Select row ${log.id}`}
                         checked={isSelected}
                         onChange={() => onToggleSelectRow(log.id)}
-                        className="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0 cursor-pointer"
+                        className="rounded border-white/10 bg-slate-900 text-indigo-500 focus:ring-0 cursor-pointer"
                       />
                     </td>
 
                     {/* Expand Arrow */}
-                    <td className={`${rowPaddingClass} sticky left-10 z-10 bg-[#0B0F17] text-center w-12 text-slate-400`}>
+                    <td className={`${rowPaddingClass} sticky left-10 z-10 bg-[#09090b] text-center w-12 text-slate-400`}>
                       {isExpanded ? (
                         <ChevronDown className="h-4 w-4 text-indigo-400 mx-auto" />
                       ) : (
@@ -268,7 +268,7 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
                     </td>
 
                     {/* Method with Faceted Click */}
-                    <td className={`${rowPaddingClass} sticky left-[88px] z-10 bg-[#0B0F17] w-24`}>
+                    <td className={`${rowPaddingClass} sticky left-[88px] z-10 bg-[#09090b] w-24`}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -282,7 +282,7 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
                     </td>
 
                     {/* Endpoint */}
-                    <td className={`${rowPaddingClass} sticky left-[184px] z-10 bg-[#0B0F17] font-medium text-white max-w-xs truncate shadow-[4px_0_12px_rgba(0,0,0,0.5)] border-r border-slate-800/60`}>
+                    <td className={`${rowPaddingClass} sticky left-[184px] z-10 bg-[#09090b] font-medium text-white max-w-xs truncate shadow-[4px_0_12px_rgba(0,0,0,0.5)] border-r border-white/10/60`}>
                       {log.endpoint}
                     </td>
 
@@ -372,18 +372,18 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
 
                   {/* Inline Expanded JSON Accordion View */}
                   {isExpanded && (
-                    <tr className="bg-[#0B0F17]/95 border-b border-slate-800">
+                    <tr className="bg-[#09090b]/95 border-b border-white/10">
                       <td colSpan={9} className="p-4 sm:p-5">
-                        <div className="rounded-xl border border-slate-800 bg-[#131B2E] p-4 text-xs font-mono space-y-4 shadow-inner">
+                        <div className="rounded-xl border border-white/10 bg-[#121318] p-4 text-xs font-mono space-y-4 shadow-inner">
                           {/* Top Meta Bar */}
-                          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800 text-slate-400">
+                          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/10 text-slate-400">
                             <div className="flex items-center gap-3">
                               <span>Client IP: <strong className="text-white">{log.clientIp}</strong></span>
                               <span>Span: <strong className="text-indigo-400">{log.spanId}</strong></span>
                             </div>
                             <button
                               onClick={(e) => handleCopyCurl(e, log)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-emerald-400 text-xs transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#09090b] hover:bg-slate-800 border border-white/10 text-emerald-400 text-xs transition-colors"
                             >
                               <Terminal className="h-3 w-3" />
                               Copy cURL
@@ -397,7 +397,7 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
                               <div className="text-[11px] uppercase font-bold text-slate-400 mb-1.5">
                                 Request Headers
                               </div>
-                              <pre className="p-3 rounded-lg bg-[#080C14] border border-slate-800/80 text-indigo-200 overflow-x-auto max-h-40">
+                              <pre className="p-3 rounded-lg bg-[#09090b] border border-white/10 text-indigo-200 overflow-x-auto max-h-40">
                                 {JSON.stringify(log.requestHeaders, null, 2)}
                               </pre>
                             </div>
@@ -407,7 +407,7 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
                               <div className="text-[11px] uppercase font-bold text-slate-400 mb-1.5">
                                 Payloads
                               </div>
-                              <pre className="p-3 rounded-lg bg-[#080C14] border border-slate-800/80 text-emerald-200 overflow-x-auto max-h-40">
+                              <pre className="p-3 rounded-lg bg-[#09090b] border border-white/10 text-emerald-200 overflow-x-auto max-h-40">
                                 {JSON.stringify(
                                   {
                                     requestBody: log.requestBody,
@@ -422,7 +422,7 @@ export const RequestLogTable: React.FC<RequestLogTableProps> = ({
 
                           {/* Error Stack Trace if exists */}
                           {log.errorDetails && (
-                            <div className="pt-2 border-t border-slate-800">
+                            <div className="pt-2 border-t border-white/10">
                               <div className="text-[11px] uppercase font-bold text-rose-400 mb-1 flex items-center gap-1.5">
                                 <AlertCircle className="h-3.5 w-3.5" />
                                 Error Diagnostics

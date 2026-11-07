@@ -129,14 +129,14 @@ export const MetricQueryBuilder: React.FC<MetricQueryBuilderProps> = ({
   };
 
   return (
-    <div className="bg-[#0F172A] border border-cyan-500/30 rounded-xl p-5 shadow-2xl space-y-5 text-slate-200">
+    <div className="bg-surface border border-cyan-500/30 rounded-xl p-5 shadow-2xl space-y-5 text-slate-200">
       {/* Header Mode Switcher */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="flex items-center justify-between border-b border-subtleBorder pb-3">
         <div className="flex items-center space-x-2">
           <Sparkles className="w-5 h-5 text-cyan-400" />
           <h3 className="text-sm font-semibold text-cyan-300 tracking-wide uppercase">PromQL / LogQL Query Studio</h3>
         </div>
-        <div className="flex bg-[#0B0F17] p-1 rounded-lg border border-slate-800 space-x-1 text-xs">
+        <div className="flex bg-canvas p-1 rounded-lg border border-subtleBorder space-x-1 text-xs">
           <button
             onClick={() => setMode('ai')}
             className={`px-3 py-1.5 rounded-md font-medium transition flex items-center space-x-1.5 ${
@@ -179,7 +179,7 @@ export const MetricQueryBuilder: React.FC<MetricQueryBuilderProps> = ({
                 onChange={(e) => setAiPrompt(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAiTranslate(aiPrompt)}
                 placeholder="e.g. Show me p99 latency by route for the past 15m..."
-                className="flex-1 bg-[#0B0F17] border border-slate-700 focus:border-cyan-500 rounded-lg px-3.5 py-2 text-sm text-slate-100 font-mono outline-none"
+                className="flex-1 bg-canvas border border-subtleBorder focus:border-cyan-500 rounded-lg px-3.5 py-2 text-sm text-slate-100 font-mono outline-none"
               />
               <button
                 onClick={() => handleAiTranslate(aiPrompt)}
@@ -209,7 +209,7 @@ export const MetricQueryBuilder: React.FC<MetricQueryBuilderProps> = ({
                     setAiPrompt(prompt);
                     handleAiTranslate(prompt);
                   }}
-                  className="bg-[#0B0F17] border border-slate-800 hover:border-cyan-500/50 text-slate-300 text-xs px-2.5 py-1 rounded-md transition"
+                  className="bg-canvas border border-subtleBorder hover:border-cyan-500/50 text-slate-300 text-xs px-2.5 py-1 rounded-md transition"
                 >
                   &quot;{prompt}&quot;
                 </button>
@@ -240,7 +240,7 @@ export const MetricQueryBuilder: React.FC<MetricQueryBuilderProps> = ({
                 setMetric(e.target.value);
                 updateVisualExpression(e.target.value, aggregation, windowVal, groupBy);
               }}
-              className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-xs font-mono text-slate-200 focus:border-cyan-500 outline-none"
+              className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-xs font-mono text-slate-200 focus:border-cyan-500 outline-none"
             >
               {METRICS_LIST.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -258,7 +258,7 @@ export const MetricQueryBuilder: React.FC<MetricQueryBuilderProps> = ({
                 setAggregation(e.target.value as any);
                 updateVisualExpression(metric, e.target.value, windowVal, groupBy);
               }}
-              className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-xs font-mono text-slate-200 focus:border-cyan-500 outline-none"
+              className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-xs font-mono text-slate-200 focus:border-cyan-500 outline-none"
             >
               {AGGREGATIONS.map((a) => (
                 <option key={a.value} value={a.value}>
@@ -276,7 +276,7 @@ export const MetricQueryBuilder: React.FC<MetricQueryBuilderProps> = ({
                 setWindowVal(e.target.value);
                 updateVisualExpression(metric, aggregation, e.target.value, groupBy);
               }}
-              className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-xs font-mono text-slate-200 focus:border-cyan-500 outline-none"
+              className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-xs font-mono text-slate-200 focus:border-cyan-500 outline-none"
             >
               {WINDOWS.map((w) => (
                 <option key={w} value={w}>
@@ -296,7 +296,7 @@ export const MetricQueryBuilder: React.FC<MetricQueryBuilderProps> = ({
                 updateVisualExpression(metric, aggregation, windowVal, e.target.value);
               }}
               placeholder="e.g. endpoint, service, status"
-              className="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-2 text-xs font-mono text-slate-200 focus:border-cyan-500 outline-none"
+              className="w-full bg-canvas border border-subtleBorder rounded-lg p-2 text-xs font-mono text-slate-200 focus:border-cyan-500 outline-none"
             />
           </div>
         </div>
@@ -313,13 +313,13 @@ export const MetricQueryBuilder: React.FC<MetricQueryBuilderProps> = ({
             value={expression}
             onChange={(e) => setExpression(e.target.value)}
             rows={3}
-            className="w-full bg-[#0B0F17] border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-xs font-mono text-emerald-400 outline-none resize-none leading-relaxed"
+            className="w-full bg-canvas border border-subtleBorder focus:border-cyan-500 rounded-lg p-3 text-xs font-mono text-emerald-400 outline-none resize-none leading-relaxed"
           />
         </div>
       )}
 
       {/* Expression Preview Bar */}
-      <div className="bg-[#0B0F17] border border-slate-800 rounded-lg p-3 space-y-1">
+      <div className="bg-canvas border border-subtleBorder rounded-lg p-3 space-y-1">
         <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Compiled Expression:</div>
         <div className="font-mono text-xs text-cyan-300 break-all">{expression}</div>
       </div>

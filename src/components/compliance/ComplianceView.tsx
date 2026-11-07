@@ -130,7 +130,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
 
   if (!canViewCompliance) {
     return (
-      <div className="p-8 text-center bg-[#0F172A] border border-slate-800 rounded-2xl text-slate-400 space-y-3">
+      <div className="p-8 text-center bg-surface border border-subtleBorder rounded-2xl text-slate-400 space-y-3">
         <ShieldAlert className="w-8 h-8 text-rose-400 mx-auto" />
         <h3 className="font-semibold text-white">Compliance Access Restricted</h3>
         <p className="text-xs max-w-md mx-auto">
@@ -141,9 +141,9 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* 1. Header & Score Banner */}
-      <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
             <ShieldCheck className="w-6 h-6" />
@@ -151,7 +151,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
           <div>
             <div className="flex items-center space-x-3">
               <h2 className="text-lg font-bold text-white tracking-wide">SOC2 & GDPR Compliance Studio</h2>
-              <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+              <span className="text-xs font-mono tabular-nums px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
                 SCORE: {complianceScore}% COMPLIANT
               </span>
             </div>
@@ -164,7 +164,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
         <button
           onClick={fetchData}
           disabled={isLoading}
-          className="flex items-center space-x-1.5 bg-[#0B0F17] hover:bg-slate-800 border border-slate-700 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-mono transition"
+          className="flex items-center space-x-1.5 bg-canvas hover:bg-white/5 border border-subtleBorder text-slate-300 px-3.5 py-2 rounded-xl text-xs font-mono transition"
         >
           <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
           <span>Refresh Posture</span>
@@ -172,7 +172,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
       </div>
 
       {/* 2. Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-3 font-mono text-xs">
+      <div className="flex items-center space-x-2 border-b border-subtleBorder pb-3 font-mono text-xs">
         <button
           onClick={() => setActiveTab('controls')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition ${
@@ -229,7 +229,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
             {controls.map((control) => (
               <div
                 key={control.id}
-                className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3 flex flex-col justify-between"
+                className="bg-surface border border-subtleBorder hover:border-white/20 rounded-2xl p-5 shadow-xl space-y-3 flex flex-col justify-between transition"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -252,7 +252,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
                   <p className="text-xs text-slate-400 leading-relaxed">{control.description}</p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800/80 text-[11px] font-mono text-slate-500 flex items-center justify-between">
+                <div className="pt-3 border-t border-subtleBorder text-[11px] font-mono text-slate-500 flex items-center justify-between">
                   <span>Evidence: <strong className="text-slate-300 truncate max-w-xs">{control.evidenceRef}</strong></span>
                   <span>Assessed: {new Date(control.lastAssessedAt).toLocaleTimeString()}</span>
                 </div>
@@ -272,7 +272,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {webhooks.map((wh) => (
-              <div key={wh.id} className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+              <div key={wh.id} className="bg-surface border border-subtleBorder hover:border-white/20 rounded-2xl p-5 shadow-xl space-y-4 transition">
                 <div className="flex items-start justify-between">
                   <div>
                     <h4 className="font-bold text-sm text-white">{wh.name}</h4>
@@ -280,21 +280,21 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
                   </div>
                   <span
                     className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border font-bold ${
-                      wh.enabled ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800 text-slate-400'
+                      wh.enabled ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-white/5 text-slate-400 border-subtleBorder'
                     }`}
                   >
                     {wh.enabled ? 'ACTIVE' : 'DISABLED'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 font-mono text-xs pt-2 border-t border-slate-800">
+                <div className="grid grid-cols-3 gap-2 font-mono text-xs pt-2 border-t border-subtleBorder">
                   <div>
                     <span className="text-[10px] text-slate-500 block">Success</span>
-                    <span className="font-bold text-emerald-400">{wh.successCount}</span>
+                    <span className="font-bold text-emerald-400 tabular-nums">{wh.successCount}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 block">Failures</span>
-                    <span className="font-bold text-rose-400">{wh.failureCount}</span>
+                    <span className="font-bold text-rose-400 tabular-nums">{wh.failureCount}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 block">HMAC Secret</span>
@@ -323,7 +323,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
 
       {activeTab === 'dlq' && (
         <div className="space-y-4">
-          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
+          <div className="bg-surface border border-subtleBorder rounded-2xl p-5 shadow-xl flex items-center justify-between">
             <div>
               <h4 className="font-bold text-sm text-white">Dead-Letter Queue (DLQ) Ledger</h4>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -346,9 +346,9 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
             </div>
           )}
 
-          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-surface border border-subtleBorder rounded-2xl overflow-hidden shadow-xl">
             <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-[#0B0F17] text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+              <thead className="bg-canvas text-slate-400 uppercase tracking-wider text-[10px] border-b border-subtleBorder">
                 <tr>
                   <th className="py-3 px-4">DLQ ID</th>
                   <th className="py-3 px-4">Webhook ID</th>
@@ -358,7 +358,7 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
                   <th className="py-3 px-4">Failed At</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 text-slate-300">
+              <tbody className="divide-y divide-subtleBorder text-slate-300">
                 {dlqItems.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-slate-500">
@@ -367,11 +367,11 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
                   </tr>
                 ) : (
                   dlqItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-800/30 transition">
+                    <tr key={item.id} className="hover:bg-white/5 transition">
                       <td className="py-3 px-4 font-bold text-white">{item.id}</td>
                       <td className="py-3 px-4 text-cyan-300">{item.webhookId}</td>
                       <td className="py-3 px-4 text-rose-400 font-bold">{item.errorCode}</td>
-                      <td className="py-3 px-4">{item.attemptCount}</td>
+                      <td className="py-3 px-4 tabular-nums">{item.attemptCount}</td>
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px]">
                           {item.status}
@@ -388,8 +388,8 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
       )}
 
       {activeTab === 'evidence' && exportPkg && (
-        <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="bg-surface border border-subtleBorder rounded-2xl p-6 shadow-xl space-y-6">
+          <div className="flex items-center justify-between border-b border-subtleBorder pb-4">
             <div>
               <h3 className="font-bold text-sm text-white">Cryptographically Signed Compliance Package</h3>
               <p className="text-xs text-slate-400 font-mono mt-0.5">Export ID: {exportPkg.exportId}</p>
@@ -404,17 +404,17 @@ export const ComplianceView: React.FC<ComplianceViewProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
-            <div className="bg-[#0B0F17] p-4 rounded-xl border border-slate-800">
+            <div className="bg-canvas p-4 rounded-xl border border-subtleBorder">
               <span className="text-slate-500 block text-[10px]">Merkle Root Hash</span>
               <span className="font-bold text-cyan-300 truncate block mt-1">{exportPkg.merkleRootHash}</span>
             </div>
-            <div className="bg-[#0B0F17] p-4 rounded-xl border border-slate-800">
+            <div className="bg-canvas p-4 rounded-xl border border-subtleBorder">
               <span className="text-slate-500 block text-[10px]">Controls Passed</span>
-              <span className="font-bold text-emerald-400 block mt-1">
+              <span className="font-bold text-emerald-400 block mt-1 tabular-nums">
                 {exportPkg.passedControls} / {exportPkg.totalControls} ({exportPkg.complianceScore}%)
               </span>
             </div>
-            <div className="bg-[#0B0F17] p-4 rounded-xl border border-slate-800">
+            <div className="bg-canvas p-4 rounded-xl border border-subtleBorder">
               <span className="text-slate-500 block text-[10px]">Cryptographic HMAC-SHA256 Signature</span>
               <span className="font-bold text-indigo-300 truncate block mt-1">{exportPkg.cryptographicSignature}</span>
             </div>

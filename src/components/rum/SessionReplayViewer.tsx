@@ -126,7 +126,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
 
         {/* User Session Meta & Deep-Link */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="px-3 py-1.5 rounded-xl bg-[#0B0F17]/80 border border-slate-800 text-slate-300 text-[11px]">
+          <div className="px-3 py-1.5 rounded-xl bg-[#09090b]/80 border border-white/10 text-slate-300 text-[11px]">
             <span>User: </span>
             <strong className="text-white">{session.userEmail}</strong> ({session.country})
           </div>
@@ -144,9 +144,9 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
       {/* 2. Visual Replay Canvas + Synchronized Telemetry Split Screen */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left: Interactive Simulated DOM Playback Screen (7 cols) */}
-        <div className="lg:col-span-7 rounded-2xl border border-slate-800 bg-[#131B2E] overflow-hidden flex flex-col shadow-2xl">
+        <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-[#121318] overflow-hidden flex flex-col shadow-2xl">
           {/* Simulated Browser Address & Tab Bar */}
-          <div className="flex items-center justify-between px-4 py-2.5 bg-[#0B0F17] border-b border-slate-800 text-slate-400">
+          <div className="flex items-center justify-between px-4 py-2.5 bg-[#09090b] border-b border-white/10 text-slate-400">
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
               <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
@@ -156,7 +156,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
               </span>
             </div>
 
-            <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-[11px] max-w-sm truncate">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900 border border-white/10 text-slate-300 text-[11px] max-w-sm truncate">
               <span className="text-indigo-400">https://app.observability.io</span>
               <span className="text-white font-semibold">
                 {currentEvent?.type === 'navigation'
@@ -172,10 +172,10 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
           </div>
 
           {/* Interactive Simulated DOM Screen */}
-          <div className="relative flex-1 min-h-[340px] p-6 bg-[#0B0F17]/95 flex flex-col justify-between select-none">
+          <div className="relative flex-1 min-h-[340px] p-6 bg-[#09090b]/95 flex flex-col justify-between select-none">
             {/* Mock Checkout View Rendering */}
             <div className="space-y-4 max-w-md mx-auto w-full">
-              <div className="p-3.5 rounded-xl border border-slate-800 bg-[#131B2E]/90 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-white/10 bg-[#121318]/90 flex items-center justify-between">
                 <div>
                   <h4 className="font-bold text-white text-xs">Review Order #88219</h4>
                   <span className="text-slate-400 text-[10px]">
@@ -189,7 +189,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
                 <label className="text-[10px] text-slate-400 uppercase font-bold block">
                   Billing Postal Code
                 </label>
-                <div className="p-2.5 rounded-xl border border-slate-800 bg-[#1E293B]/70 text-white font-mono text-xs">
+                <div className="p-2.5 rounded-xl border border-white/10 bg-[#1E293B]/70 text-white font-mono text-xs">
                   {playbackPositionMs >= 3400 ? '94107' : ''}
                 </div>
               </div>
@@ -198,7 +198,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
                 <label className="text-[10px] text-slate-400 uppercase font-bold block">
                   Credit Card Number (Auto-Masked for Security)
                 </label>
-                <div className="p-2.5 rounded-xl border border-slate-800 bg-[#1E293B]/70 text-slate-300 font-mono text-xs flex items-center justify-between">
+                <div className="p-2.5 rounded-xl border border-white/10 bg-[#1E293B]/70 text-slate-300 font-mono text-xs flex items-center justify-between">
                   <span>{playbackPositionMs >= 5600 ? '•••• •••• •••• 4242' : ''}</span>
                   <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
                     Encrypted
@@ -259,8 +259,8 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
         </div>
 
         {/* Right: Synchronized Telemetry Waterfall & Event Stream (5 cols) */}
-        <div className="lg:col-span-5 rounded-2xl border border-slate-800 bg-[#131B2E] overflow-hidden flex flex-col shadow-2xl">
-          <div className="px-4 py-2.5 bg-[#0B0F17] border-b border-slate-800 flex items-center justify-between text-slate-400 text-xs font-semibold">
+        <div className="lg:col-span-5 rounded-2xl border border-white/10 bg-[#121318] overflow-hidden flex flex-col shadow-2xl">
+          <div className="px-4 py-2.5 bg-[#09090b] border-b border-white/10 flex items-center justify-between text-slate-400 text-xs font-semibold">
             <span className="flex items-center gap-2 text-white">
               <Activity className="h-4 w-4 text-indigo-400" />
               Synchronized Telemetry Waterfall
@@ -268,7 +268,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
             <span>{session.events.length} Timeline Events</span>
           </div>
 
-          <div className="p-3 divide-y divide-slate-800/60 overflow-y-auto max-h-[380px]">
+          <div className="p-3 divide-y divide-white/10/60 overflow-y-auto max-h-[380px]">
             {session.events.map((evt) => {
               const isPastOrActive = evt.timestamp <= playbackPositionMs;
               const isRage = evt.type === 'rage_click';
@@ -285,7 +285,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
                         ? 'bg-rose-950/30 text-rose-200 border border-rose-500/30'
                         : isRage
                         ? 'bg-amber-950/25 text-amber-200 border border-amber-500/30'
-                        : 'bg-[#0B0F17]/80 text-slate-200 hover:bg-slate-800/40'
+                        : 'bg-[#09090b]/80 text-slate-200 hover:bg-slate-800/40'
                       : 'opacity-40 hover:opacity-70 text-slate-500'
                   }`}
                 >
@@ -343,7 +343,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
       </div>
 
       {/* 3. Replay Controls & Interactive Keyframe Scrubber */}
-      <div className="p-4 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-3">
+      <div className="p-4 rounded-2xl border border-white/10 bg-[#121318]/90 backdrop-blur-xl shadow-xl space-y-3">
         {/* Scrubber Bar with Keyframe Dots */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px] text-slate-400">
@@ -389,7 +389,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
         </div>
 
         {/* Playback Button Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/10">
           <div className="flex items-center gap-2">
             <button
               onClick={onTogglePlay}
@@ -410,7 +410,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
 
           {/* Speed & Inactivity Controls */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 bg-[#0B0F17] p-1 rounded-xl border border-slate-800">
+            <div className="flex items-center gap-1 bg-[#09090b] p-1 rounded-xl border border-white/10">
               {SPEED_OPTIONS.map((s) => (
                 <button
                   key={s}
@@ -431,7 +431,7 @@ export const SessionReplayViewer: React.FC<SessionReplayViewerProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
                 skipInactivity
                   ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
-                  : 'bg-slate-800/60 text-slate-400 border-slate-700'
+                  : 'bg-slate-800/60 text-slate-400 border-white/10'
               }`}
             >
               <FastForward className="h-3.5 w-3.5" />

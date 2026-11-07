@@ -207,7 +207,7 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
               }
             }}
             placeholder="Search syntax e.g. status >= 500, duration > 500, status IN (401, 403)..."
-            className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-slate-800 bg-[#0B0F17]/90 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 shadow-inner text-xs transition-all"
+            className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-white/10 bg-[#09090b]/90 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 shadow-inner text-xs transition-all"
           />
 
           {/* Inline Action Badges */}
@@ -224,18 +224,18 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
                 Clear
               </button>
             )}
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] text-slate-400">
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-800 border border-white/10 text-[10px] text-slate-400">
               Enter ↵
             </kbd>
           </div>
 
           {/* Auto-Complete Suggestion Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1.5 z-40 rounded-xl border border-slate-800 bg-[#131B2E] shadow-2xl overflow-hidden backdrop-blur-xl">
-              <div className="px-3 py-1.5 text-[10px] text-slate-400 bg-slate-900/80 border-b border-slate-800">
+            <div className="absolute top-full left-0 right-0 mt-1.5 z-40 rounded-xl border border-white/10 bg-[#121318] shadow-2xl overflow-hidden backdrop-blur-xl">
+              <div className="px-3 py-1.5 text-[10px] text-slate-400 bg-slate-900/80 border-b border-white/10">
                 Syntax Auto-Complete Suggestions
               </div>
-              <div className="divide-y divide-slate-800/60 max-h-48 overflow-y-auto">
+              <div className="divide-y divide-white/10/60 max-h-48 overflow-y-auto">
                 {suggestions.map((s) => (
                   <div
                     key={s.key}
@@ -265,7 +265,7 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
           className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border transition-all ${
             isSnippetsOpen
               ? 'bg-indigo-600/30 text-indigo-300 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
-              : 'bg-[#131B2E] text-slate-300 border-slate-800 hover:border-slate-700'
+              : 'bg-[#121318] text-slate-300 border-white/10 hover:border-white/10'
           }`}
           title="Open Curated SRE Regex Query Snippets"
         >
@@ -283,7 +283,7 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
           className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border transition-all ${
             isSavedViewsOpen
               ? 'bg-indigo-600/30 text-indigo-300 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
-              : 'bg-[#131B2E] text-slate-300 border-slate-800 hover:border-slate-700'
+              : 'bg-[#121318] text-slate-300 border-white/10 hover:border-white/10'
           }`}
           title="Saved Custom Query Views"
         >
@@ -295,7 +295,7 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
         <button
           type="button"
           onClick={handleCopyShareUrl}
-          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#131B2E] border border-slate-800 text-slate-300 hover:border-slate-700 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#121318] border border-white/10 text-slate-300 hover:border-white/10 transition-colors"
           title="Copy shareable query URL to clipboard"
         >
           {copiedLink ? (
@@ -308,8 +308,8 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
 
       {/* Snippet Drawer Panel */}
       {isSnippetsOpen && (
-        <div className="p-4 rounded-2xl border border-indigo-500/30 bg-[#131B2E]/95 backdrop-blur-xl shadow-2xl space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div className="p-4 rounded-2xl border border-indigo-500/30 bg-[#121318]/95 backdrop-blur-xl shadow-2xl space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10">
             <span className="font-bold text-white text-xs flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
               Curated SRE Query Snippets &amp; Diagnostics
@@ -327,7 +327,7 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
                   onApplyQuery(snip.query);
                   setIsSnippetsOpen(false);
                 }}
-                className="p-2.5 rounded-xl border border-slate-800/80 bg-[#0B0F17]/80 hover:border-indigo-500/50 hover:bg-indigo-950/20 text-left transition-all group"
+                className="p-2.5 rounded-xl border border-white/10 bg-[#09090b]/80 hover:border-indigo-500/50 hover:bg-indigo-950/20 text-left transition-all group"
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-white text-[11px] group-hover:text-indigo-300 transition-colors">
@@ -351,8 +351,8 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
 
       {/* Saved Views Panel */}
       {isSavedViewsOpen && (
-        <div className="p-4 rounded-2xl border border-emerald-500/30 bg-[#131B2E]/95 backdrop-blur-xl shadow-2xl space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div className="p-4 rounded-2xl border border-emerald-500/30 bg-[#121318]/95 backdrop-blur-xl shadow-2xl space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10">
             <span className="font-bold text-white text-xs flex items-center gap-2">
               <Bookmark className="h-3.5 w-3.5 text-emerald-400" />
               Saved Query Views ({savedViews.length})
@@ -367,7 +367,7 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
               placeholder="Name this view (e.g. Core API 5xx Watch)..."
               value={newViewName}
               onChange={(e) => setNewViewName(e.target.value)}
-              className="flex-1 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#0B0F17] text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
+              className="flex-1 px-3 py-1.5 rounded-xl border border-white/10 bg-[#09090b] text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
             />
             <button
               type="button"
@@ -385,7 +385,7 @@ export const RegexLibrary: React.FC<RegexLibraryProps> = ({
             {savedViews.map((view) => (
               <div
                 key={view.id}
-                className="flex items-center justify-between p-2 rounded-xl border border-slate-800 bg-[#0B0F17]/80 hover:border-slate-700 transition-colors"
+                className="flex items-center justify-between p-2 rounded-xl border border-white/10 bg-[#09090b]/80 hover:border-white/10 transition-colors"
               >
                 <div
                   onClick={() => {

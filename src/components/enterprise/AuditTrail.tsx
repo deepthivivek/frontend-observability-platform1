@@ -53,7 +53,7 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({
           </p>
         </div>
 
-        <div className="p-5 rounded-2xl border border-indigo-500/30 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-2">
+        <div className="p-5 rounded-2xl border border-indigo-500/30 bg-surface/90 backdrop-blur-xl shadow-xl space-y-2">
           <div className="flex items-center justify-between text-indigo-400">
             <span className="font-bold uppercase text-[11px]">Active Compliance Posture</span>
             <Layers className="h-5 w-5" />
@@ -62,7 +62,7 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({
           <p className="text-[11px] text-slate-400">Automated policy-as-code linting continuously inspects workspace state.</p>
         </div>
 
-        <div className="p-5 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-2 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl border border-subtleBorder bg-surface/90 backdrop-blur-xl shadow-xl space-y-2 flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400">
             <span className="font-bold uppercase text-[11px]">Posture Drift Linter</span>
             <Cpu className="h-5 w-5 text-indigo-400" />
@@ -102,8 +102,8 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({
       )}
 
       {/* Hash-Chained Audit Log Table */}
-      <div className="p-5 rounded-2xl border border-slate-800 bg-[#131B2E]/90 backdrop-blur-xl shadow-xl space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="p-5 rounded-2xl border border-subtleBorder bg-surface/90 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
           <div className="flex items-center gap-2 text-white">
             <Lock className="h-4 w-4 text-emerald-400" />
             <h3 className="font-semibold text-sm">Cryptographic Hash-Chained Audit Trail (SHA-256)</h3>
@@ -113,7 +113,7 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-[#0B0F17] text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+            <thead className="bg-canvas text-slate-400 uppercase tracking-wider text-[10px] border-b border-subtleBorder">
               <tr>
                 <th className="py-3 px-4">Timestamp</th>
                 <th className="py-3 px-4">Actor</th>
@@ -123,7 +123,7 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({
                 <th className="py-3 px-4">Signature</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-300">
+            <tbody className="divide-y divide-subtleBorder text-slate-300">
               {auditLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
                   <td className="py-3 px-4 text-slate-400 whitespace-nowrap">

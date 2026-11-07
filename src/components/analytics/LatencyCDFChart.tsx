@@ -52,9 +52,9 @@ export const LatencyCDFChart: React.FC<LatencyCDFChartProps> = ({ logs }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* 1. Cumulative Distribution Function (CDF) Tail Latency */}
-      <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+      <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+          <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-emerald-400" />
               <h3 className="text-sm font-semibold text-white">Cumulative Distribution (CDF)</h3>
@@ -88,16 +88,16 @@ export const LatencyCDFChart: React.FC<LatencyCDFChartProps> = ({ logs }) => {
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono text-slate-400">
+        <div className="mt-4 pt-3 border-t border-subtleBorder/60 flex items-center justify-between text-xs font-mono text-slate-400">
           <span>P95 knee marks tail latency boundary</span>
           <span className="text-emerald-400 font-medium">95% &le; {Math.round(maxLatency * 0.4)}ms</span>
         </div>
       </div>
 
       {/* 2. Service Dependency Latency Matrix */}
-      <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+      <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+          <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
             <div className="flex items-center gap-2">
               <Server className="h-4 w-4 text-indigo-400" />
               <h3 className="text-sm font-semibold text-white">Downstream Service Dependencies</h3>
@@ -113,7 +113,7 @@ export const LatencyCDFChart: React.FC<LatencyCDFChartProps> = ({ logs }) => {
               return (
                 <div
                   key={dep.service}
-                  className="flex items-center justify-between p-3 rounded-xl border border-slate-800/80 bg-[#0B0F17]/80 hover:border-slate-700 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-xl border border-subtleBorder bg-canvas/80 hover:border-subtleBorder transition-colors"
                 >
                   <div className="flex flex-col">
                     <span className="font-semibold text-white">{dep.service}</span>
@@ -144,7 +144,7 @@ export const LatencyCDFChart: React.FC<LatencyCDFChartProps> = ({ logs }) => {
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono text-slate-400">
+        <div className="mt-4 pt-3 border-t border-subtleBorder/60 flex items-center justify-between text-xs font-mono text-slate-400">
           <span>Stripe API accounts for primary external wait states</span>
           <span className="text-indigo-400">Automated tracing active</span>
         </div>

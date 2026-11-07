@@ -33,6 +33,11 @@ import { IncidentCommandCenter } from '../incident/IncidentCommandCenter';
 import { ComplianceView } from '../compliance/ComplianceView';
 import { GlobalLatencyView } from '../synthetic/GlobalLatencyView';
 import { CostGovernanceView } from '../governance/CostGovernanceView';
+import { AdvancedLogView } from '../logs/AdvancedLogView';
+import { SelfHealingView } from '../infra/SelfHealingView';
+import { UltimateGovernanceView } from '../capstone/UltimateGovernanceView';
+import { ImmuneSystemDashboard } from '../immune/ImmuneSystemDashboard';
+import NeuromorphicMeshView from '../mesh/NeuromorphicMeshView';
 import { generateSyntheticLogs } from '../../utils/syntheticData';
 import {
   UploadCloud,
@@ -228,25 +233,25 @@ export const DashboardContainer: React.FC = () => {
       id: 'role-admin',
       name: 'Administrator',
       description: 'Full cluster privileges across all tenants and security vaults.',
-      permissions: { canViewLogs: true, canTriggerBreakGlass: true, canEditPolicies: true, canExportVault: true, canManageWorkspaces: true, canViewTraces: true, canViewIncidents: true, canExecuteRunbooks: true, canViewCompliance: true, canConfigureSIEM: true, canViewSynthetic: true, canManageSynthetic: true, canViewGovernance: true, canManageGovernance: true },
+      permissions: { canViewLogs: true, canTriggerBreakGlass: true, canEditPolicies: true, canExportVault: true, canManageWorkspaces: true, canViewTraces: true, canViewIncidents: true, canExecuteRunbooks: true, canViewCompliance: true, canConfigureSIEM: true, canViewSynthetic: true, canManageSynthetic: true, canViewGovernance: true, canManageGovernance: true, canManageInfra: true },
     },
     {
       id: 'role-sre',
       name: 'SRE Lead',
       description: 'Incident response, trace analysis, and JIT break-glass access.',
-      permissions: { canViewLogs: true, canTriggerBreakGlass: true, canEditPolicies: false, canExportVault: false, canManageWorkspaces: false, canViewTraces: true, canViewIncidents: true, canExecuteRunbooks: true, canViewCompliance: true, canConfigureSIEM: true, canViewSynthetic: true, canManageSynthetic: true, canViewGovernance: true, canManageGovernance: true },
+      permissions: { canViewLogs: true, canTriggerBreakGlass: true, canEditPolicies: false, canExportVault: false, canManageWorkspaces: false, canViewTraces: true, canViewIncidents: true, canExecuteRunbooks: true, canViewCompliance: true, canConfigureSIEM: true, canViewSynthetic: true, canManageSynthetic: true, canViewGovernance: true, canManageGovernance: true, canManageInfra: true },
     },
     {
       id: 'role-dev',
       name: 'Software Engineer',
       description: 'Request log analysis and application performance metrics.',
-      permissions: { canViewLogs: true, canTriggerBreakGlass: false, canEditPolicies: false, canExportVault: false, canManageWorkspaces: false, canViewTraces: true, canViewIncidents: true, canExecuteRunbooks: false, canViewCompliance: false, canConfigureSIEM: false, canViewSynthetic: true, canManageSynthetic: false, canViewGovernance: true, canManageGovernance: false },
+      permissions: { canViewLogs: true, canTriggerBreakGlass: false, canEditPolicies: false, canExportVault: false, canManageWorkspaces: false, canViewTraces: true, canViewIncidents: true, canExecuteRunbooks: false, canViewCompliance: false, canConfigureSIEM: false, canViewSynthetic: true, canManageSynthetic: false, canViewGovernance: true, canManageGovernance: false, canManageInfra: false },
     },
     {
       id: 'role-auditor',
       name: 'Compliance Auditor',
       description: 'Read-only access to SHA-256 hash-chained audit logs and SOC2 posture reports.',
-      permissions: { canViewLogs: true, canTriggerBreakGlass: false, canEditPolicies: false, canExportVault: false, canManageWorkspaces: false, canViewTraces: true, canViewIncidents: true, canExecuteRunbooks: false, canViewCompliance: true, canConfigureSIEM: false, canViewSynthetic: true, canManageSynthetic: false, canViewGovernance: true, canManageGovernance: false },
+      permissions: { canViewLogs: true, canTriggerBreakGlass: false, canEditPolicies: false, canExportVault: false, canManageWorkspaces: false, canViewTraces: true, canViewIncidents: true, canExecuteRunbooks: false, canViewCompliance: true, canConfigureSIEM: false, canViewSynthetic: true, canManageSynthetic: false, canViewGovernance: true, canManageGovernance: false, canManageInfra: false },
     },
   ]);
 
@@ -444,7 +449,7 @@ export const DashboardContainer: React.FC = () => {
       liveAnnouncement={liveAnnouncement}
     >
       {/* Top View Navigation Router Bar */}
-      <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl border border-slate-800/80 bg-[#131B2E]/90 backdrop-blur-xl font-mono text-xs shadow-md">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl border border-subtleBorder bg-surface/90 backdrop-blur-xl font-mono text-xs shadow-md">
         <button
           onClick={() => setActiveView('dashboard')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
@@ -467,7 +472,7 @@ export const DashboardContainer: React.FC = () => {
         >
           <FileText className="h-4 w-4" />
           <span>Logs &amp; Traces</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-elevated text-slate-400 border border-subtleBorder">
             {worker.totalLogsCount.toLocaleString()}
           </span>
         </button>
@@ -517,7 +522,7 @@ export const DashboardContainer: React.FC = () => {
               {firingIncidentsCount} Firing
             </span>
           ) : (
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-elevated text-slate-400 border border-subtleBorder">
               {alertRules.length}
             </span>
           )}
@@ -570,7 +575,7 @@ export const DashboardContainer: React.FC = () => {
       </div>
 
       {/* Top Banner / Ingestion Control Bar in Deep Ocean Container */}
-      <div className="relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-800/80 bg-[#131B2E]/70 backdrop-blur-xl shadow-lg">
+      <div className="relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl border border-subtleBorder bg-surface/70 backdrop-blur-xl shadow-lg">
         {/* Subtle Ambient Radial Highlight */}
         <div className="absolute top-0 left-0 -ml-12 -mt-12 h-36 w-36 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
@@ -608,7 +613,7 @@ export const DashboardContainer: React.FC = () => {
           <button
             onClick={() => handleGenerateBurst(2000)}
             disabled={worker.isIngesting}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-mono font-medium bg-[#1E293B] hover:bg-slate-700/60 text-slate-200 border border-slate-700/70 transition-all hover:border-amber-500/40 hover:shadow-[0_0_12px_rgba(245,158,11,0.15)] disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-mono font-medium bg-[#1E293B] hover:bg-slate-700/60 text-slate-200 border border-subtleBorder/70 transition-all hover:border-amber-500/40 hover:shadow-[0_0_12px_rgba(245,158,11,0.15)] disabled:opacity-50"
           >
             <Sparkles className="h-3.5 w-3.5 text-amber-400" />
             Inject +2k Burst
@@ -616,7 +621,7 @@ export const DashboardContainer: React.FC = () => {
 
           <button
             onClick={handleExportLogs}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-mono font-medium bg-[#1E293B] hover:bg-slate-700/60 text-slate-200 border border-slate-700/70 transition-all hover:border-indigo-500/40 hover:shadow-[0_0_12px_rgba(99,102,241,0.15)]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-mono font-medium bg-[#1E293B] hover:bg-slate-700/60 text-slate-200 border border-subtleBorder/70 transition-all hover:border-indigo-500/40 hover:shadow-[0_0_12px_rgba(99,102,241,0.15)]"
           >
             <UploadCloud className="h-3.5 w-3.5 text-indigo-400" />
             Export JSON
@@ -852,25 +857,55 @@ export const DashboardContainer: React.FC = () => {
           }}
         />
       ) : activeView === 'logs' ? (
-        <ErrorBoundary fallbackTitle="Request Log Data Grid">
-          <LogTableContainer
-            logs={worker.getFilteredLogs(500)}
-            totalLogsCount={worker.totalLogsCount}
-            timeBuckets={worker.timeBuckets}
-            density={preferences.density}
-            onFilterChange={(f) => {
-              if (f.searchText !== undefined) handleSearchChange(f.searchText);
-            }}
-            onInjectBurst={handleGenerateBurst}
-            onExportLogs={handleExportLogs}
-            isStreaming={isLiveStreaming}
+        <ErrorBoundary fallbackTitle="Multi-Region LogQL & Causal AI Explorer">
+          <div className="space-y-6">
+            <AdvancedLogView
+              onInspectTrace={handleInspectTrace}
+              canViewLogs={roles.find((r) => r.id === 'role-admin')?.permissions.canViewLogs !== false}
+              canManageLogs={roles.find((r) => r.id === 'role-admin')?.permissions.canViewLogs !== false}
+            />
+
+            <LogTableContainer
+              logs={worker.getFilteredLogs(500)}
+              totalLogsCount={worker.totalLogsCount}
+              timeBuckets={worker.timeBuckets}
+              density={preferences.density}
+              onFilterChange={(f) => {
+                if (f.searchText !== undefined) handleSearchChange(f.searchText);
+              }}
+              onInjectBurst={handleGenerateBurst}
+              onExportLogs={handleExportLogs}
+              isStreaming={isLiveStreaming}
+            />
+          </div>
+        </ErrorBoundary>
+      ) : activeView === 'self-healing' ? (
+        <ErrorBoundary fallbackTitle="Autonomous Self-Healing Command Studio">
+          <SelfHealingView
+            canManageInfra={roles.find((r) => r.id === 'role-admin')?.permissions.canManageInfra !== false}
+            canViewLogs={roles.find((r) => r.id === 'role-admin')?.permissions.canViewLogs !== false}
           />
+        </ErrorBoundary>
+      ) : activeView === 'capstone-ultimate' ? (
+        <ErrorBoundary fallbackTitle="Ultimate Governance Studio">
+          <UltimateGovernanceView
+            canManageInfra={roles.find((r) => r.id === 'role-admin')?.permissions.canManageInfra !== false}
+            canViewLogs={roles.find((r) => r.id === 'role-admin')?.permissions.canViewLogs !== false}
+          />
+        </ErrorBoundary>
+      ) : activeView === 'immune-system' ? (
+        <ErrorBoundary fallbackTitle="Immune System Command Center">
+          <ImmuneSystemDashboard />
+        </ErrorBoundary>
+      ) : activeView === 'neuromorphic-mesh' ? (
+        <ErrorBoundary fallbackTitle="Neuromorphic Mesh Studio">
+          <NeuromorphicMeshView />
         </ErrorBoundary>
       ) : (
         /* Real-time Request Log Explorer Preview on Dashboard */
         <ErrorBoundary fallbackTitle="Request Stream Table">
-          <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 overflow-hidden backdrop-blur-xl shadow-lg">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-[#0B0F17]/60">
+          <div className="rounded-2xl border border-subtleBorder bg-surface/80 overflow-hidden backdrop-blur-xl shadow-lg">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-subtleBorder bg-canvas/60">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
                   <ShieldAlert className="h-4 w-4" />
@@ -895,7 +930,7 @@ export const DashboardContainer: React.FC = () => {
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#0B0F17]/90 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800/80">
+                <thead className="bg-canvas/90 text-slate-400 uppercase tracking-wider text-[10px] border-b border-subtleBorder">
                   <tr>
                     <th className="py-3 px-5">Method</th>
                     <th className="py-3 px-5">Endpoint</th>
@@ -905,7 +940,7 @@ export const DashboardContainer: React.FC = () => {
                     <th className="py-3 px-5">Time</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                <tbody className="divide-y divide-subtleBorder/60 text-slate-300">
                   {filteredLogsSlice.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-8 text-center text-slate-500 font-sans">

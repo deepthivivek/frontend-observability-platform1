@@ -79,9 +79,9 @@ export const EndpointLeaderboard: React.FC<EndpointLeaderboardProps> = ({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-800/80 bg-[#131B2E]/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+    <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+        <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
           <div className="flex items-center gap-2">
             <Trophy className="h-4 w-4 text-amber-400" />
             <h3 className="text-sm font-semibold text-white">Endpoint Performance Leaderboard</h3>
@@ -92,7 +92,7 @@ export const EndpointLeaderboard: React.FC<EndpointLeaderboardProps> = ({
         {/* Table */}
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left font-mono text-xs">
-            <thead className="bg-[#0B0F17]/90 text-[10px] uppercase text-slate-400 border-b border-slate-800">
+            <thead className="bg-canvas/90 text-[10px] uppercase text-slate-400 border-b border-subtleBorder">
               <tr>
                 <th className="py-2.5 px-3">Endpoint</th>
                 <th onClick={() => toggleSort('volume')} className="py-2.5 px-3 cursor-pointer select-none">
@@ -112,7 +112,7 @@ export const EndpointLeaderboard: React.FC<EndpointLeaderboardProps> = ({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-subtleBorder/60 text-slate-300">
               {sortedStats.slice(0, 8).map((row) => {
                 const isHighImpact = row.impact > 500;
                 const hasErrors = row.errorRate > 3;
@@ -148,7 +148,7 @@ export const EndpointLeaderboard: React.FC<EndpointLeaderboardProps> = ({
                         className={`inline-block px-2 py-0.5 rounded font-bold text-xs ${
                           isHighImpact
                             ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/40'
-                            : 'bg-slate-900 text-slate-400'
+                            : 'bg-elevated text-slate-400'
                         }`}
                       >
                         {row.impact.toLocaleString()}
@@ -162,7 +162,7 @@ export const EndpointLeaderboard: React.FC<EndpointLeaderboardProps> = ({
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono text-slate-400">
+      <div className="mt-4 pt-3 border-t border-subtleBorder/60 flex items-center justify-between text-xs font-mono text-slate-400">
         <span>Click any endpoint to isolate in telemetry log stream</span>
         <span className="text-indigo-400 font-medium">Auto-updated from worker index</span>
       </div>

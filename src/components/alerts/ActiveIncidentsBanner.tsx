@@ -92,7 +92,7 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
       {/* 2. List of Aggregated Root Incidents */}
       <div className="space-y-3">
         {incidents.length === 0 ? (
-          <div className="p-8 rounded-2xl border border-slate-800 bg-[#131B2E]/60 text-center text-slate-500">
+          <div className="p-8 rounded-2xl border border-subtleBorder bg-surface/60 text-center text-slate-500">
             <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto mb-2 opacity-80" />
             <h4 className="text-sm font-semibold text-white">All Systems Operational</h4>
             <p className="text-xs text-slate-400 mt-1">No active incidents or rule breaches in the buffer.</p>
@@ -110,11 +110,11 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
                     ? 'border-rose-500/50 bg-[#1E1724]/90 shadow-[0_0_20px_rgba(244,63,94,0.15)]'
                     : isAck
                     ? 'border-amber-500/40 bg-[#1E1E24]/90'
-                    : 'border-slate-800 bg-[#131B2E]/70'
+                    : 'border-subtleBorder bg-surface/70'
                 }`}
               >
                 {/* Top incident meta */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-subtleBorder">
                   <div className="flex items-center gap-2.5">
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
@@ -126,7 +126,7 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
                       {inc.severity}
                     </span>
                     <span className="font-semibold text-sm text-white font-sans">{inc.title}</span>
-                    <span className="text-[10px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                    <span className="text-[10px] text-slate-400 bg-elevated px-2 py-0.5 rounded border border-subtleBorder">
                       {inc.environment} • {inc.service}
                     </span>
                   </div>
@@ -230,7 +230,7 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
                     {/* AI Post-Mortem Export */}
                     <button
                       onClick={() => handleGeneratePostMortem(inc)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-subtleBorder bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                       AI Post-Mortem
@@ -240,13 +240,13 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
 
                 {/* Acknowledged Engineer Notes preview */}
                 {inc.acknowledgementNotes && (
-                  <div className="mt-2 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-300 font-sans">
+                  <div className="mt-2 p-2.5 rounded-xl bg-elevated/80 border border-subtleBorder text-[11px] text-slate-300 font-sans">
                     <strong>Triage Note ({inc.acknowledgedBy || 'Engineer'}):</strong> {inc.acknowledgementNotes}
                   </div>
                 )}
 
                 {/* 3. Incident Timeline Replay Scrubber */}
-                <div className="mt-3 pt-3 border-t border-slate-800/80">
+                <div className="mt-3 pt-3 border-t border-subtleBorder">
                   <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
                     <span className="flex items-center gap-1.5 font-bold uppercase text-slate-400">
                       <Clock className="h-3.5 w-3.5 text-indigo-400" />
@@ -259,7 +259,7 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
                     {inc.timeline.map((item, idx) => (
                       <div
                         key={idx}
-                        className="p-2 rounded-lg bg-[#0B0F17] border border-slate-800 text-[11px]"
+                        className="p-2 rounded-lg bg-canvas border border-subtleBorder text-[11px]"
                       >
                         <div className="text-slate-500 text-[10px]">
                           {new Date(item.timestamp).toLocaleTimeString()}
@@ -280,9 +280,9 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#080C14]/80 backdrop-blur-md p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-canvas/80 backdrop-blur-md p-4"
         >
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-[#131B2E] p-5 space-y-4">
+          <div className="w-full max-w-md rounded-2xl border border-subtleBorder bg-surface p-5 space-y-4">
             <h3 className="font-semibold text-white text-sm">
               Acknowledge Incident: {selectedIncidentForAck.title}
             </h3>
@@ -294,7 +294,7 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
               placeholder="e.g. Scaling up database read replica pool to clear queued lock threads..."
               value={ackNotes}
               onChange={(e) => setAckNotes(e.target.value)}
-              className="w-full p-3 rounded-xl border border-slate-800 bg-[#0B0F17] text-white text-xs focus:outline-none focus:border-indigo-500 font-sans"
+              className="w-full p-3 rounded-xl border border-subtleBorder bg-canvas text-white text-xs focus:outline-none focus:border-indigo-500 font-sans"
             />
             <div className="flex justify-end gap-2">
               <button
@@ -323,14 +323,14 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#080C14]/80 backdrop-blur-md p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-canvas/80 backdrop-blur-md p-4"
           onClick={() => setGeneratedPostMortem(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl border border-slate-800 bg-[#131B2E] p-6 space-y-4 shadow-2xl"
+            className="w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl border border-subtleBorder bg-surface p-6 space-y-4 shadow-2xl"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
               <h3 className="font-semibold text-white text-base flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-amber-400" />
                 AI Incident Post-Mortem Report
@@ -342,7 +342,7 @@ ${inc.remediationTriggered ? `Successfully executed automated playbook: \`${inc.
                 <Check className="h-4 w-4" />
               </button>
             </div>
-            <pre className="p-4 rounded-xl bg-[#080C14] border border-slate-800 text-indigo-200 text-xs whitespace-pre-wrap font-mono">
+            <pre className="p-4 rounded-xl bg-canvas border border-subtleBorder text-indigo-200 text-xs whitespace-pre-wrap font-mono">
               {generatedPostMortem}
             </pre>
             <div className="text-right">
