@@ -20,6 +20,9 @@ import {
   Globe,
   Cpu,
   Sparkles,
+  BrainCircuit,
+  Dna,
+  Network,
 } from 'lucide-react';
 import { DashboardView } from '../../types/telemetry';
 
@@ -199,6 +202,39 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       icon: <Sparkles className="h-4 w-4 text-indigo-400" />,
       onSelect: () => {
         onNavigate('capstone-ultimate');
+        onClose();
+      },
+    },
+    {
+      id: 'nav-neuromorphic-mesh',
+      title: 'Go to Neuromorphic Mesh Studio',
+      category: 'Navigation',
+      shortcut: 'N M',
+      icon: <BrainCircuit className="h-4 w-4 text-violet-400" />,
+      onSelect: () => {
+        onNavigate('neuromorphic-mesh');
+        onClose();
+      },
+    },
+    {
+      id: 'nav-synthetic-dream',
+      title: 'Go to Synthetic DNA & Dream State Studio',
+      category: 'Navigation',
+      shortcut: 'D S',
+      icon: <Dna className="h-4 w-4 text-emerald-400" />,
+      onSelect: () => {
+        onNavigate('synthetic-dream');
+        onClose();
+      },
+    },
+    {
+      id: 'nav-autonomous-swarm',
+      title: 'Go to Autonomous AI Swarm & Singularity Command',
+      category: 'Navigation',
+      shortcut: 'A S',
+      icon: <Network className="h-4 w-4 text-cyan-400" />,
+      onSelect: () => {
+        onNavigate('autonomous-swarm');
         onClose();
       },
     },

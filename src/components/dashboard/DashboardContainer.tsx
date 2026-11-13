@@ -38,6 +38,8 @@ import { SelfHealingView } from '../infra/SelfHealingView';
 import { UltimateGovernanceView } from '../capstone/UltimateGovernanceView';
 import { ImmuneSystemDashboard } from '../immune/ImmuneSystemDashboard';
 import NeuromorphicMeshView from '../mesh/NeuromorphicMeshView';
+import { SyntheticDreamDashboard } from '../synthetic/SyntheticDreamDashboard';
+import { SwarmDashboard } from '../swarm/SwarmDashboard';
 import { generateSyntheticLogs } from '../../utils/syntheticData';
 import {
   UploadCloud,
@@ -54,6 +56,8 @@ import {
   Shield,
   Sliders,
   Globe,
+  Dna,
+  Network,
 } from 'lucide-react';
 import { Workspace, RoleDefinition, BreakGlassRequest, AuditLogEvent, ComplianceViolation } from '../../types/enterprise';
 
@@ -572,6 +576,36 @@ export const DashboardContainer: React.FC = () => {
             RBAC
           </span>
         </button>
+
+        <button
+          onClick={() => setActiveView('synthetic-dream')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+            activeView === 'synthetic-dream'
+              ? 'bg-emerald-600/30 text-emerald-300 font-semibold border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Dna className="h-4 w-4 text-emerald-400" />
+          <span>Synthetic Dream</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+            Day 22
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveView('autonomous-swarm')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+            activeView === 'autonomous-swarm'
+              ? 'bg-cyan-600/30 text-cyan-300 font-semibold border border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.2)]'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Network className="h-4 w-4 text-cyan-400" />
+          <span>Autonomous Swarm</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+            BFT
+          </span>
+        </button>
       </div>
 
       {/* Top Banner / Ingestion Control Bar in Deep Ocean Container */}
@@ -900,6 +934,20 @@ export const DashboardContainer: React.FC = () => {
       ) : activeView === 'neuromorphic-mesh' ? (
         <ErrorBoundary fallbackTitle="Neuromorphic Mesh Studio">
           <NeuromorphicMeshView />
+        </ErrorBoundary>
+      ) : activeView === 'synthetic-dream' ? (
+        <ErrorBoundary fallbackTitle="Synthetic Dream Studio">
+          <SyntheticDreamDashboard
+            canManageInfra={roles.find((r) => r.id === 'role-admin')?.permissions.canManageInfra !== false}
+            canViewLogs={roles.find((r) => r.id === 'role-admin')?.permissions.canViewLogs !== false}
+          />
+        </ErrorBoundary>
+      ) : activeView === 'autonomous-swarm' ? (
+        <ErrorBoundary fallbackTitle="Autonomous AI Swarm & Singularity Command">
+          <SwarmDashboard
+            canManageInfra={roles.find((r) => r.id === 'role-admin')?.permissions.canManageInfra !== false}
+            canViewLogs={roles.find((r) => r.id === 'role-admin')?.permissions.canViewLogs !== false}
+          />
         </ErrorBoundary>
       ) : (
         /* Real-time Request Log Explorer Preview on Dashboard */

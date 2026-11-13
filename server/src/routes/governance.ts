@@ -14,6 +14,7 @@ import { globalFinOpsAgent } from '../governance/autonomousFinOpsAgent';
 import { globalZKPAttestation } from '../governance/zkpFinOpsAttestation';
 import { globalChaosEngine } from '../chaos/chaosEngine';
 import { globalFHEGateway } from '../gateway/homomorphicEncryption';
+import { complianceAuditor } from '../governance/complianceAuditor';
 import { appendAuditLog } from '../index';
 
 export const governanceRouter = Router();
@@ -117,3 +118,22 @@ governanceRouter.post('/fhe/aggregate', (req: Request, res: Response) => {
     fheScheme: globalFHEGateway.getStatus().activeLatticeScheme,
   });
 });
+
+// 11. Continuous Compliance Auditor Status
+governanceRouter.get('/compliance-status', (_req: Request, res: Response) => {
+  res.json(complianceAuditor.getComplianceStatus());
+});
+
+// 12. Generate Cryptographic Attestation Report (SOC2 / GDPR / HIPAA)
+governanceRouter.post('/generate-attestation-report', (req: Request, res: Response) => {
+  const { actor } = req.body || {};
+  const report = complianceAuditor.generateAttestationReport(actor || 'AUDIT_OFFICER');
+  appendAuditLog('COMPLIANCE_AGENT', 'GENERATE_ATTESTATION_REPORT', report.reportId);
+  res.json({ success: true, report });
+});
+
+// 13. Compliance Security Controls List
+governanceRouter.get('/controls', (_req: Request, res: Response) => {
+  res.json({ controls: complianceAuditor.getControls() });
+});
+

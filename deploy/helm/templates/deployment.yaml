@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-observability-engine
+  namespace: {{ .Values.namespace | default "neon-chasm-enterprise" }}
+  labels:
+    app.kubernetes.io/name: neon-chasm-observability
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Values.image.tag | default "v2.1.0" }}
+    app.kubernetes.io/component: telemetry-ingestion-engine
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: neon-chasm-observability
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: neon-chasm-observability
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/tier: telemetry-core
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4000"
+        prometheus.io/path: "/readyz"
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | default "neon-chasm-operator-sa" }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: observability-engine
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "v2.1.0" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http-telemetry
+              containerPort: 4000
+              protocol: TCP
+          securityContext:
+            privileged: false
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - NET_ADMIN
+                - BPF
+            allowPrivilegeEscalation: true
+            readOnlyRootFilesystem: false
+          env:
+            - name: NODE_ENV
+              value: "{{ .Values.env.NODE_ENV | default "production" }}"
+            - name: PORT
+              value: "{{ .Values.env.PORT | default "4000" }}"
+            - name: MAX_WORKERS
+              value: "{{ .Values.env.MAX_WORKERS | default "16" }}"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.jwtSecretName | default "neon-chasm-vault-secret" }}
+                  key: jwt-secret
+            - name: ENCRYPTION_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.encryptionKeyName | default "neon-chasm-fhe-master-secret" }}
+                  key: encryption-key
+            - name: PQC_LATTICE_SEED
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.pqcSeedName | default "neon-chasm-pqc-lattice-seed" }}
+                  key: pqc-seed
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.liveness.path }}
+              port: {{ .Values.probes.liveness.port }}
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path }}
+              port: {{ .Values.probes.readiness.port }}
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          volumeMounts:
+            - name: sys-fs-bpf
+              mountPath: /sys/fs/bpf
+              mountPropagation: HostToContainer
+            - name: trace-fs
+              mountPath: /sys/kernel/debug/tracing
+              readOnly: true
+      volumes:
+        - name: sys-fs-bpf
+          hostPath:
+            path: /sys/fs/bpf
+            type: DirectoryOrCreate
+        - name: trace-fs
+          hostPath:
+            path: /sys/kernel/debug/tracing
+            type: Directory

@@ -24,6 +24,8 @@ import {
   Cpu,
   Sparkles,
   BrainCircuit,
+  Dna,
+  Network,
 } from 'lucide-react';
 import {
   DashboardView,
@@ -139,6 +141,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return;
       }
 
+      if (lastKey === 'd' && currentKey === 's' && now - lastKeyTime < 800) {
+        e.preventDefault();
+        onNavigate('synthetic-dream');
+        lastKey = '';
+        return;
+      }
+
       if (lastKey === 'i' && currentKey === 's' && now - lastKeyTime < 800) {
         e.preventDefault();
         onNavigate('immune-system');
@@ -149,6 +158,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       if (lastKey === 'n' && currentKey === 'm' && now - lastKeyTime < 800) {
         e.preventDefault();
         onNavigate('neuromorphic-mesh');
+        lastKey = '';
+        return;
+      }
+
+      if (lastKey === 'a' && currentKey === 's' && now - lastKeyTime < 800) {
+        e.preventDefault();
+        onNavigate('autonomous-swarm');
         lastKey = '';
         return;
       }
@@ -303,6 +319,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       shortcut: 'N M',
       icon: <BrainCircuit className="h-4 w-4 text-violet-400" />,
       badge: 'Day 21',
+    },
+    {
+      id: 'synthetic-dream' as DashboardView,
+      label: 'Synthetic Dream',
+      shortcut: 'D S',
+      icon: <Dna className="h-4 w-4 text-emerald-400" />,
+      badge: 'Day 22',
+    },
+    {
+      id: 'autonomous-swarm' as DashboardView,
+      label: 'Autonomous Swarm',
+      shortcut: 'A S',
+      icon: <Network className="h-4 w-4 text-cyan-400" />,
+      badge: 'BFT',
     },
     {
       id: 'settings' as DashboardView,
@@ -550,8 +580,30 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 title="Neuromorphic Mesh Studio (N M)"
               >
                 <BrainCircuit className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400 animate-pulse" />
-                <span className="font-bold">Neuromorphic SNN, Slime-Mould &amp; Biophotonic Sync:</span>
+                <span className="font-bold">Neuromorphic SNN &amp; Biophotonic:</span>
                 <span className="px-1.5 py-0.2 rounded-full bg-violet-500/30 text-[10px] text-white font-semibold">Active</span>
+              </button>
+
+              {/* Active Day 22 Status Badge */}
+              <button
+                onClick={() => onNavigate('synthetic-dream')}
+                className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-300 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                title="Synthetic Dream Studio (D S)"
+              >
+                <Dna className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400 animate-pulse" />
+                <span className="font-bold">Synthetic DNA, Dream State &amp; Neural Resonance:</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/30 text-[10px] text-white font-semibold">Active</span>
+              </button>
+
+              {/* Active Autonomous AI Swarm Status Badge */}
+              <button
+                onClick={() => onNavigate('autonomous-swarm')}
+                className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-xs font-mono text-cyan-600 dark:text-cyan-300 transition-all whitespace-nowrap shrink-0"
+                title="Autonomous AI Swarm & Singularity Command (A S)"
+              >
+                <Network className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
+                <span className="font-bold">AI Swarm BFT:</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/30 text-[10px] text-white font-semibold">Quorum</span>
               </button>
 
               {/* Time Range Selector */}

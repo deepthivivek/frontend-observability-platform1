@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-observability-svc
+  namespace: {{ .Values.namespace | default "neon-chasm-enterprise" }}
+  labels:
+    app.kubernetes.io/name: neon-chasm-observability
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  ports:
+    - name: http-telemetry
+      port: {{ .Values.service.port | default 4000 }}
+      targetPort: {{ .Values.service.targetPort | default 4000 }}
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: neon-chasm-observability
+    app.kubernetes.io/instance: {{ .Release.Name }}

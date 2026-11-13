@@ -4,9 +4,13 @@ import helmet from 'helmet';
 import crypto from 'crypto';
 import { DistributedCircuitBreaker } from './middleware/circuitBreaker';
 import { PolicyEngine } from './security/policyEngine';
+import { validateEnterpriseEnvironment } from './config/envValidator';
+
+// Execute enterprise environment validation
+const enterpriseConfig = validateEnterpriseEnvironment();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || enterpriseConfig.PORT || 4000;
 
 app.use(helmet());
 app.use(cors());
@@ -140,7 +144,13 @@ import { selfHealingRouter } from './routes/selfHealing';
 import { capstoneUltimateRouter } from './routes/capstoneUltimate';
 import { immuneSystemRouter } from './routes/immuneSystem';
 import { neuromorphicMeshRouter } from './routes/neuromorphicMesh';
+import { syntheticDreamRouter } from './routes/syntheticDream';
+import { healthRouter } from './routes/health';
+import { swarmRouter } from './routes/swarm';
 import { setupWebSocketGateway } from './ws/gateway';
+
+// Kubernetes Health & Readiness Probes (/healthz and /readyz)
+app.use(healthRouter);
 
 // Mount Dashboard Presets API
 app.use('/api/v1/dashboards/presets', presetsRouter);
@@ -179,6 +189,16 @@ app.use('/api/v1', immuneSystemRouter);
 // Mount Neuromorphic SNN, Slime-Mould & Biophotonic Entanglement Sync API (Day 21)
 app.use('/api/v1', neuromorphicMeshRouter);
 app.use('/api/v1/neuromorphic-mesh', neuromorphicMeshRouter);
+
+// Mount Synthetic DNA, Dream-State & Neural Resonance API (Day 22)
+app.use('/api/v1', syntheticDreamRouter);
+app.use('/api/v1/synthetic-dream', syntheticDreamRouter);
+app.use('/api/v1/dna', syntheticDreamRouter);
+app.use('/api/v1/dream', syntheticDreamRouter);
+app.use('/api/v1/resonance', syntheticDreamRouter);
+
+// Mount Autonomous SRE Swarm, Neural-Genesis eBPF & Singularity Sync API (Final Capstone)
+app.use('/api/v1/swarm', swarmRouter);
 
 // PromQL / LogQL Metric Query API
 app.post('/api/v1/metrics/query', (req: Request, res: Response) => {

@@ -1,0 +1,15 @@
+apiVersion: v2
+name: neon-chasm-observability
+description: Enterprise-grade Full-Stack Observability Platform with Autonomous eBPF Defense and PQC Lattice Sync
+type: application
+version: 2.1.0
+appVersion: "2.1.0"
+maintainers:
+  - name: Principal SRE Architecture Team
+    email: sre-architecture@neonchasm.enterprise.io
+keywords:
+  - observability
+  - opentelemetry
+  - ebpf
+  - quantum-crypto
+  - neuromorphic
