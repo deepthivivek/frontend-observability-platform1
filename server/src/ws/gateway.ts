@@ -2,13 +2,28 @@ import { Server as HttpServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 
 export interface WebSocketEventMessage {
-  type: 'trace_anomaly_detected' | 'topology_updated' | 'ping' | 'pong';
-  payload: any;
+  type:
+    | 'trace_anomaly_detected'
+    | 'topology_updated'
+    | 'telemetry_tick'
+    | 'akasha_converged'
+    | 'incident_updated'
+    | 'ping'
+    | 'pong';
+  payload: unknown;
   timestamp: number;
 }
 
 let wss: WebSocketServer | null = null;
 const activeSockets = new Set<WebSocket>();
+const sseListeners = new Set<(event: WebSocketEventMessage) => void>();
+
+export function subscribeTelemetryEvents(listener: (event: WebSocketEventMessage) => void): () => void {
+  sseListeners.add(listener);
+  return () => {
+    sseListeners.delete(listener);
+  };
+}
 
 export function setupWebSocketGateway(server: HttpServer): WebSocketServer {
   if (wss) {
@@ -37,7 +52,7 @@ export function setupWebSocketGateway(server: HttpServer): WebSocketServer {
       try {
         const msg = JSON.parse(data.toString());
         if (msg.type === 'ping') {
-          ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+          ws.send(JSON.stringify({ type: 'pong', payload: { clientTs: msg.timestamp || Date.now() }, timestamp: Date.now() }));
         }
       } catch {
         // Ignore unformatted socket messages
@@ -73,10 +88,44 @@ export function broadcastTraceAnomaly(anomalyData: {
   broadcastMessage(event);
 }
 
-export function broadcastTopologyUpdate(topologyData: any) {
+export function broadcastTopologyUpdate(topologyData: unknown) {
   const event: WebSocketEventMessage = {
     type: 'topology_updated',
     payload: topologyData,
+    timestamp: Date.now(),
+  };
+  broadcastMessage(event);
+}
+
+export function broadcastTelemetryTick(telemetryPayload: {
+  processedLogs: number;
+  traceId: string;
+  source?: string;
+  throughputEstimateRps?: number;
+  tenantId?: string;
+  records?: unknown[];
+}) {
+  const event: WebSocketEventMessage = {
+    type: 'telemetry_tick',
+    payload: telemetryPayload,
+    timestamp: Date.now(),
+  };
+  broadcastMessage(event);
+}
+
+export function broadcastAkashaConvergence(payload: unknown) {
+  const event: WebSocketEventMessage = {
+    type: 'akasha_converged',
+    payload,
+    timestamp: Date.now(),
+  };
+  broadcastMessage(event);
+}
+
+export function broadcastIncidentUpdate(payload: unknown) {
+  const event: WebSocketEventMessage = {
+    type: 'incident_updated',
+    payload,
     timestamp: Date.now(),
   };
   broadcastMessage(event);
@@ -89,10 +138,17 @@ export function broadcastMessage(message: WebSocketEventMessage) {
       client.send(jsonStr);
     }
   }
+  for (const listener of sseListeners) {
+    try {
+      listener(message);
+    } catch {
+      // Ignore closed SSE subscriber errors
+    }
+  }
 }
 
 export function getConnectedClientCount(): number {
-  return activeSockets.size;
+  return activeSockets.size + sseListeners.size;
 }
 
 export function closeWebSocketGateway(): void {
@@ -101,4 +157,5 @@ export function closeWebSocketGateway(): void {
     wss = null;
     activeSockets.clear();
   }
+  sseListeners.clear();
 }

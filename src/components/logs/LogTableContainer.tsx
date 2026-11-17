@@ -13,6 +13,7 @@ import {
   Filter,
   CheckSquare,
   HelpCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { ApiRequestLog, DensityMode, HttpMethod, TimeBucket } from '../../types/telemetry';
 import { RequestLogTable } from './RequestLogTable';
@@ -33,7 +34,7 @@ interface LogTableContainerProps {
   timeBuckets: TimeBucket[];
   density: DensityMode;
   onFilterChange: (filters: { searchText?: string; methods?: HttpMethod[]; statusCode?: number }) => void;
-  onInjectBurst: (count: number) => void;
+  onSyncTelemetry: () => void;
   onExportLogs: () => void;
   isStreaming: boolean;
 }
@@ -44,7 +45,7 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
   timeBuckets,
   density,
   onFilterChange,
-  onInjectBurst,
+  onSyncTelemetry,
   onExportLogs,
   isStreaming,
 }) => {
@@ -219,11 +220,11 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
           )}
 
           <button
-            onClick={() => onInjectBurst(2000)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-mono transition-all shadow-[0_0_12px_rgba(245,158,11,0.15)]"
+            onClick={onSyncTelemetry}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-mono transition-all whitespace-nowrap shrink-0"
           >
-            <Sparkles className="h-3 w-3 text-amber-400" />
-            +2k Burst
+            <RefreshCw className="h-3 w-3 text-emerald-400" />
+            Sync OTLP Stream
           </button>
 
           <button
@@ -296,22 +297,24 @@ export const LogTableContainer: React.FC<LogTableContainerProps> = ({
             <Filter className="h-8 w-8" />
           </div>
           <h3 className="text-base font-semibold text-white">No Matching Telemetry Logs</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm">
-            Current filters excluded all {totalLogsCount} indexed records. Clear your filters or inject synthetic traffic to populate the grid.
+          <p className="text-xs text-slate-400 mt-1 max-w-md">
+            {totalLogsCount === 0
+              ? 'Waiting for live OpenTelemetry payloads on POST /api/v1/telemetry (or click Sync OTLP Stream to pull buffered production records).'
+              : `Current filters excluded all ${totalLogsCount} indexed production records. Clear filters or sync the latest OTLP buffer.`}
           </p>
 
           <div className="mt-5 flex items-center gap-3">
             <button
               onClick={handleClearAllFilters}
-              className="px-4 py-2 rounded-xl text-xs font-mono font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 transition-colors"
+              className="px-4 py-2 rounded-xl text-xs font-mono font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 transition-colors whitespace-nowrap shrink-0"
             >
               Clear Active Filters
             </button>
             <button
-              onClick={() => onInjectBurst(2000)}
-              className="px-4 py-2 rounded-xl text-xs font-mono font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] border border-indigo-400/40 transition-all"
+              onClick={onSyncTelemetry}
+              className="px-4 py-2 rounded-xl text-xs font-mono font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] border border-indigo-400/40 transition-all whitespace-nowrap shrink-0"
             >
-              Inject Synthetic Test Burst (+2,000 requests)
+              Sync OTLP Stream
             </button>
           </div>
         </div>

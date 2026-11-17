@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Search,
@@ -83,14 +83,16 @@ export const AdvancedLogView: React.FC<AdvancedLogViewProps> = ({
     }
   }, []);
 
+  const initialQueryRef = useRef(queryInput);
+
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       if (mounted) {
-        await executeLogQuery(queryInput);
+        await executeLogQuery(initialQueryRef.current);
       }
     };
-    load();
+    void load();
     return () => {
       mounted = false;
     };

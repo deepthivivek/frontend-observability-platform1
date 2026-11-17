@@ -1,0 +1,96 @@
+replicaCount: 3
+
+image:
+  repository: ghcr.io/neon-chasm/observability-engine
+  pullPolicy: IfNotPresent
+  tag: "v2.1.0"
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: false
+  name: ""
+
+# Kubernetes Restricted Pod Security Standard (PSS) Compliant Defaults
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1001
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  webPort: 3000
+  gatewayPort: 4000
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 12
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+networkPolicy:
+  enabled: true
+  ingressNamespaces:
+    - ingress-nginx
+    - monitoring
+  egressOtelPort: 4318
+
+env:
+  NODE_ENV: "production"
+  PORT: "4000"
+  NEON_CHASM_STATE_DIR: "/tmp/neon-chasm-state"
+  RATE_LIMIT_BURST: "240"
+  RATE_LIMIT_RPS: "60"
+
+secrets:
+  existingSecretName: neon-chasm-runtime-secrets
+
+probes:
+  liveness:
+    path: /healthz
+    port: 4000
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    path: /readyz
+    port: 4000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway

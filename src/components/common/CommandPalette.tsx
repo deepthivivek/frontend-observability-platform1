@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search,
   SlidersHorizontal,
   Download,
-  Activity,
   RotateCcw,
   LayoutDashboard,
   FileText,
@@ -23,13 +22,24 @@ import {
   BrainCircuit,
   Dna,
   Network,
+  RefreshCw,
+  Send,
+  Layers,
+  AlertTriangle,
+  Infinity as InfinityIcon,
 } from 'lucide-react';
-import { DashboardView } from '../../types/telemetry';
+import {
+  ApiRequestLog,
+  DashboardView,
+  DetectedAnomaly,
+} from '../../types/telemetry';
+import { Incident } from '../../types/alert';
 
 export interface CommandAction {
   id: string;
   title: string;
-  category: 'Navigation' | 'Actions' | 'Filters';
+  subtitle?: string;
+  category: 'Navigation' | 'Actions' | 'Alerts' | 'Traces' | 'Endpoints';
   icon: React.ReactNode;
   shortcut?: string;
   onSelect: () => void;
@@ -41,8 +51,14 @@ interface CommandPaletteProps {
   onNavigate: (view: DashboardView) => void;
   onClearFilters: () => void;
   onExportLogs: () => void;
-  onToggleLiveMode: () => void;
   onResetMetrics: () => void;
+  onSyncTelemetry?: () => void;
+  onSendDiagnosticSpan?: () => void;
+  onInspectTrace?: (traceId: string) => void;
+  onFilterEndpoint?: (endpoint: string) => void;
+  logs?: ApiRequestLog[];
+  anomalies?: DetectedAnomaly[];
+  incidents?: Incident[];
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
@@ -51,8 +67,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onNavigate,
   onClearFilters,
   onExportLogs,
-  onToggleLiveMode,
   onResetMetrics,
+  onSyncTelemetry,
+  onSendDiagnosticSpan,
+  onInspectTrace,
+  onFilterEndpoint,
+  logs = [],
+  anomalies = [],
+  incidents = [],
 }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -60,245 +82,376 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const lastActiveElement = useRef<HTMLElement | null>(null);
 
-  const actions: CommandAction[] = [
-    // Navigation
-    {
-      id: 'nav-dashboard',
-      title: 'Go to Overview Dashboard',
-      category: 'Navigation',
-      shortcut: 'G D',
-      icon: <LayoutDashboard className="h-4 w-4" />,
-      onSelect: () => {
-        onNavigate('dashboard');
-        onClose();
+  const actions = useMemo<CommandAction[]>(() => {
+    const baseNavigation: CommandAction[] = [
+      {
+        id: 'nav-dashboard',
+        title: 'Go to Overview Dashboard',
+        category: 'Navigation',
+        shortcut: 'G D',
+        icon: <LayoutDashboard className="h-4 w-4" />,
+        onSelect: () => {
+          onNavigate('dashboard');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-logs',
-      title: 'Go to Request Log Explorer',
-      category: 'Navigation',
-      shortcut: 'G R',
-      icon: <FileText className="h-4 w-4" />,
-      onSelect: () => {
-        onNavigate('logs');
-        onClose();
+      {
+        id: 'nav-logs',
+        title: 'Go to Request Logs Explorer',
+        category: 'Navigation',
+        shortcut: 'G R',
+        icon: <FileText className="h-4 w-4" />,
+        onSelect: () => {
+          onNavigate('logs');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-traces',
-      title: 'Go to Distributed Traces & Flamegraph Waterfall',
-      category: 'Navigation',
-      shortcut: 'G T',
-      icon: <FileText className="h-4 w-4 text-indigo-400" />,
-      onSelect: () => {
-        onNavigate('traces');
-        onClose();
+      {
+        id: 'nav-traces',
+        title: 'Go to Distributed Traces & Waterfall',
+        category: 'Navigation',
+        shortcut: 'G T',
+        icon: <Layers className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
+        onSelect: () => {
+          onNavigate('traces');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-analytics',
-      title: 'Go to Analytics & Time Series Charts',
-      category: 'Navigation',
-      shortcut: 'G A',
-      icon: <LineChart className="h-4 w-4" />,
-      onSelect: () => {
-        onNavigate('analytics');
-        onClose();
+      {
+        id: 'nav-analytics',
+        title: 'Go to Analytics & Latency Charts',
+        category: 'Navigation',
+        shortcut: 'G A',
+        icon: <LineChart className="h-4 w-4" />,
+        onSelect: () => {
+          onNavigate('analytics');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-metrics',
-      title: 'Go to Metrics & PromQL Studio',
-      category: 'Navigation',
-      shortcut: 'G M',
-      icon: <SlidersHorizontal className="h-4 w-4 text-cyan-400" />,
-      onSelect: () => {
-        onNavigate('metrics');
-        onClose();
+      {
+        id: 'nav-metrics',
+        title: 'Go to Metrics & PromQL Studio',
+        category: 'Navigation',
+        shortcut: 'G M',
+        icon: <SlidersHorizontal className="h-4 w-4 text-cyan-500 dark:text-cyan-400" />,
+        onSelect: () => {
+          onNavigate('metrics');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-anomalies',
-      title: 'Go to Anomaly Detection Rules',
-      category: 'Navigation',
-      shortcut: 'G N',
-      icon: <ShieldAlert className="h-4 w-4" />,
-      onSelect: () => {
-        onNavigate('anomalies');
-        onClose();
+      {
+        id: 'nav-anomalies',
+        title: 'Go to Anomalies & Alert Rules',
+        category: 'Navigation',
+        shortcut: 'G N',
+        icon: <ShieldAlert className="h-4 w-4" />,
+        onSelect: () => {
+          onNavigate('anomalies');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-rum',
-      title: 'Go to RUM, Session Replay & Web Vitals',
-      category: 'Navigation',
-      shortcut: 'G U',
-      icon: <Users className="h-4 w-4" />,
+      {
+        id: 'nav-rum',
+        title: 'Go to RUM & Session Replay',
+        category: 'Navigation',
+        shortcut: 'G U',
+        icon: <Users className="h-4 w-4" />,
       onSelect: () => {
-        onNavigate('rum');
-        onClose();
+          onNavigate('rum');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-incidents',
-      title: 'Go to Incident Command Center & AI Triage',
-      category: 'Navigation',
-      shortcut: 'G I',
-      icon: <Flame className="h-4 w-4 text-rose-400" />,
-      onSelect: () => {
-        onNavigate('incidents');
-        onClose();
+      {
+        id: 'nav-synthetic',
+        title: 'Go to Global Synthetic Probers',
+        category: 'Navigation',
+        shortcut: 'G S',
+        icon: <Globe className="h-4 w-4 text-sky-500 dark:text-sky-400" />,
+        onSelect: () => {
+          onNavigate('synthetic');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-governance',
-      title: 'Go to FinOps, Cardinality, ZKP & Chaos Governance',
-      category: 'Navigation',
-      shortcut: 'G G',
-      icon: <ShieldCheck className="h-4 w-4 text-cyan-400" />,
-      onSelect: () => {
-        onNavigate('governance');
-        onClose();
+      {
+        id: 'nav-incidents',
+        title: 'Go to Incident Command Center',
+        category: 'Navigation',
+        shortcut: 'G I',
+        icon: <Flame className="h-4 w-4 text-rose-500 dark:text-rose-400" />,
+        onSelect: () => {
+          onNavigate('incidents');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-compliance',
-      title: 'Go to SOC2 & GDPR Compliance Studio',
-      category: 'Navigation',
-      shortcut: 'G C',
-      icon: <ShieldCheck className="h-4 w-4 text-emerald-400" />,
-      onSelect: () => {
-        onNavigate('compliance');
-        onClose();
+      {
+        id: 'nav-governance',
+        title: 'Go to Governance & Security Suite',
+        category: 'Navigation',
+        shortcut: 'G G',
+        icon: <ShieldCheck className="h-4 w-4 text-cyan-500 dark:text-cyan-400" />,
+        onSelect: () => {
+          onNavigate('governance');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-synthetic',
-      title: 'Go to Global Synthetic & Edge Latency Map',
-      category: 'Navigation',
-      shortcut: 'G S',
-      icon: <Globe className="h-4 w-4 text-sky-400" />,
-      onSelect: () => {
-        onNavigate('synthetic');
-        onClose();
+      {
+        id: 'nav-compliance',
+        title: 'Go to Compliance & SIEM Studio',
+        category: 'Navigation',
+        shortcut: 'G C',
+        icon: <ShieldCheck className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />,
+        onSelect: () => {
+          onNavigate('compliance');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-self-healing',
-      title: 'Go to Autonomous Self-Healing Command Studio',
-      category: 'Navigation',
-      shortcut: 'H H',
-      icon: <Cpu className="h-4 w-4 text-emerald-400" />,
-      onSelect: () => {
-        onNavigate('self-healing');
-        onClose();
+      {
+        id: 'nav-self-healing',
+        title: 'Go to Self-Healing Studio',
+        category: 'Navigation',
+        shortcut: 'H H',
+        icon: <Cpu className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />,
+        onSelect: () => {
+          onNavigate('self-healing');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-capstone-ultimate',
-      title: 'Go to Ultimate Governance & Digital Twin Studio',
-      category: 'Navigation',
-      shortcut: 'D T',
-      icon: <Sparkles className="h-4 w-4 text-indigo-400" />,
-      onSelect: () => {
-        onNavigate('capstone-ultimate');
-        onClose();
+      {
+        id: 'nav-capstone-ultimate',
+        title: 'Go to Ultimate Governance Studio',
+        category: 'Navigation',
+        shortcut: 'D T',
+        icon: <Sparkles className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
+        onSelect: () => {
+          onNavigate('capstone-ultimate');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-neuromorphic-mesh',
-      title: 'Go to Neuromorphic Mesh Studio',
-      category: 'Navigation',
-      shortcut: 'N M',
-      icon: <BrainCircuit className="h-4 w-4 text-violet-400" />,
-      onSelect: () => {
-        onNavigate('neuromorphic-mesh');
-        onClose();
+      {
+        id: 'nav-neuromorphic-mesh',
+        title: 'Go to Neuromorphic Mesh Studio',
+        category: 'Navigation',
+        shortcut: 'N M',
+        icon: <BrainCircuit className="h-4 w-4 text-violet-500 dark:text-violet-400" />,
+        onSelect: () => {
+          onNavigate('neuromorphic-mesh');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-synthetic-dream',
-      title: 'Go to Synthetic DNA & Dream State Studio',
-      category: 'Navigation',
-      shortcut: 'D S',
-      icon: <Dna className="h-4 w-4 text-emerald-400" />,
-      onSelect: () => {
-        onNavigate('synthetic-dream');
-        onClose();
+      {
+        id: 'nav-synthetic-dream',
+        title: 'Go to Synthetic Dream Studio',
+        category: 'Navigation',
+        shortcut: 'D S',
+        icon: <Dna className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />,
+        onSelect: () => {
+          onNavigate('synthetic-dream');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-autonomous-swarm',
-      title: 'Go to Autonomous AI Swarm & Singularity Command',
-      category: 'Navigation',
-      shortcut: 'A S',
-      icon: <Network className="h-4 w-4 text-cyan-400" />,
-      onSelect: () => {
-        onNavigate('autonomous-swarm');
-        onClose();
+      {
+        id: 'nav-autonomous-swarm',
+        title: 'Go to Autonomous Swarm Command',
+        category: 'Navigation',
+        shortcut: 'A S',
+        icon: <Network className="h-4 w-4 text-cyan-500 dark:text-cyan-400" />,
+        onSelect: () => {
+          onNavigate('autonomous-swarm');
+          onClose();
+        },
       },
-    },
-    {
-      id: 'nav-settings',
-      title: 'Go to Observability Settings',
-      category: 'Navigation',
-      shortcut: 'G ,',
-      icon: <Settings className="h-4 w-4" />,
-      onSelect: () => {
-        onNavigate('settings');
-        onClose();
+      {
+        id: 'nav-akasha-omega',
+        title: 'Go to Akasha-Omega Studio',
+        category: 'Navigation',
+        shortcut: 'A K',
+        icon: <InfinityIcon className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
+        onSelect: () => {
+          onNavigate('akasha-omega');
+          onClose();
+        },
       },
-    },
+      {
+        id: 'nav-settings',
+        title: 'Go to Settings',
+        category: 'Navigation',
+        shortcut: 'G ,',
+        icon: <Settings className="h-4 w-4" />,
+        onSelect: () => {
+          onNavigate('settings');
+          onClose();
+        },
+      },
+    ];
 
-    // Actions
-    {
-      id: 'act-clear-filters',
-      title: 'Clear All Active Filters',
-      category: 'Actions',
-      icon: <SlidersHorizontal className="h-4 w-4 text-indigo-400" />,
-      onSelect: () => {
-        onClearFilters();
-        onClose();
+    const quickActions: CommandAction[] = [
+      ...(onSendDiagnosticSpan
+        ? [
+            {
+              id: 'act-send-otlp-span',
+              title: 'Send 1 Real OTLP Trace Span',
+              subtitle: 'POST live W3C trace span to /api/v1/telemetry',
+              category: 'Actions' as const,
+              icon: <Send className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
+              onSelect: () => {
+                onSendDiagnosticSpan();
+                onClose();
+              },
+            },
+          ]
+        : []),
+      ...(onSyncTelemetry
+        ? [
+            {
+              id: 'act-sync-otlp',
+              title: 'Sync OTLP Telemetry Buffer',
+              subtitle: 'Fetch latest records from /api/v1/telemetry/recent',
+              category: 'Actions' as const,
+              icon: <RefreshCw className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />,
+              onSelect: () => {
+                onSyncTelemetry();
+                onClose();
+              },
+            },
+          ]
+        : []),
+      {
+        id: 'act-clear-filters',
+        title: 'Clear All Active Filters',
+        category: 'Actions',
+        icon: <SlidersHorizontal className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
+        onSelect: () => {
+          onClearFilters();
+          onClose();
+        },
       },
-    },
-    {
-      id: 'act-export',
-      title: 'Export Active Logs to JSON',
-      category: 'Actions',
-      icon: <Download className="h-4 w-4 text-emerald-400" />,
-      onSelect: () => {
-        onExportLogs();
-        onClose();
+      {
+        id: 'act-export',
+        title: 'Export Active Logs to JSON',
+        category: 'Actions',
+        icon: <Download className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />,
+        onSelect: () => {
+          onExportLogs();
+          onClose();
+        },
       },
-    },
-    {
-      id: 'act-toggle-live',
-      title: 'Toggle Live Ingestion Stream',
-      category: 'Actions',
-      icon: <Activity className="h-4 w-4 text-amber-400" />,
-      onSelect: () => {
-        onToggleLiveMode();
-        onClose();
+      {
+        id: 'act-reset',
+        title: 'Reset Metrics & Worker Store',
+        category: 'Actions',
+        icon: <RotateCcw className="h-4 w-4 text-rose-500 dark:text-rose-400" />,
+        onSelect: () => {
+          onResetMetrics();
+          onClose();
+        },
       },
-    },
-    {
-      id: 'act-reset',
-      title: 'Reset Metrics & In-Memory Store',
-      category: 'Actions',
-      icon: <RotateCcw className="h-4 w-4 text-rose-400" />,
-      onSelect: () => {
-        onResetMetrics();
-        onClose();
-      },
-    },
-  ];
+    ];
 
-  const filteredActions = actions.filter((act) =>
-    act.title.toLowerCase().includes(query.toLowerCase()) ||
-    act.category.toLowerCase().includes(query.toLowerCase())
-  );
+    const alertActions: CommandAction[] = [
+      ...anomalies.slice(0, 6).map((a, idx) => ({
+        id: `anom-${a.ruleId}-${idx}`,
+        title: a.ruleName,
+        subtitle: a.description,
+        category: 'Alerts' as const,
+        icon: <AlertTriangle className="h-4 w-4 text-rose-500 dark:text-rose-400" />,
+        onSelect: () => {
+          onNavigate('anomalies');
+          onClose();
+        },
+      })),
+      ...incidents
+        .filter((i) => i.status !== 'resolved')
+        .slice(0, 6)
+        .map((inc) => ({
+          id: `inc-${inc.id}`,
+          title: inc.title,
+          subtitle: `${inc.severity} · ${inc.service} (${inc.status})`,
+          category: 'Alerts' as const,
+          icon: <Flame className="h-4 w-4 text-amber-500 dark:text-amber-400" />,
+          onSelect: () => {
+            onNavigate('anomalies');
+            onClose();
+          },
+        })),
+    ];
 
-  // Focus trapping and keyboard lifecycle
+    const seenTraces = new Set<string>();
+    const traceActions: CommandAction[] = [];
+    const seenEndpoints = new Set<string>();
+    const endpointActions: CommandAction[] = [];
+
+    for (const log of logs) {
+      if (log.traceId && !seenTraces.has(log.traceId) && traceActions.length < 8) {
+        seenTraces.add(log.traceId);
+        traceActions.push({
+          id: `trace-${log.traceId}`,
+          title: `Inspect Trace ${log.traceId}`,
+          subtitle: `${log.method} ${log.endpoint} (${log.latencyMs}ms · ${log.statusCode})`,
+          category: 'Traces',
+          icon: <Layers className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
+          onSelect: () => {
+            if (onInspectTrace) {
+              onInspectTrace(log.traceId);
+            } else {
+              onNavigate('traces');
+            }
+            onClose();
+          },
+        });
+      }
+
+      if (log.endpoint && !seenEndpoints.has(log.endpoint) && endpointActions.length < 8) {
+        seenEndpoints.add(log.endpoint);
+        endpointActions.push({
+          id: `endpoint-${log.endpoint}`,
+          title: `Filter Endpoint ${log.endpoint}`,
+          subtitle: `${log.method} · ${log.statusCode} (${log.latencyMs}ms)`,
+          category: 'Endpoints',
+          icon: <FileText className="h-4 w-4 text-cyan-500 dark:text-cyan-400" />,
+          onSelect: () => {
+            if (onFilterEndpoint) {
+              onFilterEndpoint(log.endpoint);
+            }
+            onNavigate('logs');
+            onClose();
+          },
+        });
+      }
+    }
+
+    return [
+      ...quickActions,
+      ...alertActions,
+      ...traceActions,
+      ...endpointActions,
+      ...baseNavigation,
+    ];
+  }, [
+    anomalies,
+    incidents,
+    logs,
+    onClearFilters,
+    onClose,
+    onExportLogs,
+    onFilterEndpoint,
+    onInspectTrace,
+    onNavigate,
+    onResetMetrics,
+    onSendDiagnosticSpan,
+    onSyncTelemetry,
+  ]);
+
+  const filteredActions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return actions;
+    return actions.filter(
+      (act) =>
+        act.title.toLowerCase().includes(q) ||
+        act.category.toLowerCase().includes(q) ||
+        (act.subtitle && act.subtitle.toLowerCase().includes(q))
+    );
+  }, [actions, query]);
+
   useEffect(() => {
     if (isOpen) {
       lastActiveElement.current = document.activeElement as HTMLElement;
@@ -348,18 +501,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Global Command Palette"
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-28 bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-28 bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
         ref={modalRef}
-        className="w-full max-w-xl rounded-2xl border border-subtleBorder bg-surface shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col text-slate-200 backdrop-blur-xl font-sans"
+        className="w-full max-w-xl rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-main)] shadow-[0_24px_60px_rgba(2,6,23,0.45)] overflow-hidden flex flex-col backdrop-blur-xl font-sans"
       >
         {/* Search Input Bar */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-subtleBorder bg-canvas/90">
-          <Search className="h-5 w-5 text-indigo-400 shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--border-color)] bg-[var(--bg-canvas)]/75">
+          <Search className="h-5 w-5 text-indigo-500 dark:text-indigo-400 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -372,13 +525,13 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Type a command, view, or action..."
-            className="w-full bg-transparent text-sm sm:text-base text-white placeholder:text-slate-500 focus:outline-none font-sans"
+            placeholder="Search modules, active alerts, live trace IDs, endpoints, or actions..."
+            className="w-full bg-transparent text-sm sm:text-base text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none font-sans"
           />
           <button
             onClick={onClose}
             aria-label="Close Command Palette"
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-elevated)] transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -387,8 +540,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         {/* Command List */}
         <div id="command-list" role="listbox" className="max-h-80 overflow-y-auto p-2 space-y-1">
           {filteredActions.length === 0 ? (
-            <div className="py-8 text-center text-sm text-slate-500">
-              No matching commands or actions found for &quot;{query}&quot;.
+            <div className="py-8 text-center text-sm text-[var(--text-muted)]">
+              No matching commands, traces, or views found for &quot;{query}&quot;.
             </div>
           ) : (
             filteredActions.map((action, idx) => {
@@ -400,30 +553,39 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   aria-selected={isSelected}
                   onClick={() => action.onSelect()}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm cursor-pointer transition-all ${
+                  className={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-indigo-600/20 text-indigo-200 border border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
-                      : 'text-slate-300 hover:bg-white/5 border border-transparent'
+                      ? 'bg-indigo-600/20 text-indigo-700 dark:text-indigo-200 border border-indigo-500/40'
+                      : 'text-[var(--text-main)] hover:bg-[var(--bg-elevated)]/70 border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className={isSelected ? 'text-indigo-400' : 'text-slate-400'}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={isSelected ? 'text-indigo-600 dark:text-indigo-400 shrink-0' : 'text-[var(--text-muted)] shrink-0'}>
                       {action.icon}
                     </span>
-                    <span className="font-medium text-white">{action.title}</span>
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-mono px-2 py-0.5 rounded-full bg-canvas border border-subtleBorder">
-                      {action.category}
-                    </span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-[var(--text-main)] truncate">{action.title}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-mono px-2 py-0.5 rounded-full bg-[var(--bg-canvas)] border border-[var(--border-color)] shrink-0">
+                          {action.category}
+                        </span>
+                      </div>
+                      {action.subtitle && (
+                        <div className="text-[11px] font-mono text-[var(--text-muted)] truncate mt-0.5">
+                          {action.subtitle}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     {action.shortcut && (
-                      <kbd className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-canvas text-slate-400 border border-subtleBorder">
+                      <kbd className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[var(--bg-canvas)] text-[var(--text-muted)] border border-[var(--border-color)]">
                         {action.shortcut}
                       </kbd>
                     )}
                     {isSelected && (
-                      <CornerDownLeft className="h-3.5 w-3.5 text-indigo-400 ml-1" />
+                      <CornerDownLeft className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 ml-1" />
                     )}
                   </div>
                 </div>
@@ -433,19 +595,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         {/* Footer shortcuts helper */}
-        <div className="px-4 py-2.5 border-t border-subtleBorder bg-canvas/80 flex items-center justify-between text-xs text-slate-500">
+        <div className="px-4 py-2.5 border-t border-[var(--border-color)] bg-[var(--bg-canvas)]/75 flex items-center justify-between text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-3 font-mono">
             <span>
-              <kbd className="bg-canvas px-1.5 py-0.5 rounded border border-subtleBorder text-slate-400">↑↓</kbd> navigate
+              <kbd className="bg-[var(--bg-surface)] px-1.5 py-0.5 rounded border border-[var(--border-color)] text-[var(--text-main)]">↑↓</kbd> navigate
             </span>
             <span>
-              <kbd className="bg-canvas px-1.5 py-0.5 rounded border border-subtleBorder text-slate-400">↵</kbd> select
+              <kbd className="bg-[var(--bg-surface)] px-1.5 py-0.5 rounded border border-[var(--border-color)] text-[var(--text-main)]">↵</kbd> select
             </span>
             <span>
-              <kbd className="bg-canvas px-1.5 py-0.5 rounded border border-subtleBorder text-slate-400">esc</kbd> close
+              <kbd className="bg-[var(--bg-surface)] px-1.5 py-0.5 rounded border border-[var(--border-color)] text-[var(--text-main)]">esc</kbd> close
             </span>
           </div>
-          <span className="font-mono text-[11px] text-indigo-400 font-semibold">Neon Chasm OS</span>
+          <span className="font-mono text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">Neon Chasm OS</span>
         </div>
       </div>
     </div>

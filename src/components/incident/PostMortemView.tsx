@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   FileText,
   Copy,
@@ -28,27 +28,32 @@ export const PostMortemView: React.FC<PostMortemViewProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'preview' | 'raw'>('preview');
   const [copied, setCopied] = useState(false);
-  const [authorName, setAuthorName] = useState(currentUser.name);
+  const [authorName] = useState(currentUser.name);
 
-  const fetchPostMortem = async (author = authorName) => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/v1/incidents/${incident.id}/post-mortem?author=${encodeURIComponent(author)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setReport(data);
+  const fetchPostMortem = useCallback(
+    async (author = authorName) => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/v1/incidents/${incident.id}/post-mortem?author=${encodeURIComponent(author)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setReport(data);
+        }
+      } catch (err) {
+        console.error('Failed to load post-mortem:', err);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to load post-mortem:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [incident.id, authorName]
+  );
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchPostMortem();
-  }, [incident.id]);
+    const timer = window.setTimeout(() => {
+      void fetchPostMortem();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchPostMortem]);
 
   const copyToClipboard = () => {
     if (!report) return;

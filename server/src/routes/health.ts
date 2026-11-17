@@ -1,10 +1,11 @@
 /**
  * Kubernetes Health & Readiness Probes
  * Exposes /healthz (liveness probe) and /readyz (readiness probe) with memory pressure
- * validation and multi-subsystem telemetry readiness checks.
+ * validation, OTLP ingestion telemetry, atomic WAL state persistence, and Akasha convergence checks.
  */
 
 import { Router, Request, Response } from 'express';
+import fs from 'fs';
 import os from 'os';
 import { neuromorphicEngine } from '../ai/neuromorphicPredictor';
 import { meshRingController } from '../mesh/autonomousMeshRing';
@@ -15,14 +16,38 @@ import { complianceAuditor } from '../governance/complianceAuditor';
 import { sreSwarmOrchestrator } from '../swarm/sreSwarmOrchestrator';
 import { biophotonicSingularitySync } from '../swarm/biophotonicSingularitySync';
 import { selfHealingMesh } from '../mesh/selfHealingMesh';
+import { akashaOmegaCore } from '../swarm/akashaOmegaCore';
+import { statePersistence } from '../storage/statePersistence';
+import { getConnectedClientCount } from '../ws/gateway';
 
 const router = Router();
 const startTime = Date.now();
 
+let totalOtlpBatchesIngested = 0;
+let totalOtlpRecordsIngested = 0;
+let lastIngestedAt: number | null = null;
+
+export function recordOtlpIngestionMetrics(recordCount: number): void {
+  totalOtlpBatchesIngested += 1;
+  totalOtlpRecordsIngested += recordCount;
+  lastIngestedAt = Date.now();
+}
+
+export function getOtlpIngestionSummary() {
+  return {
+    status: 'READY' as const,
+    batchesIngested: totalOtlpBatchesIngested,
+    recordsIngested: totalOtlpRecordsIngested,
+    lastIngestedAt,
+    connectedStreamSubscribers: getConnectedClientCount(),
+  };
+}
+
 // 1. Kubernetes Liveness Probe: /healthz
-router.get('/healthz', (_req: Request, res: Response) => {
+router.get('/healthz', (req: Request, res: Response) => {
   res.status(200).json({
     status: 'healthy',
+    requestId: req.requestId,
     uptimeSeconds: Math.floor((Date.now() - startTime) / 1000),
     pid: process.pid,
     nodeVersion: process.version,
@@ -31,14 +56,46 @@ router.get('/healthz', (_req: Request, res: Response) => {
 });
 
 // 2. Kubernetes Readiness Probe: /readyz
-router.get('/readyz', (_req: Request, res: Response) => {
+router.get('/readyz', (req: Request, res: Response) => {
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
   const freeMemRatio = totalMem > 0 ? freeMem / totalMem : 1.0;
   const freeMemPct = Number((freeMemRatio * 100).toFixed(2));
-
-  // Memory Pressure Guard: ensure free memory > 5%
   const memoryHealthy = freeMemRatio > 0.05;
+
+  const stateDir = statePersistence.getDirectory();
+  let stateDirWritable = false;
+  try {
+    if (!fs.existsSync(stateDir)) {
+      fs.mkdirSync(stateDir, { recursive: true, mode: 0o750 });
+    }
+    fs.accessSync(stateDir, fs.constants.W_OK);
+    stateDirWritable = true;
+  } catch {
+    stateDirWritable = false;
+  }
+
+  const akashaIntegrity = statePersistence.verifySnapshotIntegrity('akasha-omega-state');
+  const auditIntegrity = statePersistence.verifySnapshotIntegrity('audit-log-chain');
+  const akashaState = akashaOmegaCore.getUnifiedState();
+
+  const components = {
+    otlpIngestion: getOtlpIngestionSummary(),
+    statePersistence: {
+      status: stateDirWritable ? 'READY' : 'DEGRADED',
+      directory: stateDir,
+      writable: stateDirWritable,
+      akashaChecksumValid: akashaIntegrity.valid,
+      auditChecksumValid: auditIntegrity.valid,
+    },
+    akashaConvergence: {
+      status: akashaState.zeroDefectActive ? 'ETERNAL_SINGULARITY' : 'CONVERGING',
+      cycleEpoch: akashaState.cycleEpoch,
+      globalCoherenceIndex: akashaState.globalCoherenceIndex,
+      convergedEngines: akashaState.convergedEnginesCount,
+      eternalStateHash: akashaState.eternalStateHash,
+    },
+  };
 
   const subsystems = {
     ebpfKernelGovernance: 'ACTIVE',
@@ -52,15 +109,25 @@ router.get('/readyz', (_req: Request, res: Response) => {
     sreSwarmBft: sreSwarmOrchestrator.getSwarmState().totalAgents >= 4 ? 'CONSENSUS_READY' : 'DEGRADED',
     holographicSingularity: biophotonicSingularitySync.getStatus().singularityLock ? 'LOCKED' : 'DESYNC',
     selfHealingMesh: selfHealingMesh.getStatus().meshHealthStatus,
+    akashaOmegaCore: akashaState.zeroDefectActive ? 'ETERNAL_SINGULARITY' : 'CONVERGING',
   };
 
-  const isReady = memoryHealthy && Object.values(subsystems).every((v) => v !== 'OFFLINE' && v !== 'DESYNC');
+  const isReady =
+    memoryHealthy &&
+    stateDirWritable &&
+    Object.values(subsystems).every((v) => v !== 'OFFLINE' && v !== 'DESYNC');
 
   if (!isReady) {
     return res.status(503).json({
       status: 'NOT_READY',
-      reason: !memoryHealthy ? 'CRITICAL_MEMORY_PRESSURE' : 'SUBSYSTEM_INITIALIZING',
+      requestId: req.requestId,
+      reason: !memoryHealthy
+        ? 'CRITICAL_MEMORY_PRESSURE'
+        : !stateDirWritable
+        ? 'STATE_DIR_UNWRITABLE'
+        : 'SUBSYSTEM_INITIALIZING',
       freeMemoryPct: freeMemPct,
+      components,
       subsystems,
       timestamp: Date.now(),
     });
@@ -68,8 +135,10 @@ router.get('/readyz', (_req: Request, res: Response) => {
 
   res.status(200).json({
     status: 'READY',
+    requestId: req.requestId,
     uptimeSeconds: Math.floor((Date.now() - startTime) / 1000),
     freeMemoryPct: freeMemPct,
+    components,
     subsystems,
     timestamp: Date.now(),
   });

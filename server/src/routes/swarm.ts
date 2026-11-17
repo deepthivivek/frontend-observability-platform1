@@ -8,7 +8,10 @@ import { neuromorphicFaultIsolation } from '../swarm/neuromorphicFaultIsolation'
 import { zkSwarmAttestation } from '../swarm/zkSwarmAttestation';
 import { predictiveChaosSwarm } from '../swarm/predictiveChaosSwarm';
 import { selfHealingMesh } from '../mesh/selfHealingMesh';
+import { akashaOmegaCore } from '../swarm/akashaOmegaCore';
 import { appendAuditLog } from '../index';
+import { validateBody, AkashaConvergeSchema, SwarmProposalSchema } from '../middleware/productionHardening';
+import { broadcastAkashaConvergence } from '../ws/gateway';
 
 const router = Router();
 
@@ -17,7 +20,7 @@ router.get('/orchestrator/status', (_req: Request, res: Response) => {
   res.json(sreSwarmOrchestrator.getSwarmState());
 });
 
-router.post('/orchestrator/propose', (req: Request, res: Response) => {
+router.post('/orchestrator/propose', validateBody(SwarmProposalSchema), (req: Request, res: Response) => {
   const { targetService, anomalySignature, recommendedAction, dissentingAgent } = req.body || {};
   const proposal = sreSwarmOrchestrator.proposeRemediation({
     targetService,
@@ -130,7 +133,36 @@ router.post('/self-healing-mesh/mitigate', (req: Request, res: Response) => {
   res.status(201).json({ success: true, record });
 });
 
-// 10. Unified Swarm & Singularity Summary
+// 10. Akasha-Omega Omnitemporal Core Unification
+router.get('/akasha/state', (_req: Request, res: Response) => {
+  res.json(akashaOmegaCore.getUnifiedState());
+});
+
+router.get('/akasha/field', (_req: Request, res: Response) => {
+  res.json(akashaOmegaCore.getTimelineConvergenceField());
+});
+
+router.get('/akasha/history', (_req: Request, res: Response) => {
+  res.json({ history: akashaOmegaCore.getConvergenceHistory() });
+});
+
+router.post('/akasha/converge', validateBody(AkashaConvergeSchema), (req: Request, res: Response) => {
+  const { triggerVector, timelineSpanYears } = req.body || {};
+  const event = akashaOmegaCore.convergeOmnitemporalState({
+    triggerVector,
+    timelineSpanYears: timelineSpanYears ? Number(timelineSpanYears) : 1000,
+  });
+  const unifiedState = akashaOmegaCore.getUnifiedState();
+  appendAuditLog('AKASHA_OMEGA_CORE', 'OMNITEMPORAL_CONVERGENCE', event.eventId);
+  broadcastAkashaConvergence({ event, state: unifiedState });
+  res.status(201).json({
+    success: true,
+    event,
+    state: unifiedState,
+  });
+});
+
+// 11. Unified Swarm & Singularity Summary
 router.get('/summary', (_req: Request, res: Response) => {
   res.json({
     orchestrator: sreSwarmOrchestrator.getSwarmState(),
@@ -142,6 +174,7 @@ router.get('/summary', (_req: Request, res: Response) => {
     zkAttestation: zkSwarmAttestation.getReceipts(),
     chaosInoculation: predictiveChaosSwarm.getStatus(),
     selfHealingMesh: selfHealingMesh.getStatus(),
+    akashaOmega: akashaOmegaCore.getUnifiedState(),
     timestamp: Date.now(),
   });
 });

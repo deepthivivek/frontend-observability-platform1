@@ -1,0 +1,134 @@
+:root {
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --border-color: rgba(15, 23, 42, 0.1);
+  --accent-glow: rgba(79, 70, 229, 0.16);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(15, 23, 42, 0.09);
+  --chromatic-edge: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.18),
+    rgba(6, 182, 212, 0.12),
+    rgba(16, 185, 129, 0.16)
+  );
+  --scrollbar-thumb: rgba(100, 116, 139, 0.32);
+  --scrollbar-track: transparent;
+}
+
+.dark {
+  --bg-canvas: #09090b;
+  --bg-surface: #121318;
+  --bg-elevated: #1a1b23;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.09);
+  --accent-glow: rgba(99, 102, 241, 0.34);
+  --glass-bg: rgba(18, 19, 24, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.11);
+  --chromatic-edge: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.35),
+    rgba(34, 211, 238, 0.25),
+    rgba(16, 185, 129, 0.28)
+  );
+  --scrollbar-thumb: rgba(148, 163, 184, 0.28);
+  --scrollbar-track: rgba(9, 9, 11, 0.6);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-main);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.metric-number,
+table td,
+code,
+pre,
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom Sleek Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.55);
+}
+
+/* Multi-layered Glassmorphic Surface & Chromatic Edge Helpers */
+.glass-card {
+  position: relative;
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+    0 12px 32px -12px rgba(2, 6, 23, 0.16),
+    0 0 24px -10px var(--accent-glow);
+  transition:
+    border-color 200ms ease,
+    box-shadow 220ms ease,
+    transform 180ms ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(99, 102, 241, 0.36);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.12) inset,
+    0 16px 36px -14px rgba(2, 6, 23, 0.22),
+    0 0 28px -6px var(--accent-glow);
+}
+
+.chromatic-rim {
+  position: relative;
+}
+
+.chromatic-rim::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--chromatic-edge);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.45;
+  transition: opacity 220ms ease;
+}
+
+.chromatic-rim:hover::before {
+  opacity: 0.9;
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ShieldAlert,
   Flame,
@@ -45,8 +45,13 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
   const [isRunbookModalOpen, setIsRunbookModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const selectedIncidentIdRef = useRef(selectedIncidentId);
 
-  const fetchIncidents = async () => {
+  useEffect(() => {
+    selectedIncidentIdRef.current = selectedIncidentId;
+  }, [selectedIncidentId]);
+
+  const fetchIncidents = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/v1/incidents');
@@ -54,7 +59,8 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
         const data = await res.json();
         if (data.incidents && data.incidents.length > 0) {
           setIncidents(data.incidents);
-          if (!selectedIncidentId || !data.incidents.some((i: Incident) => i.id === selectedIncidentId)) {
+          const currentSelected = selectedIncidentIdRef.current;
+          if (!currentSelected || !data.incidents.some((i: Incident) => i.id === currentSelected)) {
             setSelectedIncidentId(data.incidents[0].id);
           }
         }
@@ -64,12 +70,14 @@ export const IncidentCommandCenter: React.FC<IncidentCommandCenterProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchIncidents();
-  }, []);
+    const timer = window.setTimeout(() => {
+      void fetchIncidents();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchIncidents]);
 
   const activeIncident = incidents.find((i) => i.id === selectedIncidentId) || incidents[0];
 

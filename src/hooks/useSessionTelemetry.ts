@@ -1,49 +1,145 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   RumSession,
   UncaughtExceptionGroup,
   SyntheticMonitor,
 } from '../types/rum';
-import {
-  SEED_RUM_SESSIONS,
-  SEED_EXCEPTIONS,
-  SEED_SYNTHETIC_MONITORS,
-} from '../utils/rumSyntheticData';
 
 export function useSessionTelemetry() {
-  const [sessions, setSessions] = useState<RumSession[]>(SEED_RUM_SESSIONS);
-  const [selectedSessionId, setSelectedSessionId] = useState<string>(
-    SEED_RUM_SESSIONS[0].id
-  );
-  const [exceptions, setExceptions] = useState<UncaughtExceptionGroup[]>(SEED_EXCEPTIONS);
-  const [syntheticMonitors, setSyntheticMonitors] =
-    useState<SyntheticMonitor[]>(SEED_SYNTHETIC_MONITORS);
+  const [sessions, setSessions] = useState<RumSession[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState<string>('');
+  const [exceptions, setExceptions] = useState<UncaughtExceptionGroup[]>([]);
+  const [syntheticMonitors, setSyntheticMonitors] = useState<SyntheticMonitor[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Playback Player State
-  const [playbackPositionMs, setPlaybackPositionMs] = useState<number>(10200);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const [probesRes, telemetryRes] = await Promise.all([
+          fetch('/api/v1/synthetic/probes', { cache: 'no-store' }).catch(() => null),
+          fetch('/api/v1/telemetry/recent?limit=100', { cache: 'no-store' }).catch(() => null),
+        ]);
+
+        if (!active) return;
+
+        if (probesRes?.ok) {
+          const probeJson = (await probesRes.json()) as {
+            probes?: Array<{
+              id: string;
+              name: string;
+              targetUrl: string;
+              intervalSeconds?: number;
+              overallStatus?: string;
+              lastRunAt?: number;
+            }>;
+          };
+          if (Array.isArray(probeJson.probes)) {
+            setSyntheticMonitors(
+              probeJson.probes.map((p) => ({
+                id: p.id,
+                name: p.name,
+                targetUrl: p.targetUrl,
+                frequencyMinutes: Math.max(1, Math.round((p.intervalSeconds || 60) / 60)),
+                status: p.overallStatus === 'HEALTHY' ? 'passing' : 'failing',
+                lastRunTimestamp: p.lastRunAt || Date.now(),
+                regions: [],
+                steps: [],
+              }))
+            );
+          }
+        }
+
+        if (telemetryRes?.ok) {
+          const telJson = (await telemetryRes.json()) as {
+            records?: Array<{
+              id: string;
+              timestamp: number;
+              tenantId?: string;
+              endpoint: string;
+              statusCode: number;
+              latencyMs: number;
+              traceId: string;
+              method: string;
+            }>;
+          };
+          if (Array.isArray(telJson.records) && telJson.records.length > 0) {
+            const groupedSession: RumSession = {
+              id: `otlp-live-${telJson.records[0].traceId}`,
+              userId: telJson.records[0].tenantId || 'default-tenant',
+              userEmail: `${telJson.records[0].tenantId || 'default-tenant'}@otlp-live`,
+              startTime: telJson.records[0].timestamp,
+              durationMs: Math.max(1000, telJson.records[telJson.records.length - 1].timestamp - telJson.records[0].timestamp),
+              device: 'Desktop',
+              browser: 'OTLP Collector',
+              os: 'Linux',
+              networkTier: 'WiFi',
+              country: 'US',
+              frustrationScore: telJson.records.some((r) => r.statusCode >= 500) ? 75 : 10,
+              rageClicksCount: 0,
+              deadClicksCount: 0,
+              errorsCount: telJson.records.filter((r) => r.statusCode >= 500).length,
+              correlatedTraceId: telJson.records[0].traceId,
+              events: telJson.records.slice(0, 25).map((r, idx) => ({
+                id: r.id || `evt-${idx}`,
+                timestamp: Math.max(0, r.timestamp - telJson.records![0].timestamp),
+                type: 'network_call',
+                targetSelector: r.endpoint,
+                networkDetails: {
+                  method: r.method,
+                  url: r.endpoint,
+                  status: r.statusCode,
+                  durationMs: r.latencyMs,
+                  traceId: r.traceId,
+                },
+              })),
+              webVitals: {
+                lcp: Math.round(telJson.records.reduce((a, r) => a + r.latencyMs, 0) / telJson.records.length),
+                inp: 45,
+                cls: 0.01,
+                fcp: 200,
+                ttfb: Math.round(telJson.records[0].latencyMs || 15),
+                slowElement: telJson.records[0].endpoint,
+                networkLatencyAttribution: telJson.records[0].latencyMs,
+                loafDuration: 12,
+              },
+              memoryProfile: [],
+            };
+            setSessions([groupedSession]);
+            setSelectedSessionId(groupedSession.id);
+          }
+        }
+        setExceptions([]);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const [playbackPositionMs, setPlaybackPositionMs] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
   const [skipInactivity, setSkipInactivity] = useState<boolean>(true);
 
   const selectedSession = useMemo(() => {
-    return (
-      sessions.find((s) => s.id === selectedSessionId) || sessions[0]
-    );
+    return sessions.find((s) => s.id === selectedSessionId) || sessions[0] || null;
   }, [sessions, selectedSessionId]);
 
-  // Derived current visible events up to current playback timestamp
   const currentVisibleEvents = useMemo(() => {
+    if (!selectedSession) return [];
     return selectedSession.events.filter((e) => e.timestamp <= playbackPositionMs);
   }, [selectedSession, playbackPositionMs]);
 
-  // Derived active event closest to playback position
   const activeEvent = useMemo(() => {
-    return (
-      [...currentVisibleEvents].reverse()[0] || selectedSession.events[0]
-    );
-  }, [currentVisibleEvents, selectedSession.events]);
+    if (!selectedSession) return null;
+    return [...currentVisibleEvents].reverse()[0] || selectedSession.events[0] || null;
+  }, [currentVisibleEvents, selectedSession]);
 
   const togglePlay = useCallback(() => {
     setIsPlaying((prev) => !prev);
@@ -55,39 +151,37 @@ export function useSessionTelemetry() {
     setIsPlaying(false);
   }, []);
 
-  // Run a synthetic test monitor simulation
-  const runSyntheticMonitor = useCallback((monitorId: string) => {
-    setSyntheticMonitors((prev) =>
-      prev.map((m) => {
-        if (m.id !== monitorId) return m;
-        return {
-          ...m,
-          status: 'passing',
-          lastRunTimestamp: 1700000000000,
-          steps: m.steps.map((st) => ({
-            ...st,
-            status: 'passed',
-            assertionMessage: undefined,
-          })),
-          regions: m.regions.map((r) => ({
-            ...r,
-            status: 'ok',
-            latencyMs: Math.round(r.latencyMs * 0.85),
-          })),
-        };
-      })
-    );
-  }, []);
+  const runSyntheticMonitor = useCallback(async (monitorId: string) => {
+    const target = syntheticMonitors.find((m) => m.id === monitorId);
+    if (!target) return;
+    try {
+      const res = await fetch(
+        `/api/v1/synthetic/probe/run?url=${encodeURIComponent(target.targetUrl)}`,
+        { cache: 'no-store' }
+      );
+      if (res.ok) {
+        setSyntheticMonitors((prev) =>
+          prev.map((m) =>
+            m.id === monitorId
+              ? { ...m, status: 'passing', lastRunTimestamp: Date.now() }
+              : m
+          )
+        );
+      }
+    } catch {
+      // Non-fatal probe trigger
+    }
+  }, [syntheticMonitors]);
 
   return {
     sessions,
     selectedSessionId,
     selectedSession,
+    isLoading,
     onSelectSession: handleSelectSession,
     exceptions,
     syntheticMonitors,
     runSyntheticMonitor,
-    // Playback state
     playbackPositionMs,
     setPlaybackPositionMs,
     isPlaying,

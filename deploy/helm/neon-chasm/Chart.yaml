@@ -1,0 +1,16 @@
+apiVersion: v2
+name: neon-chasm
+description: Hardened production Helm chart for The Neon Chasm Observability & Omnitemporal Core
+type: application
+version: 2.1.0
+appVersion: "2.1.0"
+kubeVersion: ">=1.26.0-0"
+maintainers:
+  - name: Neon Chasm Platform Engineering
+    email: platform@neonchasm.enterprise.io
+keywords:
+  - observability
+  - opentelemetry
+  - akasha-omega
+  - zero-trust
+  - pqc

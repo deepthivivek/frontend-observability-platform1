@@ -1,0 +1,128 @@
+name: Zero-Trust CI & Signed Release Pipeline
+
+on:
+  push:
+    branches: [main, release/*]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  security-events: write
+
+env:
+  IMAGE_NAME: ghcr.io/neon-chasm/observability-engine
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  verify-quality-and-iac:
+    name: Typecheck, ESLint, Next Build, Helm & Terraform Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Frozen Dependencies
+        run: npm ci
+
+      - name: TypeScript Strict Check
+        run: npx tsc --noEmit
+
+      - name: ESLint Zero-Warning Gate
+        run: npm run lint
+
+      - name: Production Next.js Build
+        run: npm run build
+
+      - name: Helm Chart Validation
+        uses: azure/setup-helm@v4
+
+      - name: Lint Restricted PSS Helm Chart
+        run: helm lint ./deploy/helm/neon-chasm
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Terraform Format & Validate
+        run: |
+          terraform -chdir=deploy/terraform fmt -check -recursive
+          terraform -chdir=deploy/terraform init -backend=false
+          terraform -chdir=deploy/terraform validate
+
+  supply-chain-sbom-and-cosign-release:
+    name: Container Build, Trivy Gate, CycloneDX SBOM & Cosign Sign
+    needs: verify-quality-and-iac
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Container Image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Generate CycloneDX SBOM (Syft)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: cyclonedx-json
+          output-file: neon-chasm-sbom.cdx.json
+
+      - name: Upload CycloneDX SBOM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-chasm-cyclonedx-sbom
+          path: neon-chasm-sbom.cdx.json
+
+      - name: Trivy Vulnerability Gate (Fail on CRITICAL/HIGH)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Push Signed Container Image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Keyless Cosign Signature (OIDC)
+        run: |
+          cosign sign --yes ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}

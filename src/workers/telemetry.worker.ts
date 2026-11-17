@@ -41,14 +41,29 @@ self.onmessage = (e: MessageEvent<WorkerAction>) => {
 
   try {
     switch (action.type) {
+      case 'RESET_LOGS': {
+        logs = [];
+        activeFilteredIndices = new Uint32Array(0);
+        metricsCache.clear();
+        self.postMessage({
+          type: 'INGESTION_PROGRESS',
+          payload: { processedCount: 0, isComplete: true, throughputPerSec: 0 },
+        });
+        break;
+      }
+
       case 'INGEST_CHUNK': {
-        const { chunk, isFinal } = action.payload;
+        const { chunk, isFinal, replaceExisting } = action.payload;
+        if (replaceExisting) {
+          logs = [];
+          metricsCache.clear();
+        }
         const startTime = Date.now();
         if (Array.isArray(chunk)) {
           logs.push(...chunk);
         }
         const elapsed = (Date.now() - startTime) || 1;
-        const throughput = Math.round((chunk.length / elapsed) * 1000);
+        const throughput = chunk.length > 0 ? Math.round((chunk.length / elapsed) * 1000) : 0;
 
         if (isFinal || logs.length === chunk.length) {
           activeFilteredIndices = new Uint32Array(logs.length);

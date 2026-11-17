@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   FileText,
@@ -15,6 +15,7 @@ import {
   Globe,
   Sliders,
   Menu,
+  X,
   Shield,
   Layers,
   Flame,
@@ -26,6 +27,10 @@ import {
   BrainCircuit,
   Dna,
   Network,
+  Radio,
+  RefreshCw,
+  WifiOff,
+  Infinity as InfinityIcon,
 } from 'lucide-react';
 import {
   DashboardView,
@@ -33,7 +38,18 @@ import {
   TimezoneMode,
   DensityMode,
 } from '../../types/telemetry';
-import { LiveThroughputMeter } from './LiveThroughputMeter';
+import {
+  TelemetryConnectionStatus,
+  TelemetryStreamTransport,
+} from '../../hooks/useTelemetryStream';
+
+interface NavItem {
+  id: DashboardView;
+  label: string;
+  shortcut: string;
+  icon: React.ReactNode;
+  badge?: string | number;
+}
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -43,18 +59,22 @@ interface DashboardLayoutProps {
   // Preferences
   timeRange: TimeRangePreset;
   onTimeRangeChange: (preset: TimeRangePreset) => void;
-  timezone: TimezoneMode;
-  onTimezoneChange: (tz: TimezoneMode) => void;
+  timezone?: TimezoneMode;
+  onTimezoneChange?: (tz: TimezoneMode) => void;
   density: DensityMode;
-  onToggleDensity: () => void;
+  onToggleDensity?: () => void;
   // Search & Global state
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  throughput: number;
-  isIngesting: boolean;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  throughput?: number;
+  isIngesting?: boolean;
   totalLogs: number;
   activeAnomaliesCount: number;
   liveAnnouncement?: string;
+  // Live Stream status pill
+  streamStatus?: TelemetryConnectionStatus;
+  streamTransport?: TelemetryStreamTransport;
+  onReconnectStream?: () => void;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -64,55 +84,62 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   onOpenCommandPalette,
   timeRange,
   onTimeRangeChange,
-  timezone,
-  onTimezoneChange,
   density,
-  onToggleDensity,
-  searchQuery,
+  searchQuery = '',
   onSearchChange,
-  throughput,
-  isIngesting,
   totalLogs,
   activeAnomaliesCount,
   liveAnnouncement = '',
+  streamStatus = 'connecting',
+  streamTransport = 'websocket',
+  onReconnectStream,
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof document !== 'undefined') {
-      return document.documentElement.classList.contains('dark');
-    }
-    return true;
-  });
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setMounted(true);
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const toggleTheme = () => {
     const nextDark = !isDarkMode;
     setIsDarkMode(nextDark);
     if (nextDark) {
       document.documentElement.classList.add('dark');
-      try { localStorage.setItem('theme', 'dark'); } catch (_) {}
+      try {
+        localStorage.setItem('theme', 'dark');
+      } catch {
+        // Ignore storage errors
+      }
     } else {
       document.documentElement.classList.remove('dark');
-      try { localStorage.setItem('theme', 'light'); } catch (_) {}
+      try {
+        localStorage.setItem('theme', 'light');
+      } catch {
+        // Ignore storage errors
+      }
     }
   };
 
-  // Keyboard navigation shortcuts: '/' for search, 'G + ...' for views
+  // Keyboard navigation shortcuts: '/' or Cmd+K for Command Palette, 'G + ...' & chords for views
   useEffect(() => {
     let lastKey = '';
     let lastKeyTime = 0;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      const targetTag = (e.target as HTMLElement)?.tagName?.toLowerCase();
-      const isInput = targetTag === 'input' || targetTag === 'textarea';
-
-      // Focus search with '/'
-      if (e.key === '/' && !isInput) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-        return;
-      }
+      const target = e.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isEditableTarget =
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        tagName === 'select' ||
+        Boolean(target?.isContentEditable);
 
       // Open command palette with Cmd+K or Ctrl+K
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -121,12 +148,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return;
       }
 
-      if (isInput) return;
+      if (isEditableTarget || e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+
+      // Open Quick Actions / Search with '/'
+      if (e.key === '/') {
+        e.preventDefault();
+        onOpenCommandPalette();
+        return;
+      }
 
       const now = Date.now();
       const currentKey = e.key.toLowerCase();
 
-      // Two-key quick-jump sequence (L L for logs, D T for capstone, G then D/R/A/N/S/G)
       if (lastKey === 'l' && currentKey === 'l' && now - lastKeyTime < 800) {
         e.preventDefault();
         onNavigate('logs');
@@ -169,6 +204,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return;
       }
 
+      if (lastKey === 'a' && currentKey === 'k' && now - lastKeyTime < 800) {
+        e.preventDefault();
+        onNavigate('akasha-omega');
+        lastKey = '';
+        return;
+      }
+
       if (lastKey === 'g' && now - lastKeyTime < 800) {
         if (currentKey === 'd') {
           e.preventDefault();
@@ -206,18 +248,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         } else if (currentKey === 'h') {
           e.preventDefault();
           onNavigate('self-healing');
+        } else if (currentKey === ',') {
+          e.preventDefault();
+          onNavigate('settings');
         }
         lastKey = '';
         return;
       }
 
-      if (lastKey === 'h') {
-        if (currentKey === 'h') {
-          e.preventDefault();
-          onNavigate('self-healing');
-          lastKey = '';
-          return;
-        }
+      if (lastKey === 'h' && currentKey === 'h' && now - lastKeyTime < 800) {
+        e.preventDefault();
+        onNavigate('self-healing');
+        lastKey = '';
+        return;
       }
 
       lastKey = currentKey;
@@ -228,119 +271,139 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onNavigate, onOpenCommandPalette]);
 
-  const navItems = [
+  const navItems: NavItem[] = [
     {
-      id: 'dashboard' as DashboardView,
+      id: 'dashboard',
       label: 'Overview',
       shortcut: 'G D',
       icon: <LayoutDashboard className="h-4 w-4" />,
     },
     {
-      id: 'logs' as DashboardView,
+      id: 'logs',
       label: 'Request Logs',
       shortcut: 'G R',
       icon: <FileText className="h-4 w-4" />,
+      badge: totalLogs > 0 ? totalLogs.toLocaleString() : undefined,
     },
     {
-      id: 'traces' as DashboardView,
+      id: 'traces',
       label: 'Distributed Traces',
       shortcut: 'G T',
-      icon: <Layers className="h-4 w-4 text-indigo-400" />,
+      icon: <Layers className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
     },
     {
-      id: 'analytics' as DashboardView,
+      id: 'analytics',
       label: 'Analytics',
       shortcut: 'G A',
       icon: <LineChart className="h-4 w-4" />,
     },
     {
-      id: 'metrics' as DashboardView,
+      id: 'metrics',
       label: 'Metrics & Studio',
       shortcut: 'G M',
-      icon: <Sliders className="h-4 w-4 text-cyan-400" />,
+      icon: <Sliders className="h-4 w-4 text-cyan-500 dark:text-cyan-400" />,
     },
     {
-      id: 'anomalies' as DashboardView,
+      id: 'anomalies',
       label: 'Anomalies',
       shortcut: 'G N',
       icon: <ShieldAlert className="h-4 w-4" />,
       badge: activeAnomaliesCount > 0 ? activeAnomaliesCount : undefined,
     },
     {
-      id: 'rum' as DashboardView,
+      id: 'rum',
       label: 'RUM & Replay',
       shortcut: 'G U',
       icon: <Users className="h-4 w-4" />,
     },
     {
-      id: 'synthetic' as DashboardView,
+      id: 'synthetic',
       label: 'Global Synthetic',
       shortcut: 'G S',
-      icon: <Globe className="h-4 w-4 text-sky-400" />,
-      badge: 'SLO',
+      icon: <Globe className="h-4 w-4 text-sky-500 dark:text-sky-400" />,
     },
     {
-      id: 'incidents' as DashboardView,
+      id: 'incidents',
       label: 'Incident Command',
       shortcut: 'G I',
-      icon: <Flame className="h-4 w-4 text-rose-400" />,
-      badge: 'AI',
+      icon: <Flame className="h-4 w-4 text-rose-500 dark:text-rose-400" />,
     },
     {
-      id: 'governance' as DashboardView,
+      id: 'governance',
       label: 'Governance & Security',
       shortcut: 'G G',
-      icon: <Shield className="h-4 w-4 text-cyan-400" />,
+      icon: <Shield className="h-4 w-4 text-cyan-500 dark:text-cyan-400" />,
     },
     {
-      id: 'compliance' as DashboardView,
+      id: 'compliance',
       label: 'Compliance & SIEM',
       shortcut: 'G C',
-      icon: <ShieldCheck className="h-4 w-4 text-emerald-400" />,
-      badge: 'SOC2',
+      icon: <ShieldCheck className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />,
     },
     {
-      id: 'self-healing' as DashboardView,
+      id: 'self-healing',
       label: 'Self-Healing Studio',
       shortcut: 'H H',
-      icon: <Cpu className="h-4 w-4 text-emerald-400" />,
-      badge: 'eBPF',
+      icon: <Cpu className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />,
     },
     {
-      id: 'capstone-ultimate' as DashboardView,
+      id: 'capstone-ultimate',
       label: 'Ultimate Governance',
       shortcut: 'D T',
-      icon: <Sparkles className="h-4 w-4 text-indigo-400" />,
-      badge: 'Twin',
+      icon: <Sparkles className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
     },
     {
-      id: 'neuromorphic-mesh' as DashboardView,
+      id: 'neuromorphic-mesh',
       label: 'Neuromorphic Mesh',
       shortcut: 'N M',
-      icon: <BrainCircuit className="h-4 w-4 text-violet-400" />,
-      badge: 'Day 21',
+      icon: <BrainCircuit className="h-4 w-4 text-violet-500 dark:text-violet-400" />,
     },
     {
-      id: 'synthetic-dream' as DashboardView,
+      id: 'synthetic-dream',
       label: 'Synthetic Dream',
       shortcut: 'D S',
-      icon: <Dna className="h-4 w-4 text-emerald-400" />,
-      badge: 'Day 22',
+      icon: <Dna className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />,
     },
     {
-      id: 'autonomous-swarm' as DashboardView,
+      id: 'autonomous-swarm',
       label: 'Autonomous Swarm',
       shortcut: 'A S',
-      icon: <Network className="h-4 w-4 text-cyan-400" />,
-      badge: 'BFT',
+      icon: <Network className="h-4 w-4 text-cyan-500 dark:text-cyan-400" />,
     },
     {
-      id: 'settings' as DashboardView,
+      id: 'akasha-omega',
+      label: 'Akasha-Omega',
+      shortcut: 'A K',
+      icon: <InfinityIcon className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />,
+    },
+    {
+      id: 'settings',
       label: 'Settings',
       shortcut: 'G ,',
       icon: <Settings className="h-4 w-4" />,
     },
   ];
+
+  const activeNavItem =
+    navItems.find((item) => item.id === activeView) || navItems[0];
+
+  const streamPillStyles =
+    streamStatus === 'connected'
+      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+      : streamStatus === 'reconnecting' || streamStatus === 'connecting'
+      ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20'
+      : 'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20';
+
+  const streamLabel =
+    streamStatus === 'connected'
+      ? `Live · ${streamTransport === 'websocket' ? 'WS' : streamTransport.toUpperCase()}`
+      : streamStatus === 'reconnecting'
+      ? 'Reconnecting'
+      : streamStatus === 'connecting'
+      ? 'Live (Idle)'
+      : streamStatus === 'degraded'
+      ? 'Degraded'
+      : 'Offline';
 
   return (
     <div className="min-h-screen bg-canvas text-customText flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200 transition-colors duration-200">
@@ -354,24 +417,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         {liveAnnouncement}
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar Desktop - Clean Container */}
+      <div className="flex flex-1 min-h-0">
+        {/* Sole Left Vertical Sidebar - Independent Scrolling */}
         <aside
-          className={`hidden md:flex flex-col border-r border-subtleBorder bg-canvas transition-all duration-200 z-20 ${
+          aria-label="Primary Observability Navigation"
+          className={`hidden md:flex flex-col border-r border-subtleBorder bg-canvas h-screen sticky top-0 shrink-0 transition-all duration-200 z-20 ${
             isSidebarCollapsed ? 'w-16' : 'w-64'
           }`}
         >
-          {/* Logo & Brand Header with glowing accent */}
-          <div className="h-16 flex items-center justify-between px-4 border-b border-subtleBorder">
+          {/* Logo & Brand Header */}
+          <div className="h-16 flex items-center justify-between px-4 border-b border-subtleBorder shrink-0">
             {!isSidebarCollapsed ? (
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="h-8 w-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-mono font-bold text-sm shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                <div className="h-8 w-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm shadow-[0_0_15px_rgba(99,102,241,0.2)] shrink-0">
                   Ω
                 </div>
                 <div className="truncate">
-                  <div className="font-semibold text-sm tracking-tight text-customText flex items-center gap-1.5">
+                  <div className="font-semibold text-sm tracking-tight text-customText">
                     Neon Chasm
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
                   </div>
                   <div className="text-[10px] font-mono text-mutedText leading-none">
                     Observability Engine
@@ -379,7 +442,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="h-8 w-8 mx-auto rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-mono font-bold text-sm shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+              <div className="h-8 w-8 mx-auto rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm shadow-[0_0_15px_rgba(99,102,241,0.2)]">
                 Ω
               </div>
             )}
@@ -387,7 +450,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               aria-label={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-              className="p-1.5 rounded-lg text-mutedText hover:text-customText hover:bg-elevated transition-colors"
+              className="p-1.5 rounded-lg text-mutedText hover:text-customText hover:bg-elevated transition-colors shrink-0"
             >
               {isSidebarCollapsed ? (
                 <ChevronRight className="h-4 w-4" />
@@ -397,8 +460,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </button>
           </div>
 
-          {/* Navigation Links with Glowing Indigo Pill Accents */}
-          <nav className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto">
+          {/* Independently Scrollable Sidebar Links */}
+          <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const isActive = activeView === item.id;
               return (
@@ -406,23 +469,29 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
                   title={isSidebarCollapsed ? `${item.label} (${item.shortcut})` : undefined}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-indigo-600/20 text-indigo-400 dark:text-indigo-300 border border-indigo-500/40 shadow-[0_0_18px_rgba(99,102,241,0.18)]'
-                      : 'text-mutedText hover:text-customText hover:bg-elevated'
+                      ? 'bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/40 shadow-[0_0_18px_rgba(99,102,241,0.16)]'
+                      : 'text-mutedText hover:text-customText hover:bg-elevated border border-transparent'
                   } ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}
                 >
                   <div className="flex items-center gap-3 truncate">
-                    <span className={isActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-mutedText'}>
+                    <span className={isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-mutedText'}>
                       {item.icon}
                     </span>
                     {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
                   </div>
 
                   {!isSidebarCollapsed && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {item.badge !== undefined && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/20 text-rose-400 dark:text-rose-300 border border-rose-500/40 shadow-[0_0_10px_rgba(244,63,94,0.3)]">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tabular-nums border ${
+                            item.id === 'anomalies'
+                              ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40'
+                              : 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30'
+                          }`}
+                        >
                           {item.badge}
                         </span>
                       )}
@@ -437,7 +506,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </nav>
 
           {/* Sidebar Footer Command Trigger */}
-          <div className="p-3 border-t border-subtleBorder">
+          <div className="p-3 border-t border-subtleBorder shrink-0">
             <button
               onClick={onOpenCommandPalette}
               className={`w-full flex items-center gap-2 py-2.5 px-3 rounded-xl border border-subtleBorder hover:border-indigo-500/40 bg-surface text-mutedText hover:text-customText transition-all text-xs ${
@@ -445,7 +514,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               }`}
             >
               <div className="flex items-center gap-2">
-                <Command className="h-3.5 w-3.5 text-indigo-400" />
+                <Command className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
                 {!isSidebarCollapsed && <span>Quick Actions</span>}
               </div>
               {!isSidebarCollapsed && (
@@ -458,163 +527,55 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </aside>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-canvas">
-          {/* Sticky Frosted Header */}
-          <header className="h-16 border-b border-subtleBorder bg-canvas/80 backdrop-blur-md sticky top-0 z-10 px-4 sm:px-6 flex items-center justify-between gap-3 transition-colors duration-200">
-            {/* Left: Mobile hamburger & Global search input */}
-            <div className="flex items-center gap-3 flex-1 max-w-xl">
+        <div className="flex-1 flex flex-col min-w-0 bg-canvas">
+          {/* Compact Streamlined Global Header */}
+          <header className="h-16 border-b border-subtleBorder bg-canvas/85 backdrop-blur-md sticky top-0 z-10 px-4 sm:px-6 flex items-center justify-between gap-3 transition-colors duration-200">
+            {/* Left: Mobile Drawer Toggle & Active View Title */}
+            <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl text-mutedText hover:text-customText hover:bg-elevated"
+                className="md:hidden p-2 rounded-xl text-mutedText hover:text-customText hover:bg-elevated shrink-0"
                 aria-label="Toggle Mobile Navigation"
               >
-                <Menu className="h-5 w-5" />
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
 
-              <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-mutedText" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search endpoint, IP, trace, error... Press '/' to focus"
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-10 pr-9 py-2 rounded-xl border border-subtleBorder bg-surface text-xs sm:text-sm text-customText placeholder:text-mutedText focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-all font-mono shadow-inner"
-                />
-                <kbd className="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-mutedText bg-elevated px-1.5 py-0.5 rounded border border-subtleBorder">
-                  /
-                </kbd>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-indigo-600 dark:text-indigo-400 shrink-0">
+                  {activeNavItem.icon}
+                </span>
+                <h2 className="text-sm sm:text-base font-semibold tracking-tight text-customText truncate">
+                  {activeNavItem.label}
+                </h2>
+                {searchQuery && onSearchChange && (
+                  <button
+                    type="button"
+                    onClick={() => onSearchChange('')}
+                    title="Clear active search filter"
+                    className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-indigo-500/30 bg-indigo-500/10 text-[11px] font-mono text-indigo-700 dark:text-indigo-300 whitespace-nowrap shrink-0"
+                  >
+                    <span>Filter: {searchQuery}</span>
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Right: Controls & Throughput meter */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Isolated Throughput Meter */}
-              <LiveThroughputMeter
-                throughput={throughput}
-                isIngesting={isIngesting}
-                totalLogs={totalLogs}
-              />
-
-              {/* AI Incident Assistant Quick Trigger */}
-              <button
-                onClick={() => onNavigate('incidents')}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-mono text-rose-500 dark:text-rose-300 transition-all shadow-[0_0_12px_rgba(244,63,94,0.2)]"
-                title="AI Incident Command Center (G I)"
-              >
-                <Flame className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400 animate-pulse" />
-                <span className="font-bold">AI Incident</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-rose-500/30 text-[10px] text-white">Active</span>
-              </button>
-
-              {/* Compliance Health Quick Trigger */}
-              <button
-                onClick={() => onNavigate('compliance')}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-300 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-                title="SOC2 & GDPR Compliance Studio (G C)"
-              >
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
-                <span className="font-bold">Compliance</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/30 text-[10px] text-white">100%</span>
-              </button>
-
-              {/* Global Edge Synthetic Probers Quick Trigger */}
-              <button
-                onClick={() => onNavigate('synthetic')}
-                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-mono text-sky-600 dark:text-sky-300 transition-all shadow-[0_0_12px_rgba(14,165,233,0.2)]"
-                title="Global Edge Synthetic Probers & Latency Map (G S)"
-              >
-                <Globe className="h-3.5 w-3.5 text-sky-500 dark:text-sky-400" />
-                <span className="font-bold">Edge SLO</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-sky-500/30 text-[10px] text-white">99.98%</span>
-              </button>
-
-              {/* FinOps & System Resilience Quick Trigger */}
-              <button
-                onClick={() => onNavigate('governance')}
-                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-mono text-indigo-600 dark:text-indigo-300 transition-all shadow-[0_0_12px_rgba(99,102,241,0.2)]"
-                title="FinOps, Cardinality & Chaos Governance (G G)"
-              >
-                <Shield className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
-                <span className="font-bold">FinOps</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-white">$3.4k/mo · Resil</span>
-              </button>
-
-              {/* Active Log Stream & Causal Health Quick Trigger */}
-              <button
-                onClick={() => onNavigate('logs')}
-                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-xs font-mono text-cyan-600 dark:text-cyan-300 transition-all shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-                title="Multi-Region LogQL & Causal AI Explorer (L L)"
-              >
-                <FileText className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
-                <span className="font-bold">Log Stream</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/30 text-[10px] text-white">4.2 GB/s · Causal AI</span>
-              </button>
-
-              {/* Active Self-Healing Status Badge */}
-              <button
-                onClick={() => onNavigate('self-healing')}
-                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-300 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-                title="Autonomous Self-Healing Command Studio (H H)"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400 animate-pulse" />
-                <span className="font-bold">Autonomous Defense, RL &amp; GitOps:</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/30 text-[10px] text-white font-semibold">Active</span>
-              </button>
-
-              {/* Active Capstone Status Badge */}
-              <button
-                onClick={() => onNavigate('capstone-ultimate')}
-                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-mono text-indigo-600 dark:text-indigo-300 transition-all shadow-[0_0_12px_rgba(99,102,241,0.2)]"
-                title="Ultimate Governance Studio (D T)"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 animate-pulse" />
-                <span className="font-bold">Digital Twin Chaos &amp; Federated AI:</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-white font-semibold">Active</span>
-              </button>
-
-              {/* Active Day 21 Status Badge */}
-              <button
-                onClick={() => onNavigate('neuromorphic-mesh')}
-                className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-violet-500/40 bg-violet-500/10 hover:bg-violet-500/20 text-xs font-mono text-violet-600 dark:text-violet-300 transition-all shadow-[0_0_12px_rgba(139,92,246,0.2)]"
-                title="Neuromorphic Mesh Studio (N M)"
-              >
-                <BrainCircuit className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400 animate-pulse" />
-                <span className="font-bold">Neuromorphic SNN &amp; Biophotonic:</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-violet-500/30 text-[10px] text-white font-semibold">Active</span>
-              </button>
-
-              {/* Active Day 22 Status Badge */}
-              <button
-                onClick={() => onNavigate('synthetic-dream')}
-                className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-300 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-                title="Synthetic Dream Studio (D S)"
-              >
-                <Dna className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400 animate-pulse" />
-                <span className="font-bold">Synthetic DNA, Dream State &amp; Neural Resonance:</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/30 text-[10px] text-white font-semibold">Active</span>
-              </button>
-
-              {/* Active Autonomous AI Swarm Status Badge */}
-              <button
-                onClick={() => onNavigate('autonomous-swarm')}
-                className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-xs font-mono text-cyan-600 dark:text-cyan-300 transition-all whitespace-nowrap shrink-0"
-                title="Autonomous AI Swarm & Singularity Command (A S)"
-              >
-                <Network className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
-                <span className="font-bold">AI Swarm BFT:</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/30 text-[10px] text-white font-semibold">Quorum</span>
-              </button>
-
+            {/* Right: Time Range, Clickable Stream Pill, Quick Actions (⌘K / /), Theme Toggle */}
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
               {/* Time Range Selector */}
-              <div className="flex items-center rounded-xl border border-subtleBorder bg-surface p-1 text-xs font-mono">
+              <div
+                role="group"
+                aria-label="Time Range Selector"
+                className="flex items-center rounded-xl border border-subtleBorder bg-surface p-1 text-xs font-mono"
+              >
                 {(['15m', '1h', '24h', '7d'] as TimeRangePreset[]).map((preset) => (
                   <button
                     key={preset}
                     onClick={() => onTimeRangeChange(preset)}
-                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                    className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all whitespace-nowrap shrink-0 ${
                       timeRange === preset
-                        ? 'bg-indigo-600/20 text-indigo-600 dark:text-indigo-300 font-semibold border border-indigo-500/30 shadow-[0_0_10px_rgba(99,102,241,0.15)]'
+                        ? 'bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-500/30'
                         : 'text-mutedText hover:text-customText'
                     }`}
                   >
@@ -623,38 +584,46 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 ))}
               </div>
 
-              {/* Timezone Switcher */}
+              {/* Clickable Stream Status Pill */}
               <button
-                onClick={() =>
-                  onTimezoneChange(
-                    timezone === 'local' ? 'utc' : timezone === 'utc' ? 'relative' : 'local'
-                  )
-                }
-                title={`Timezone mode: ${timezone.toUpperCase()} (Click to cycle)`}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-subtleBorder bg-surface hover:bg-elevated text-xs font-mono text-customText transition-colors"
+                type="button"
+                onClick={() => onReconnectStream?.()}
+                title="Click to reconnect WebSocket / SSE telemetry stream"
+                className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono font-medium transition-colors whitespace-nowrap shrink-0 ${streamPillStyles}`}
               >
-                <Globe className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
-                <span className="uppercase text-[11px] font-medium">{timezone}</span>
+                {streamStatus === 'connected' ? (
+                  <Radio className="h-3.5 w-3.5" />
+                ) : streamStatus === 'reconnecting' || streamStatus === 'connecting' ? (
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <WifiOff className="h-3.5 w-3.5" />
+                )}
+                <span>{streamLabel}</span>
               </button>
 
-              {/* Layout Density Toggle */}
+              {/* Quick Actions Trigger (⌘K / /) */}
               <button
-                onClick={onToggleDensity}
-                title={`Layout density: ${density} (Click to toggle)`}
-                className="p-2 rounded-xl border border-subtleBorder bg-surface hover:bg-elevated text-customText transition-colors"
-                aria-label="Toggle layout density"
+                type="button"
+                onClick={onOpenCommandPalette}
+                title="Open Quick Actions & Search (⌘K or /)"
+                className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border border-subtleBorder bg-surface hover:bg-elevated hover:border-indigo-500/40 text-xs font-mono text-mutedText hover:text-customText transition-colors whitespace-nowrap shrink-0"
               >
-                <Sliders className="h-4 w-4 text-mutedText" />
+                <Search className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
+                <span className="hidden lg:inline">Quick Actions</span>
+                <kbd className="hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded bg-elevated border border-subtleBorder text-mutedText">
+                  ⌘K /
+                </kbd>
               </button>
 
               {/* Seamless Light/Dark Mode Switcher */}
               <button
+                type="button"
                 onClick={toggleTheme}
-                title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                title={mounted ? (isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode') : 'Toggle theme mode'}
                 aria-label="Toggle theme mode"
-                className="p-2 rounded-xl border border-subtleBorder bg-surface hover:bg-elevated text-customText transition-colors"
+                className="p-2 rounded-xl border border-subtleBorder bg-surface hover:bg-elevated text-customText transition-colors shrink-0"
               >
-                {isDarkMode ? (
+                {!mounted || isDarkMode ? (
                   <Sun className="h-4 w-4 text-amber-400" />
                 ) : (
                   <Moon className="h-4 w-4 text-indigo-600" />
@@ -665,7 +634,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
           {/* Mobile Navigation Drawer */}
           {isMobileMenuOpen && (
-            <div className="md:hidden border-b border-subtleBorder bg-canvas p-4 space-y-2">
+            <nav
+              aria-label="Mobile Navigation"
+              className="md:hidden border-b border-subtleBorder bg-canvas p-4 space-y-1.5 max-h-[75vh] overflow-y-auto"
+            >
               {navItems.map((item) => (
                 <button
                   key={item.id}
@@ -675,7 +647,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   }}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium ${
                     activeView === item.id
-                      ? 'bg-indigo-600/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/40'
+                      ? 'bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/40'
                       : 'text-customText hover:bg-elevated'
                   }`}
                 >
@@ -684,16 +656,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     <span>{item.label}</span>
                   </div>
                   {item.badge !== undefined && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-rose-500/20 text-rose-500 dark:text-rose-300 border border-rose-500/40">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-mono tabular-nums bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40">
                       {item.badge}
                     </span>
                   )}
                 </button>
               ))}
-            </div>
+            </nav>
           )}
 
-          {/* Main Dashboard Panel Body with Viewport Scroll */}
+          {/* Main Dashboard Panel Body */}
           <main
             className={`flex-1 overflow-y-auto ${
               density === 'compact' ? 'p-3 space-y-3' : 'p-5 sm:p-6 space-y-6'
@@ -706,4 +678,3 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     </div>
   );
 };
-

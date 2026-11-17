@@ -52,50 +52,55 @@ export const TrafficHeatmap: React.FC<TrafficHeatmapProps> = ({
           </div>
 
           {/* Grid Heatmap */}
-          <div className="mt-4 space-y-1.5 font-mono text-xs">
-            {latencyRanges.map((range) => {
-              return (
-                <div key={range.label} className="flex items-center gap-2">
-                  <span className="w-24 text-right text-[11px] text-slate-400 shrink-0">
-                    {range.label}
-                  </span>
-                  <div className="flex-1 grid grid-cols-10 gap-1.5">
-                    {timeSlices.map((slice, idx) => {
-                      // Estimate count matching this latency range in this bucket
-                      const count = Math.round(
-                        (slice.requestCount / 5) * (range.min === 0 ? 0.6 : range.min > 500 ? 0.05 : 0.2)
-                      );
-                      const isHigh = count > 15;
-                      const isMed = count > 5;
-                      const hasErr = slice.errorCount > 0 && range.min >= 200;
+          {timeSlices.length === 0 ? (
+            <div className="mt-4 h-40 flex items-center justify-center rounded-xl border border-subtleBorder bg-canvas/50 text-xs font-mono text-mutedText">
+              Awaiting live OpenTelemetry (OTLP) stream...
+            </div>
+          ) : (
+            <div className="mt-4 space-y-1.5 font-mono text-xs">
+              {latencyRanges.map((range) => {
+                return (
+                  <div key={range.label} className="flex items-center gap-2">
+                    <span className="w-24 text-right text-[11px] text-mutedText shrink-0">
+                      {range.label}
+                    </span>
+                    <div className="flex-1 grid grid-cols-10 gap-1.5">
+                      {timeSlices.map((slice, idx) => {
+                        const count = Math.round(
+                          (slice.requestCount / 5) * (range.min === 0 ? 0.6 : range.min > 500 ? 0.05 : 0.2)
+                        );
+                        const isHigh = count > 15;
+                        const isMed = count > 5;
+                        const hasErr = slice.errorCount > 0 && range.min >= 200;
 
-                      return (
-                        <div
-                          key={idx}
-                          onClick={() => onFilterBucket && onFilterBucket(range.min, range.max)}
-                          title={`${new Date(slice.timestamp).toLocaleTimeString()}: ~${count} requests in ${range.label}`}
-                          className={`h-7 rounded-lg transition-all cursor-pointer flex items-center justify-center text-[10px] font-bold ${
-                            hasErr
-                              ? 'bg-rose-500/80 text-white shadow-[0_0_10px_rgba(244,63,94,0.4)]'
-                              : isHigh
-                              ? 'bg-indigo-500 text-white shadow-[0_0_8px_rgba(99,102,241,0.4)]'
-                              : isMed
-                              ? 'bg-indigo-900/60 text-indigo-200 border border-indigo-700/50'
-                              : 'bg-elevated/80 text-slate-600 hover:bg-slate-800'
-                          }`}
-                        >
-                          {count > 0 ? count : ''}
-                        </div>
-                      );
-                    })}
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => onFilterBucket && onFilterBucket(range.min, range.max)}
+                            title={`${new Date(slice.timestamp).toLocaleTimeString()}: ~${count} requests in ${range.label}`}
+                            className={`h-7 rounded-lg transition-all cursor-pointer flex items-center justify-center text-[10px] font-bold ${
+                              hasErr
+                                ? 'bg-rose-500/80 text-white'
+                                : isHigh
+                                ? 'bg-indigo-500 text-white'
+                                : isMed
+                                ? 'bg-indigo-900/60 text-indigo-200 border border-indigo-700/50'
+                                : 'bg-elevated/80 text-mutedText hover:bg-elevated'
+                            }`}
+                          >
+                            {count > 0 ? count : ''}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="mt-4 pt-3 border-t border-subtleBorder/60 flex items-center justify-between text-xs font-mono text-slate-400">
+        <div className="mt-4 pt-3 border-t border-subtleBorder/60 flex items-center justify-between text-xs font-mono text-mutedText">
           <span>Click any cell to isolate latency bracket in log stream</span>
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-sm bg-elevated" /> Low
@@ -106,45 +111,51 @@ export const TrafficHeatmap: React.FC<TrafficHeatmapProps> = ({
       </div>
 
       {/* 2. "BubbleUp" Outlier Scatter Plot */}
-      <div className="rounded-2xl border border-subtleBorder bg-surface/80 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+      <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between pb-3 border-b border-subtleBorder">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-rose-400" />
-              <h3 className="text-sm font-semibold text-white">&quot;BubbleUp&quot; Outlier Analysis</h3>
+              <Sparkles className="h-4 w-4 text-rose-500 dark:text-rose-400" />
+              <h3 className="text-sm font-semibold text-customText">&quot;BubbleUp&quot; Outlier Analysis</h3>
             </div>
-            <span className="text-[11px] font-mono text-rose-300">
+            <span className="text-[11px] font-mono text-rose-600 dark:text-rose-300 tabular-nums">
               {outliers.length} Tail Outliers
             </span>
           </div>
 
-          <p className="mt-2 text-xs text-slate-400 font-mono">
+          <p className="mt-2 text-xs text-mutedText font-mono">
             Statistical outliers automatically surfaced. Click any outlier cluster to expose over-indexed attributes.
           </p>
 
-          {/* Scatter Canvas Simulator */}
-          <div className="mt-4 h-44 rounded-xl border border-subtleBorder bg-canvas relative p-3 overflow-hidden">
-            {outliers.map((outlier, idx) => {
-              const xPct = 10 + (idx * 2.2) % 80;
-              const yPct = Math.max(10, Math.min(85, (outlier.latencyMs / 1200) * 80));
+          {/* Scatter Canvas */}
+          <div className="mt-4 h-44 rounded-xl border border-subtleBorder bg-canvas relative p-3 overflow-hidden flex items-center justify-center">
+            {outliers.length === 0 ? (
+              <span className="text-xs font-mono text-mutedText">
+                No latency outliers (&gt;350ms or 5xx) detected.
+              </span>
+            ) : (
+              outliers.map((outlier, idx) => {
+                const xPct = 10 + (idx * 2.2) % 80;
+                const yPct = Math.max(10, Math.min(85, (outlier.latencyMs / 1200) * 80));
 
-              return (
-                <div
-                  key={outlier.id}
-                  onClick={() => {
-                    handleBubbleUpClick([outlier]);
-                    if (onInspectOutlier) onInspectOutlier(outlier);
-                  }}
-                  style={{ left: `${xPct}%`, bottom: `${yPct}%` }}
-                  title={`${outlier.method} ${outlier.endpoint} (${outlier.latencyMs}ms, ${outlier.statusCode})`}
-                  className={`absolute h-3 w-3 rounded-full cursor-pointer transition-transform hover:scale-150 ${
-                    outlier.statusCode >= 500
-                      ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)] animate-pulse'
-                      : 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]'
-                  }`}
-                />
-              );
-            })}
+                return (
+                  <div
+                    key={outlier.id}
+                    onClick={() => {
+                      handleBubbleUpClick([outlier]);
+                      if (onInspectOutlier) onInspectOutlier(outlier);
+                    }}
+                    style={{ left: `${xPct}%`, bottom: `${yPct}%` }}
+                    title={`${outlier.method} ${outlier.endpoint} (${outlier.latencyMs}ms, ${outlier.statusCode})`}
+                    className={`absolute h-3 w-3 rounded-full cursor-pointer transition-transform hover:scale-150 ${
+                      outlier.statusCode >= 500
+                        ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]'
+                        : 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]'
+                    }`}
+                  />
+                );
+              })
+            )}
           </div>
         </div>
 

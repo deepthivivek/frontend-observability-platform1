@@ -47,7 +47,7 @@ export function validateEnterpriseEnvironment(customEnv?: Record<string, string 
     });
     console.error('================================================================================');
 
-    if (process.env.NODE_ENV === 'production' && !process.env.VITEST) {
+    if (process.env.NODE_ENV === 'production') {
       throw new Error(`Enterprise environment validation failed: ${JSON.stringify(errorDetails)}`);
     }
 

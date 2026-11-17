@@ -9,7 +9,8 @@ import {
 } from './telemetry';
 
 export type WorkerAction = 
-  | { type: 'INGEST_CHUNK'; payload: { chunk: ApiRequestLog[]; isFinal: boolean; totalExpected?: number } }
+  | { type: 'INGEST_CHUNK'; payload: { chunk: ApiRequestLog[]; isFinal: boolean; totalExpected?: number; replaceExisting?: boolean } }
+  | { type: 'RESET_LOGS' }
   | { type: 'APPLY_FILTERS'; payload: { filters: Partial<FilterState>; requestId: string } }
   | { type: 'CALCULATE_METRICS'; payload: { requestId: string; previousWindowMinutes?: number } }
   | { type: 'COMPUTE_TIME_BUCKETS'; payload: { requestId: string; bucketSizeMinutes?: number } }

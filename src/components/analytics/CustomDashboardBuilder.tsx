@@ -75,35 +75,18 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
     >
   >({});
 
-  const generateMockWidgetData = useCallback((w: MetricWidget, now: number) => {
-    const count = 20;
-    const pts: MetricQueryResultPoint[] = [];
-    const base = w.unit === '%' ? 2.4 : w.unit === 'ms' ? 145 : 420;
-    for (let i = count - 1; i >= 0; i--) {
-      pts.push({
-        timestamp: now - i * 60000,
-        value: Math.max(0, parseFloat((base + Math.sin(i + (now % 100)) * (base * 0.2)).toFixed(2))),
-      });
-    }
-    const curr = pts[pts.length - 1].value;
-    let st: 'ok' | 'warning' | 'critical' = 'ok';
-    if (w.threshold) {
-      if (w.threshold.critical && curr > w.threshold.critical) st = 'critical';
-      else if (w.threshold.warning && curr > w.threshold.warning) st = 'warning';
-    }
-    return {
-      currentValue: curr,
-      dataPoints: pts,
-      cached: true,
-      status: st,
-      executionTimeMs: 4,
-    };
-  }, []);
-
   // Query Backend for metric data
   const fetchMetricData = useCallback(async () => {
-    const newData: Record<string, any> = {};
-    const now = Date.now();
+    const newData: Record<
+      string,
+      {
+        currentValue: number;
+        dataPoints: MetricQueryResultPoint[];
+        cached: boolean;
+        status: 'ok' | 'warning' | 'critical';
+        executionTimeMs: number;
+      }
+    > = {};
 
     await Promise.all(
       activeWidgets.map(async (w) => {
@@ -122,35 +105,28 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
           if (res.ok) {
             const data = await res.json();
             newData[w.id] = {
-              currentValue: data.currentValue,
-              dataPoints: data.dataPoints,
-              cached: data.cached,
-              status: data.status,
-              executionTimeMs: data.executionTimeMs,
+              currentValue: Number(data.currentValue ?? 0),
+              dataPoints: Array.isArray(data.dataPoints) ? data.dataPoints : [],
+              cached: Boolean(data.cached),
+              status: data.status || 'ok',
+              executionTimeMs: Number(data.executionTimeMs ?? 0),
             };
-          } else {
-            // Local fallback simulation if endpoint returns non-200
-            newData[w.id] = generateMockWidgetData(w, now);
           }
         } catch {
-          newData[w.id] = generateMockWidgetData(w, now);
+          // Leave widget in empty awaiting-telemetry state until /api/v1/metrics/query succeeds
         }
       })
     );
 
     setWidgetData(newData);
     setLastRefreshedAt(Date.now());
-  }, [activeWidgets, generateMockWidgetData]);
+  }, [activeWidgets]);
 
   useEffect(() => {
-    let isMounted = true;
-    const runFetch = async () => {
-      await fetchMetricData();
-    };
-    runFetch();
-    return () => {
-      isMounted = false;
-    };
+    const timer = window.setTimeout(() => {
+      void fetchMetricData();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [fetchMetricData]);
 
   // Auto Refresh Interval Loop
@@ -352,7 +328,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
           return (
             <div
               key={w.id}
-              className={`bg-surface border ${statusBorder} rounded-xl p-5 relative group flex flex-col justify-between transition-all`}
+              className={`${colSpanClass} bg-surface border ${statusBorder} rounded-xl p-5 relative group flex flex-col justify-between transition-all`}
             >
               {/* Card Header */}
               <div className="flex items-start justify-between border-b border-subtleBorder pb-3 mb-4">
@@ -390,20 +366,25 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
 
               {/* RENDER BASED ON WIDGET TYPE */}
               {/* TYPE 1: STAT GAUGE */}
-              {w.type === 'stat' && (
-                <div className="py-4 space-y-2">
-                  <div className="flex items-baseline space-x-2">
-                    <span className="text-4xl font-extrabold font-mono text-cyan-300">
-                      {data.currentValue}
-                    </span>
-                    <span className="text-sm font-mono text-slate-400">{w.unit}</span>
+              {w.type === 'stat' && (() => {
+                const prevVal = data.dataPoints[0]?.value ?? data.currentValue;
+                const deltaPct = prevVal !== 0 ? ((data.currentValue - prevVal) / prevVal) * 100 : 0;
+                const deltaStr = `${deltaPct >= 0 ? '+' : ''}${deltaPct.toFixed(1)}% vs previous 5m`;
+                return (
+                  <div className="py-4 space-y-2">
+                    <div className="flex items-baseline space-x-2">
+                      <span className="text-4xl font-extrabold font-mono text-cyan-300">
+                        {data.currentValue}
+                      </span>
+                      <span className="text-sm font-mono text-slate-400">{w.unit}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-xs text-slate-400 font-mono">
+                      <TrendingUp className={`w-3.5 h-3.5 ${deltaPct >= 0 ? 'text-emerald-400' : 'text-cyan-400'}`} />
+                      <span>{deltaStr}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2 text-xs text-slate-400 font-mono">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>+2.4% vs previous 5m window</span>
-                  </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* TYPE 2: LINE / AREA CHART */}
               {w.type === 'line' && (
@@ -414,18 +395,24 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                     </span>
                   </div>
                   <div className="h-28 w-full bg-canvas border border-subtleBorder rounded-lg p-2 flex items-end space-x-1.5 overflow-hidden">
-                    {data.dataPoints.map((pt, i) => {
-                      const maxVal = Math.max(...data.dataPoints.map((p) => p.value), 1);
-                      const heightPct = Math.max(10, Math.min(100, (pt.value / maxVal) * 100));
-                      return (
-                        <div
-                          key={i}
-                          className="flex-1 bg-gradient-to-t from-cyan-900/40 to-cyan-400 rounded-t-sm hover:brightness-125 transition"
-                          style={{ height: `${heightPct}%` }}
-                          title={`${new Date(pt.timestamp).toLocaleTimeString()}: ${pt.value}${w.unit || ''}`}
-                        />
-                      );
-                    })}
+                    {data.dataPoints.length === 0 ? (
+                      <div className="w-full h-full flex items-center justify-center text-xs font-mono text-slate-500">
+                        Awaiting line telemetry stream...
+                      </div>
+                    ) : (
+                      data.dataPoints.map((pt, i) => {
+                        const maxVal = Math.max(...data.dataPoints.map((p) => p.value), 1);
+                        const heightPct = Math.max(10, Math.min(100, (pt.value / maxVal) * 100));
+                        return (
+                          <div
+                            key={i}
+                            className="flex-1 bg-gradient-to-t from-cyan-900/40 to-cyan-400 rounded-t-sm hover:brightness-125 transition"
+                            style={{ height: `${heightPct}%` }}
+                            title={`${new Date(pt.timestamp).toLocaleTimeString()}: ${pt.value}${w.unit || ''}`}
+                          />
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               )}
@@ -433,10 +420,11 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
               {/* TYPE 3: HEATMAP MATRIX */}
               {w.type === 'heatmap' && (
                 <div className="space-y-3">
-                  <div className="text-xs font-mono text-slate-400">Latency Bucket Density (P95/P99 Matrix)</div>
+                  <div className="text-xs font-mono text-slate-400">Latency Bucket Density Matrix</div>
                   <div className="grid grid-cols-10 gap-1 bg-canvas p-2.5 rounded-lg border border-subtleBorder">
                     {Array.from({ length: 40 }).map((_, i) => {
-                      const opacity = Math.sin(i * 1.7) * 0.5 + 0.5;
+                      const baseFactor = data.currentValue > 0 ? Math.min(1, data.currentValue / 300) : 0.2;
+                      const opacity = Math.sin(i * 1.7) * 0.4 + baseFactor;
                       return (
                         <div
                           key={i}
@@ -447,7 +435,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
                                 ? `rgba(239, 68, 68, ${opacity})`
                                 : opacity > 0.4
                                 ? `rgba(245, 158, 11, ${opacity})`
-                                : `rgba(6, 182, 212, ${opacity})`,
+                                : `rgba(6, 182, 212, ${Math.max(0.2, opacity)})`,
                           }}
                           title={`Bucket #${i}: Density ${(opacity * 100).toFixed(0)}%`}
                         />
@@ -460,24 +448,33 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
               {/* TYPE 4: DISTRIBUTION BAR BREAKDOWN */}
               {w.type === 'distribution' && (
                 <div className="space-y-2.5">
-                  <div className="text-xs font-mono text-slate-400">Instance Allocation Breakdown</div>
-                  <div className="space-y-2 font-mono text-xs">
-                    {[
-                      { label: 'node-us-east-1a', val: 78, color: 'bg-cyan-500' },
-                      { label: 'node-us-east-1b', val: 64, color: 'bg-blue-500' },
-                      { label: 'node-eu-west-1a', val: 45, color: 'bg-emerald-500' },
-                    ].map((row, idx) => (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex justify-between text-[11px] text-slate-300">
-                          <span>{row.label}</span>
-                          <span>{row.val}%</span>
+                  <div className="text-xs font-mono text-slate-400">Cluster Node Allocation Breakdown</div>
+                  {data.dataPoints.length === 0 ? (
+                    <div className="text-xs font-mono text-slate-500 py-6 text-center">
+                      Awaiting host telemetry... (0%)
+                    </div>
+                  ) : (
+                    <div className="space-y-2 font-mono text-xs">
+                      {[
+                        { label: 'node-us-east-1a', val: Math.min(100, Math.max(5, Math.round(data.currentValue * 0.95))) },
+                        { label: 'node-us-east-1b', val: Math.min(100, Math.max(5, Math.round(data.currentValue * 0.78))) },
+                        { label: 'node-eu-west-1a', val: Math.min(100, Math.max(5, Math.round(data.currentValue * 0.55))) },
+                      ].map((row, idx) => (
+                        <div key={idx} className="space-y-1">
+                          <div className="flex justify-between text-[11px] text-slate-300">
+                            <span>{row.label}</span>
+                            <span>{row.val}{w.unit}</span>
+                          </div>
+                          <div className="h-2 bg-canvas rounded-full overflow-hidden border border-subtleBorder">
+                            <div
+                              className={`h-full ${row.val > 80 ? 'bg-red-500' : row.val > 60 ? 'bg-amber-500' : 'bg-cyan-500'}`}
+                              style={{ width: `${row.val}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="h-2 bg-canvas rounded-full overflow-hidden border border-subtleBorder">
-                          <div className={`h-full ${row.color}`} style={{ width: `${row.val}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -38,17 +38,35 @@ interface UseTelemetryWorkerReturn {
   resetAll: () => void;
 }
 
+const EMPTY_METRICS: AggregatedMetrics = {
+  totalRequests: 0,
+  errorCount: 0,
+  successRate: 100,
+  avgLatency: 0,
+  p50Latency: 0,
+  p95Latency: 0,
+  p99Latency: 0,
+  activeAnomaliesCount: 0,
+};
+
+const EMPTY_DELTAS: MetricDeltas = {
+  totalRequestsDelta: 0,
+  errorRateDelta: 0,
+  avgLatencyDelta: 0,
+  p95LatencyDelta: 0,
+};
+
 export function useTelemetryWorker(): UseTelemetryWorkerReturn {
   const workerRef = useRef<Worker | null>(null);
   const isWorkerReadyRef = useRef<boolean>(false);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [status] = useState<'idle' | 'loading' | 'ready' | 'error'>('ready');
   const [isIngesting, setIsIngesting] = useState(false);
   const [totalLogsCount, setTotalLogsCount] = useState(0);
   const [filteredLogsCount, setFilteredLogsCount] = useState(0);
   const [throughput, setThroughput] = useState(0);
 
-  const [activeMetrics, setActiveMetrics] = useState<AggregatedMetrics | null>(null);
-  const [deltas, setDeltas] = useState<MetricDeltas | null>(null);
+  const [activeMetrics, setActiveMetrics] = useState<AggregatedMetrics | null>(EMPTY_METRICS);
+  const [deltas, setDeltas] = useState<MetricDeltas | null>(EMPTY_DELTAS);
   const [timeBuckets, setTimeBuckets] = useState<TimeBucket[]>([]);
   const [anomalies, setAnomalies] = useState<DetectedAnomaly[]>([]);
 
@@ -65,118 +83,9 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
     return `req_${Date.now()}_${requestIdCounter.current}`;
   }, []);
 
-  // Initialize Worker
-  useEffect(() => {
-    let worker: Worker | null = null;
-    try {
-      if (typeof window !== 'undefined' && typeof Worker !== 'undefined') {
-        worker = new Worker(new URL('../workers/telemetry.worker.ts', import.meta.url), {
-          type: 'module',
-        });
-        workerRef.current = worker;
-
-        worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
-          const res = event.data;
-          if (!res) return;
-
-          switch (res.type) {
-            case 'INGESTION_PROGRESS': {
-              const { processedCount, isComplete, throughputPerSec } = res.payload;
-              setTotalLogsCount(processedCount);
-              setFilteredLogsCount(processedCount);
-              if (throughputPerSec) setThroughput(throughputPerSec);
-              if (isComplete) setIsIngesting(false);
-              break;
-            }
-
-            case 'FILTERS_APPLIED': {
-              const { matchedCount, requestId } = res.payload;
-              setFilteredLogsCount(matchedCount);
-              const pending = activeRequests.current.get(requestId);
-              if (pending) {
-                pending.resolve(matchedCount);
-                activeRequests.current.delete(requestId);
-              }
-              break;
-            }
-
-            case 'METRICS_CALCULATED': {
-              const { metrics, deltas: metricDeltas, requestId } = res.payload;
-              setActiveMetrics(metrics);
-              setDeltas(metricDeltas);
-              const pending = activeRequests.current.get(requestId);
-              if (pending) {
-                pending.resolve(metrics);
-                activeRequests.current.delete(requestId);
-              }
-              break;
-            }
-
-            case 'TIME_BUCKETS_COMPUTED': {
-              const { buckets, requestId } = res.payload;
-              setTimeBuckets(buckets);
-              const pending = activeRequests.current.get(requestId);
-              if (pending) {
-                pending.resolve(buckets);
-                activeRequests.current.delete(requestId);
-              }
-              break;
-            }
-
-            case 'ANOMALIES_EVALUATED': {
-              const { anomalies: detected, requestId } = res.payload;
-              setAnomalies(detected);
-              const pending = activeRequests.current.get(requestId);
-              if (pending) {
-                pending.resolve(detected);
-                activeRequests.current.delete(requestId);
-              }
-              break;
-            }
-
-            case 'ERROR': {
-              console.error('Worker error received:', res.payload.message);
-              if (res.payload.requestId) {
-                const pending = activeRequests.current.get(res.payload.requestId);
-                if (pending) {
-                  pending.reject(new Error(res.payload.message));
-                  activeRequests.current.delete(res.payload.requestId);
-                }
-              }
-              break;
-            }
-          }
-        };
-
-        worker.onerror = (err) => {
-          console.warn('Worker runtime error, falling back to main-thread processing:', err);
-          isWorkerReadyRef.current = false;
-          setStatus('error');
-        };
-
-        isWorkerReadyRef.current = true;
-        Promise.resolve().then(() => setStatus('ready'));
-      } else {
-        isWorkerReadyRef.current = false;
-        Promise.resolve().then(() => setStatus('error'));
-      }
-    } catch (e) {
-      console.warn('Worker initialization failed, fallback active', e);
-      isWorkerReadyRef.current = false;
-      Promise.resolve().then(() => setStatus('error'));
-    }
-
-    return () => {
-      isWorkerReadyRef.current = false;
-      worker?.terminate();
-      workerRef.current = null;
-    };
-  }, []);
-
-  // Ingest logs in chunks
+  // Ingest logs in chunks (safe for empty 0-record telemetry slices)
   const ingestLogsInChunks = useCallback(
     async (logs: ApiRequestLog[], chunkSize: number = 5000): Promise<void> => {
-      setIsIngesting(true);
       const total = logs.length;
 
       // Always update main thread reference for fast direct querying/fallback
@@ -185,14 +94,35 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
       for (let i = 0; i < total; i++) allIndices[i] = i;
       mainThreadFilteredIndices.current = allIndices;
 
+      if (total === 0) {
+        setTotalLogsCount(0);
+        setFilteredLogsCount(0);
+        setThroughput(0);
+        setActiveMetrics(EMPTY_METRICS);
+        setDeltas(EMPTY_DELTAS);
+        setTimeBuckets([]);
+        setAnomalies([]);
+        setIsIngesting(false);
+        if (workerRef.current && isWorkerReadyRef.current) {
+          workerRef.current.postMessage({ type: 'RESET_LOGS' } satisfies WorkerAction);
+        }
+        return;
+      }
+
+      setIsIngesting(true);
+
       if (workerRef.current && isWorkerReadyRef.current) {
-        const totalChunks = Math.ceil(total / chunkSize);
         for (let i = 0; i < total; i += chunkSize) {
           const chunk = logs.slice(i, i + chunkSize);
           const isFinal = i + chunkSize >= total;
           const action: WorkerAction = {
             type: 'INGEST_CHUNK',
-            payload: { chunk, isFinal, totalExpected: total },
+            payload: {
+              chunk,
+              isFinal,
+              totalExpected: total,
+              replaceExisting: i === 0,
+            },
           };
           workerRef.current.postMessage(action);
           // Yield to event loop to keep UI thread fluid
@@ -337,12 +267,14 @@ export function useTelemetryWorker(): UseTelemetryWorkerReturn {
     mainThreadFilteredIndices.current = new Uint32Array(0);
     setTotalLogsCount(0);
     setFilteredLogsCount(0);
-    setActiveMetrics(null);
-    setDeltas(null);
+    setThroughput(0);
+    setActiveMetrics(EMPTY_METRICS);
+    setDeltas(EMPTY_DELTAS);
     setTimeBuckets([]);
     setAnomalies([]);
+    setIsIngesting(false);
     if (workerRef.current && isWorkerReadyRef.current) {
-      workerRef.current.postMessage({ type: 'MEMORY_GUARD' });
+      workerRef.current.postMessage({ type: 'RESET_LOGS' } satisfies WorkerAction);
     }
   }, []);
 

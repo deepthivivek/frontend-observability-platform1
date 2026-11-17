@@ -1,20 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   BrainCircuit, 
   Network, 
   Workflow, 
   Radio, 
-  Activity, 
   Zap, 
   ShieldAlert, 
   CheckCircle2, 
   RefreshCw, 
   Sliders, 
-  Cpu, 
-  Globe, 
-  Layers 
 } from 'lucide-react';
 
 interface SpikeEvent {
@@ -85,6 +81,81 @@ export default function NeuromorphicMeshView() {
   
   const [loading, setLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const topoCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = topoCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let rafId = 0;
+    let t = 0;
+    const draw = () => {
+      const w = (canvas.width = canvas.clientWidth || 720);
+      const h = (canvas.height = canvas.clientHeight || 140);
+      ctx.clearRect(0, 0, w, h);
+
+      const nodeList = topology?.nodes?.length ? topology.nodes : [
+        { id: 'us-east-1', status: 'HEALTHY' },
+        { id: 'eu-central-1', status: 'HEALTHY' },
+        { id: 'ap-southeast-1', status: 'HEALTHY' },
+        { id: 'sa-east-1', status: 'HEALTHY' },
+      ];
+      const cx = w / 2;
+      const cy = h / 2;
+      const rx = Math.min(w * 0.36, 220);
+      const ry = Math.min(h * 0.32, 46);
+      t += 0.02;
+
+      // Synaptic ring
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(139, 92, 246, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      nodeList.forEach((node, idx) => {
+        const angle = t * 0.35 + (idx / nodeList.length) * Math.PI * 2;
+        const nx = cx + Math.cos(angle) * rx;
+        const ny = cy + Math.sin(angle) * ry;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(34, 211, 238, 0.25)';
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(nx, ny);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.fillStyle = node.status === 'HEALTHY' ? '#10b981' : '#f43f5e';
+        ctx.arc(nx, ny, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.beginPath();
+      ctx.fillStyle = '#8b5cf6';
+      ctx.arc(cx, cy, 8 + Math.sin(t * 2) * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      rafId = requestAnimationFrame(draw);
+    };
+
+    rafId = requestAnimationFrame(draw);
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => {
+        if (canvas.parentElement) {
+          canvas.width = canvas.clientWidth || 720;
+          canvas.height = canvas.clientHeight || 140;
+        }
+      }) : null;
+    if (canvas.parentElement) {
+      resizeObserver?.observe(canvas.parentElement);
+    }
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObserver?.disconnect();
+    };
+  }, [topology?.nodes]);
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -229,14 +300,14 @@ export default function NeuromorphicMeshView() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 text-[var(--text-main)] bg-[var(--bg-canvas)] min-h-screen">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm">
+      <div className="glass-card chromatic-rim flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 text-xs font-mono font-semibold rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20">
+            <span className="px-2.5 py-1 text-xs font-mono font-semibold rounded-md bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/25">
               DAY 21 CAPSTONE
             </span>
-            <span className="px-2.5 py-1 text-xs font-mono font-semibold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              NEUROMORPHIC SNN & BIOPHOTONIC SYNC
+            <span className="px-2.5 py-1 text-xs font-mono font-semibold rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
+              NEUROMORPHIC SNN &amp; BIOPHOTONIC SYNC
             </span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Neuromorphic Mesh Studio</h1>
@@ -244,12 +315,12 @@ export default function NeuromorphicMeshView() {
             Autonomous spiking neural networks, self-healing eBPF mesh rings, slime-mould bio-routing, and biophotonic quantum entanglement sync.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={fetchData}
             className="flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] hover:border-violet-500/50 transition-colors"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-violet-400" />
+            <RefreshCw className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" />
             Refresh Telemetry
           </button>
           <button
@@ -264,7 +335,7 @@ export default function NeuromorphicMeshView() {
       </div>
 
       {actionMessage && (
-        <div className="p-4 rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-300 text-sm flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-violet-500/10 border border-violet-500/30 text-violet-700 dark:text-violet-300 text-sm flex items-center justify-between">
           <span>{actionMessage}</span>
           <button onClick={() => setActionMessage(null)} className="text-xs opacity-70 hover:opacity-100">Dismiss</button>
         </div>
@@ -272,62 +343,75 @@ export default function NeuromorphicMeshView() {
 
       {/* Top Status Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] space-y-2">
+        <div className="glass-card p-4 rounded-xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
             <span>Membrane Potential</span>
-            <BrainCircuit className="w-4 h-4 text-violet-400" />
+            <BrainCircuit className="w-4 h-4 text-violet-500 dark:text-violet-400" />
           </div>
           <div className="text-2xl font-bold font-mono tabular-nums">
             {membraneState ? `${membraneState.globalVoltage} mV` : '-68.4 mV'}
           </div>
-          <div className="text-xs flex items-center gap-1 text-emerald-400 font-mono">
+          <div className="text-xs flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">
             <span>Firing Rate:</span>
             <span>{membraneState ? `${membraneState.averageFiringRateHz} Hz` : '48.2 Hz'}</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] space-y-2">
+        <div className="glass-card p-4 rounded-xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
             <span>Cascading Failure Risk</span>
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
+            <ShieldAlert className="w-4 h-4 text-amber-500 dark:text-amber-400" />
           </div>
           <div className="text-2xl font-bold font-mono tabular-nums">
             {membraneState ? `${(membraneState.cascadingFailureProbability * 100).toFixed(1)}%` : '4.2%'}
           </div>
-          <div className="text-xs font-mono uppercase tracking-wider text-amber-400">
+          <div className="text-xs font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400">
             {membraneState?.status || 'STABLE'}
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] space-y-2">
+        <div className="glass-card p-4 rounded-xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
             <span>Slime-Mould Conductivity</span>
-            <Workflow className="w-4 h-4 text-emerald-400" />
+            <Workflow className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
           </div>
           <div className="text-2xl font-bold font-mono tabular-nums">
             {bioSummary ? `${(bioSummary.averageConductivity * 100).toFixed(1)}%` : '84.0%'}
           </div>
-          <div className="text-xs font-mono text-[var(--text-muted)]">
+          <div className="text-xs font-mono tabular-nums text-[var(--text-muted)]">
             Throughput: {bioSummary?.totalThroughput || 124.6} Gbps
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] space-y-2">
+        <div className="glass-card p-4 rounded-xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
             <span>Biophotonic Fidelity</span>
-            <Radio className="w-4 h-4 text-cyan-400" />
+            <Radio className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
           </div>
           <div className="text-2xl font-bold font-mono tabular-nums">
             {biophotonicStatus ? `${(biophotonicStatus.averageFidelity * 100).toFixed(2)}%` : '99.7%'}
           </div>
-          <div className="text-xs font-mono text-cyan-400">
+          <div className="text-xs font-mono text-cyan-600 dark:text-cyan-400">
             Bell-State |Φ+⟩ Synchronized
           </div>
         </div>
       </div>
 
+      {/* Live Neuromorphic Synaptic Ring Visualizer */}
+      <div className="glass-card rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="space-y-1 shrink-0">
+          <div className="text-xs font-mono font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider">
+            Live Synaptic Ring Topology
+          </div>
+          <div className="text-xs text-[var(--text-muted)] font-mono tabular-nums">
+            Efficiency: {topology?.routingEfficiency ?? 99.8}% · Active Partitions: {topology?.activePartitions ?? 0}
+          </div>
+        </div>
+        <canvas ref={topoCanvasRef} aria-label="Synaptic Ring Visualizer" className="w-full sm:w-2/3 h-[110px]" />
+      </div>
+
       {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-color)] pb-3">
         {[
           { id: 'snn', label: 'Spiking Neural Network (SNN)', icon: BrainCircuit },
           { id: 'mesh', label: 'Autonomous Mesh Ring', icon: Network },
@@ -339,11 +423,11 @@ export default function NeuromorphicMeshView() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'snn' | 'mesh' | 'slime' | 'biophotonic')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium transition-colors ${
                 isActive
-                  ? 'bg-violet-600/20 text-violet-400 border border-violet-500/50'
-                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-color)] hover:text-[var(--text-main)] hover:border-white/20'
+                  ? 'bg-violet-600/20 text-violet-600 dark:text-violet-300 border border-violet-500/50'
+                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-color)] hover:text-[var(--text-main)] hover:border-violet-500/40'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -378,7 +462,7 @@ export default function NeuromorphicMeshView() {
                     className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-color)] text-xs font-mono"
                   >
                     <div className="flex items-center gap-3">
-                      <span className={`w-2 h-2 rounded-full ${spike.fired ? 'bg-rose-500 animate-ping' : 'bg-emerald-500'}`} />
+                      <span className={`w-2 h-2 rounded-full ${spike.fired ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                       <span className="font-semibold text-[var(--text-main)]">{spike.neuronId}</span>
                       <span className="text-[var(--text-muted)] uppercase text-[10px] px-2 py-0.5 rounded bg-[var(--bg-elevated)]">
                         {spike.layer}

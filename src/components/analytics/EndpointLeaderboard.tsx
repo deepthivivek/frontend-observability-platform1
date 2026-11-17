@@ -112,51 +112,59 @@ export const EndpointLeaderboard: React.FC<EndpointLeaderboardProps> = ({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-subtleBorder/60 text-slate-300">
-              {sortedStats.slice(0, 8).map((row) => {
-                const isHighImpact = row.impact > 500;
-                const hasErrors = row.errorRate > 3;
+            <tbody className="divide-y divide-subtleBorder/60 text-customText tabular-nums">
+              {sortedStats.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-xs font-mono text-mutedText">
+                    Awaiting live OpenTelemetry (OTLP) stream...
+                  </td>
+                </tr>
+              ) : (
+                sortedStats.slice(0, 8).map((row) => {
+                  const isHighImpact = row.impact > 500;
+                  const hasErrors = row.errorRate > 3;
 
-                return (
-                  <tr key={row.endpoint} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2.5 px-3 font-semibold text-white max-w-xs truncate">
-                      <button
-                        onClick={() => onFilterEndpoint(row.endpoint)}
-                        title={`Filter log stream by ${row.endpoint}`}
-                        className="hover:text-indigo-400 transition-colors text-left truncate flex items-center gap-1.5"
-                      >
-                        <Filter className="h-3 w-3 text-slate-500 hover:text-indigo-400" />
-                        <span className="truncate">{row.endpoint}</span>
-                      </button>
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-200">{row.volume.toLocaleString()}</td>
-                    <td className="py-2.5 px-3">{row.avgLatency}ms</td>
-                    <td className="py-2.5 px-3 text-amber-300 font-medium">{row.p99Latency}ms</td>
-                    <td className="py-2.5 px-3">
-                      <span
-                        className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
-                          hasErrors
-                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                        }`}
-                      >
-                        {row.errorRate}%
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-right">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded font-bold text-xs ${
-                          isHighImpact
-                            ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/40'
-                            : 'bg-elevated text-slate-400'
-                        }`}
-                      >
-                        {row.impact.toLocaleString()}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={row.endpoint} className="hover:bg-elevated/60 transition-colors">
+                      <td className="py-2.5 px-3 font-semibold text-customText max-w-xs truncate">
+                        <button
+                          onClick={() => onFilterEndpoint(row.endpoint)}
+                          title={`Filter log stream by ${row.endpoint}`}
+                          className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors text-left truncate flex items-center gap-1.5"
+                        >
+                          <Filter className="h-3 w-3 text-mutedText hover:text-indigo-400" />
+                          <span className="truncate">{row.endpoint}</span>
+                        </button>
+                      </td>
+                      <td className="py-2.5 px-3">{row.volume.toLocaleString()}</td>
+                      <td className="py-2.5 px-3">{row.avgLatency}ms</td>
+                      <td className="py-2.5 px-3 text-amber-600 dark:text-amber-300 font-medium">{row.p99Latency}ms</td>
+                      <td className="py-2.5 px-3">
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
+                            hasErrors
+                              ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40'
+                              : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40'
+                          }`}
+                        >
+                          {row.errorRate}%
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-right">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded font-bold text-xs ${
+                            isHighImpact
+                              ? 'bg-indigo-600/25 text-indigo-700 dark:text-indigo-300 border border-indigo-500/40'
+                              : 'bg-elevated text-mutedText'
+                          }`}
+                        >
+                          {row.impact.toLocaleString()}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
