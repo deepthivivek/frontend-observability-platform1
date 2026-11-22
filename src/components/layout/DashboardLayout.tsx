@@ -30,8 +30,12 @@ import {
   Radio,
   RefreshCw,
   WifiOff,
+  Building2,
+  LogOut,
+  Activity,
   Infinity as InfinityIcon,
 } from 'lucide-react';
+import { AuthRole } from '../../types/auth';
 import {
   DashboardView,
   TimeRangePreset,
@@ -75,6 +79,16 @@ interface DashboardLayoutProps {
   streamStatus?: TelemetryConnectionStatus;
   streamTransport?: TelemetryStreamTransport;
   onReconnectStream?: () => void;
+  // Multi-tenant auth header controls
+  activeTenantName?: string;
+  activeUserEmail?: string;
+  activeRole?: AuthRole;
+  onOpenWorkspaceSwitcher?: () => void;
+  onSignOut?: () => void;
+  // Opt-in Live OTLP Traffic Simulator
+  isSimulatingTraffic?: boolean;
+  canSimulateTraffic?: boolean;
+  onToggleTrafficSimulation?: () => void;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -93,6 +107,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   streamStatus = 'connecting',
   streamTransport = 'websocket',
   onReconnectStream,
+  activeTenantName,
+  activeUserEmail,
+  activeRole,
+  onOpenWorkspaceSwitcher,
+  onSignOut,
+  isSimulatingTraffic = false,
+  canSimulateTraffic = false,
+  onToggleTrafficSimulation,
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -601,6 +623,36 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <span>{streamLabel}</span>
               </button>
 
+              {/* Opt-in Live OTLP Traffic Simulator Toggle (Admin / Editor only) */}
+              {onToggleTrafficSimulation && (
+                <button
+                  type="button"
+                  onClick={() => onToggleTrafficSimulation()}
+                  disabled={!canSimulateTraffic}
+                  title={
+                    canSimulateTraffic
+                      ? isSimulatingTraffic
+                        ? 'Stop live microservice OTLP traffic generator'
+                        : 'Simulate Live Microservice Traffic through POST /api/v1/telemetry'
+                      : 'Viewer role is read-only and cannot emit simulated OTLP traffic'
+                  }
+                  aria-pressed={isSimulatingTraffic}
+                  className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono font-medium transition-colors whitespace-nowrap shrink-0 disabled:opacity-45 disabled:cursor-not-allowed ${
+                    isSimulatingTraffic
+                      ? 'border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                      : 'border-subtleBorder bg-surface hover:bg-elevated hover:border-indigo-500/40 text-customText'
+                  }`}
+                >
+                  <Activity className={`h-3.5 w-3.5 ${isSimulatingTraffic ? 'animate-pulse text-emerald-500' : 'text-indigo-500 dark:text-indigo-400'}`} />
+                  <span className="hidden xl:inline">
+                    {isSimulatingTraffic ? 'Stop Traffic Sim' : 'Simulate Live Microservice Traffic'}
+                  </span>
+                  <span className="xl:hidden">
+                    {isSimulatingTraffic ? 'Stop Sim' : 'Sim Traffic'}
+                  </span>
+                </button>
+              )}
+
               {/* Quick Actions Trigger (⌘K / /) */}
               <button
                 type="button"
@@ -614,6 +666,46 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   ⌘K /
                 </kbd>
               </button>
+
+              {/* Workspace / Login Switcher */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenWorkspaceSwitcher) {
+                    onOpenWorkspaceSwitcher();
+                  } else {
+                    window.location.href = '/login';
+                  }
+                }}
+                title={
+                  activeUserEmail
+                    ? `Signed in as ${activeUserEmail} (${activeRole || 'member'}). Click to switch company or manage sessions.`
+                    : 'Switch Company Workspace or Sign In'
+                }
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 text-xs font-mono font-medium transition-colors whitespace-nowrap shrink-0 max-w-[200px]"
+              >
+                <Building2 className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden sm:inline truncate">
+                  {activeTenantName || 'Workspace / Login'}
+                </span>
+                {activeRole && (
+                  <span className="hidden xl:inline text-[10px] uppercase px-1.5 py-0.2 rounded bg-cyan-500/20 border border-cyan-500/30">
+                    {activeRole}
+                  </span>
+                )}
+              </button>
+
+              {onSignOut && (
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  title="Sign Out"
+                  aria-label="Sign Out"
+                  className="p-2 rounded-xl border border-subtleBorder bg-surface hover:bg-rose-500/10 hover:border-rose-500/40 text-mutedText hover:text-rose-600 dark:hover:text-rose-400 transition-colors shrink-0"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              )}
 
               {/* Seamless Light/Dark Mode Switcher */}
               <button

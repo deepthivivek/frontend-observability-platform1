@@ -108,11 +108,75 @@ export function buildCorrelationHeaders(extra?: Record<string, string>): Record<
   return headers;
 }
 
+export interface SafeJsonResponse<T> {
+  ok: boolean;
+  status: number;
+  data: T | null;
+  error: string | null;
+}
+
+/**
+ * Safely fetches JSON from an API route. Always checks Content-Type before parsing JSON
+ * so HTML 404/500 responses never trigger `Unexpected token '<'` crashes.
+ */
+export async function safeApiFetchJson<T = Record<string, unknown>>(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<SafeJsonResponse<T>> {
+  try {
+    const res = await fetch(input, {
+      credentials: 'include',
+      cache: 'no-store',
+      ...init,
+    });
+
+    const contentType = res.headers.get('content-type') || '';
+    const isJson = contentType.toLowerCase().includes('application/json');
+
+    if (isJson) {
+      const parsed = (await res.json().catch(() => null)) as (T & { error?: string }) | null;
+      if (!res.ok) {
+        return {
+          ok: false,
+          status: res.status,
+          data: parsed,
+          error: (parsed && typeof parsed.error === 'string' && parsed.error) || `Request failed (HTTP ${res.status})`,
+        };
+      }
+      return {
+        ok: true,
+        status: res.status,
+        data: parsed,
+        error: null,
+      };
+    }
+
+    const text = await res.text().catch(() => '');
+    const cleanedPreview = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
+    return {
+      ok: false,
+      status: res.status,
+      data: null,
+      error: res.ok
+        ? 'Unexpected non-JSON response received from server.'
+        : `Server returned non-JSON error (HTTP ${res.status})${cleanedPreview ? `: ${cleanedPreview}` : ''}`,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      status: 0,
+      data: null,
+      error: err instanceof Error ? err.message : 'Network error reaching backend API.',
+    };
+  }
+}
+
 let fetchInterceptorInstalled = false;
 
 /**
  * Installs an idempotent same-origin fetch wrapper that ensures every API/health request
- * automatically includes X-Request-ID, X-Trace-ID, X-Tenant-ID, and Authorization headers.
+ * automatically includes X-Request-ID, X-Trace-ID, X-Tenant-ID, credentials, and emits
+ * a mid-session expiry event when protected API calls return HTTP 401.
  */
 export function installCorrelationFetchInterceptor(): () => void {
   if (typeof window === 'undefined' || fetchInterceptorInstalled) {
@@ -164,11 +228,43 @@ export function installCorrelationFetchInterceptor(): () => void {
     if (!headers.has('X-Tenant-ID')) {
       headers.set('X-Tenant-ID', settings.tenantId || 'default-tenant');
     }
-    if (settings.tenantApiKey && !headers.has('Authorization')) {
+    if (settings.tenantApiKey && !headers.has('Authorization') && !urlStr.includes('/api/v1/auth/')) {
       headers.set('Authorization', `Bearer ${settings.tenantApiKey}`);
     }
 
-    return boundFetch(input, { ...init, headers });
+    const hadExplicitAuthHeader = Boolean(
+      init?.headers &&
+        new Headers(init.headers).has('Authorization')
+    );
+
+    const res = await boundFetch(input, {
+      ...init,
+      credentials: init?.credentials || 'include',
+      headers,
+    });
+
+    if (
+      res.status === 401 &&
+      !hadExplicitAuthHeader &&
+      !urlStr.includes('/api/v1/auth/')
+    ) {
+      void boundFetch('/api/v1/auth/session', {
+        credentials: 'include',
+        cache: 'no-store',
+      })
+        .then(async (sessionRes) => {
+          const ct = sessionRes.headers.get('content-type') || '';
+          if (sessionRes.ok && ct.toLowerCase().includes('application/json')) {
+            const payload = (await sessionRes.json().catch(() => null)) as { authenticated?: boolean } | null;
+            if (payload && payload.authenticated === false) {
+              window.dispatchEvent(new CustomEvent('neon-chasm-session-expired'));
+            }
+          }
+        })
+        .catch(() => {});
+    }
+
+    return res;
   };
 
   try {

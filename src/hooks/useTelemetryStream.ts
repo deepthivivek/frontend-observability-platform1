@@ -194,7 +194,7 @@ export function useTelemetryStream(options: UseTelemetryStreamOptions = {}) {
       }
 
       try {
-        const es = new EventSource(sseUrl);
+        const es = new EventSource(sseUrl, { withCredentials: true });
         sseRef.current = es;
 
         es.onopen = () => {
@@ -323,8 +323,26 @@ export function useTelemetryStream(options: UseTelemetryStreamOptions = {}) {
       }
     }, 1500);
 
+    const handleSessionExpired = () => {
+      unmounted = true;
+      clearTimeout(fallbackTimer);
+      clearTimers();
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      if (sseRef.current) {
+        sseRef.current.close();
+        sseRef.current = null;
+      }
+      setSnapshot((prev) => ({ ...prev, status: 'offline', reconnectAttempt: 0 }));
+    };
+
+    window.addEventListener('neon-chasm-session-expired', handleSessionExpired);
+
     return () => {
       unmounted = true;
+      window.removeEventListener('neon-chasm-session-expired', handleSessionExpired);
       clearTimeout(fallbackTimer);
       clearTimers();
       if (rafScheduledRef.current !== null) {

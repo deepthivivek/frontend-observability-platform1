@@ -32,6 +32,7 @@ export class AtomicStateStore {
   constructor(baseDir?: string) {
     this.baseDir =
       baseDir ||
+      process.env.DATA_DIR ||
       process.env.NEON_CHASM_STATE_DIR ||
       path.join(os.tmpdir(), 'neon-chasm-state');
   }

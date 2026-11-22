@@ -1,8 +1,12 @@
-import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { akashaOmegaCore } from '@/server/src/swarm/akashaOmegaCore';
 import { AkashaConvergeSchema } from '@/server/src/middleware/productionHardening';
-import { resolveUpstreamGatewayUrl } from '@/lib/upstreamProxy';
+import {
+  getAuthStore,
+  getPrivateHeaders,
+  validateCsrfOrigin,
+} from '@/src/lib/server/authStore';
+import { authenticateTenantSession, getRequestId } from '@/src/lib/server/authRequestHelper';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,34 +15,28 @@ export async function GET(
   context: { params: Promise<{ action: string }> }
 ) {
   const { action } = await context.params;
-  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
-  const upstream = resolveUpstreamGatewayUrl(req);
+  const requestId = getRequestId(req);
 
-  if (upstream) {
-    const res = await fetch(`${upstream}/api/v1/swarm/akasha/${action}`, {
-      headers: { 'X-Request-ID': requestId, 'x-neon-chasm-proxied': '1' },
-      cache: 'no-store',
-    });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status, headers: { 'X-Request-ID': requestId } });
+  const auth = authenticateTenantSession(req, requestId);
+  if (!auth.ok) {
+    return auth.response;
   }
+
+  const headers = getPrivateHeaders(requestId, auth.tenant.tenantId);
 
   if (action === 'state') {
-    return NextResponse.json(akashaOmegaCore.getUnifiedState(), { headers: { 'X-Request-ID': requestId } });
+    return NextResponse.json(akashaOmegaCore.getUnifiedState(), { headers });
   }
   if (action === 'field') {
-    return NextResponse.json(akashaOmegaCore.getTimelineConvergenceField(), { headers: { 'X-Request-ID': requestId } });
+    return NextResponse.json(akashaOmegaCore.getTimelineConvergenceField(), { headers });
   }
   if (action === 'history') {
-    return NextResponse.json(
-      { history: akashaOmegaCore.getConvergenceHistory() },
-      { headers: { 'X-Request-ID': requestId } }
-    );
+    return NextResponse.json({ history: akashaOmegaCore.getConvergenceHistory() }, { headers });
   }
 
   return NextResponse.json(
     { error: 'Unknown Akasha endpoint.', code: 'NOT_FOUND', requestId },
-    { status: 404, headers: { 'X-Request-ID': requestId } }
+    { status: 404, headers }
   );
 }
 
@@ -47,29 +45,40 @@ export async function POST(
   context: { params: Promise<{ action: string }> }
 ) {
   const { action } = await context.params;
-  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
+  const requestId = getRequestId(req);
 
-  if (action !== 'converge') {
-    return NextResponse.json({ error: 'Unsupported action.', code: 'NOT_FOUND', requestId }, { status: 404 });
+  if (!validateCsrfOrigin(req)) {
+    return NextResponse.json(
+      { error: 'Invalid CSRF request origin.', code: 'CSRF_FORBIDDEN', requestId },
+      { status: 403, headers: getPrivateHeaders(requestId) }
+    );
   }
 
-  const upstream = resolveUpstreamGatewayUrl(req);
+  const auth = authenticateTenantSession(req, requestId);
+  if (!auth.ok) {
+    return auth.response;
+  }
+  const store = getAuthStore();
+
+  if (auth.role === 'viewer') {
+    return NextResponse.json(
+      { error: 'Viewer role cannot execute Akasha convergence actions.', code: 'ROLE_FORBIDDEN', requestId },
+      { status: 403, headers: getPrivateHeaders(requestId, auth.tenant.tenantId) }
+    );
+  }
+
+  if (action !== 'converge') {
+    return NextResponse.json(
+      { error: 'Unsupported action.', code: 'NOT_FOUND', requestId },
+      { status: 404, headers: getPrivateHeaders(requestId, auth.tenant.tenantId) }
+    );
+  }
+
   let body: unknown = {};
   try {
     body = await req.json();
   } catch {
     body = {};
-  }
-
-  if (upstream) {
-    const res = await fetch(`${upstream}/api/v1/swarm/akasha/converge`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Request-ID': requestId, 'x-neon-chasm-proxied': '1' },
-      body: JSON.stringify(body),
-      cache: 'no-store',
-    });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status, headers: { 'X-Request-ID': requestId } });
   }
 
   const parsed = AkashaConvergeSchema.safeParse(body);
@@ -85,7 +94,7 @@ export async function POST(
           code: issue.code,
         })),
       },
-      { status: 400, headers: { 'X-Request-ID': requestId } }
+      { status: 400, headers: getPrivateHeaders(requestId, auth.tenant.tenantId) }
     );
   }
 
@@ -94,9 +103,10 @@ export async function POST(
     timelineSpanYears: parsed.data.timelineSpanYears ?? 1000,
   });
   const state = akashaOmegaCore.getUnifiedState();
+  store.appendAudit(auth.tenant.tenantId, auth.user.email, 'AKASHA_CONVERGE', parsed.data.triggerVector || 'manual-converge', requestId);
 
   return NextResponse.json(
     { success: true, requestId, event, state },
-    { status: 201, headers: { 'X-Request-ID': requestId } }
+    { status: 201, headers: getPrivateHeaders(requestId, auth.tenant.tenantId) }
   );
 }

@@ -1,27 +1,29 @@
-import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { statePersistence } from '@/server/src/storage/statePersistence';
-import { resolveUpstreamGatewayUrl } from '@/lib/upstreamProxy';
+import {
+  getAuthStore,
+  getPrivateHeaders,
+  validateCsrfOrigin,
+} from '@/src/lib/server/authStore';
+import {
+  authenticateSessionOrApiKey,
+  authenticateTenantSession,
+  getRequestId,
+  requireStepUpAuth,
+} from '@/src/lib/server/authRequestHelper';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
-  const tenantId = (req.headers.get('x-tenant-id') || 'default-tenant').trim() || 'default-tenant';
-  const upstream = resolveUpstreamGatewayUrl(req);
-
-  if (upstream) {
-    const res = await fetch(`${upstream}/api/v1/telemetry/recent`, {
-      headers: { 'X-Request-ID': requestId, 'X-Tenant-ID': tenantId, 'x-neon-chasm-proxied': '1' },
-      cache: 'no-store',
-    });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status, headers: { 'X-Request-ID': requestId } });
+  const requestId = getRequestId(req);
+  const auth = authenticateSessionOrApiKey(req, 'telemetry:read', requestId);
+  if (!auth.ok) {
+    return auth.response;
   }
 
+  const tenantId = auth.tenant.tenantId;
+  const store = getAuthStore();
   const limit = Math.min(500, Math.max(1, Number(req.nextUrl.searchParams.get('limit') || 200)));
-  const snap = statePersistence.loadSnapshot<Record<string, unknown>[]>('recent-telemetry', []);
-  const records = Array.isArray(snap.data) ? snap.data.slice(-limit) : [];
+  const records = store.getTelemetryRecords(tenantId, limit);
 
   return NextResponse.json(
     {
@@ -31,6 +33,48 @@ export async function GET(req: NextRequest) {
       records,
       timestamp: Date.now(),
     },
-    { status: 200, headers: { 'X-Request-ID': requestId, 'X-Tenant-ID': tenantId } }
+    { status: 200, headers: getPrivateHeaders(requestId, tenantId) }
+  );
+}
+
+export async function DELETE(req: NextRequest) {
+  const requestId = getRequestId(req);
+  if (!validateCsrfOrigin(req)) {
+    return NextResponse.json(
+      { error: 'Invalid CSRF request origin.', code: 'CSRF_FORBIDDEN', requestId },
+      { status: 403, headers: getPrivateHeaders(requestId) }
+    );
+  }
+
+  const store = getAuthStore();
+  const sessAuth = authenticateTenantSession(req, requestId);
+  if (!sessAuth.ok) {
+    return sessAuth.response;
+  }
+
+  if (sessAuth.role !== 'admin') {
+    return NextResponse.json(
+      { error: 'Administrator privileges required to purge tenant telemetry.', code: 'FORBIDDEN_ADMIN', requestId },
+      { status: 403, headers: getPrivateHeaders(requestId, sessAuth.tenant.tenantId) }
+    );
+  }
+
+  const stepUpDenied = requireStepUpAuth(sessAuth, requestId);
+  if (stepUpDenied) return stepUpDenied;
+
+  const purgedCount = store.purgeTelemetryRecords(
+    sessAuth.tenant.tenantId,
+    sessAuth.user.email,
+    requestId
+  );
+
+  return NextResponse.json(
+    {
+      ok: true,
+      tenantId: sessAuth.tenant.tenantId,
+      purgedCount,
+      requestId,
+    },
+    { status: 200, headers: getPrivateHeaders(requestId, sessAuth.tenant.tenantId) }
   );
 }

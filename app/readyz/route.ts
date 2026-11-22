@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { statePersistence } from '@/server/src/storage/statePersistence';
 import { resolveUpstreamGatewayUrl } from '@/lib/upstreamProxy';
+import { getAuthStore } from '@/src/lib/server/authStore';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,12 +23,21 @@ export async function GET(req: NextRequest) {
       const body = await res.json();
       return NextResponse.json(body, {
         status: res.status,
-        headers: { 'X-Request-ID': requestId },
+        headers: {
+          'X-Request-ID': requestId,
+          'Cache-Control': 'private, no-store, max-age=0',
+        },
       });
     } catch {
       return NextResponse.json(
         { status: 'NOT_READY', reason: 'UPSTREAM_GATEWAY_UNREACHABLE', requestId, timestamp: Date.now() },
-        { status: 503, headers: { 'X-Request-ID': requestId } }
+        {
+          status: 503,
+          headers: {
+            'X-Request-ID': requestId,
+            'Cache-Control': 'private, no-store, max-age=0',
+          },
+        }
       );
     }
   }
@@ -37,6 +47,8 @@ export async function GET(req: NextRequest) {
   const freeMemRatio = totalMem > 0 ? freeMem / totalMem : 1.0;
   const freeMemPct = Number((freeMemRatio * 100).toFixed(2));
   const memoryHealthy = freeMemRatio > 0.05;
+
+  const platformTelemetry = getAuthStore().getPlatformDiagnostics();
 
   const stateDir = statePersistence.getDirectory();
   let stateDirWritable = false;
@@ -52,7 +64,6 @@ export async function GET(req: NextRequest) {
 
   const akashaIntegrity = statePersistence.verifySnapshotIntegrity('akasha-omega-state');
   const auditIntegrity = statePersistence.verifySnapshotIntegrity('audit-log-chain');
-  const telemetrySnap = statePersistence.loadSnapshot<unknown[]>('recent-telemetry', []);
   const akashaSnap = statePersistence.loadSnapshot<{
     cycleEpoch?: number;
     cumulativeDissolvedLatencyMs?: number;
@@ -77,10 +88,13 @@ export async function GET(req: NextRequest) {
   const components = {
     otlpIngestion: {
       status: 'READY',
-      batchesIngested: telemetrySnap.data.length > 0 ? 1 : 0,
-      recordsIngested: telemetrySnap.data.length,
-      lastIngestedAt: telemetrySnap.data.length > 0 ? Date.now() : null,
-      connectedStreamSubscribers: 0,
+      batchesIngested: platformTelemetry.totalIngestBatches,
+      recordsIngested: platformTelemetry.totalBufferedRecords,
+      totalIngestedRecords: platformTelemetry.totalIngestedRecords,
+      redactedSecretsTotal: platformTelemetry.redactedSecretsTotal,
+      ingestionEventsPerSec: platformTelemetry.ingestionEventsPerSec,
+      lastIngestedAt: platformTelemetry.totalIngestedRecords > 0 ? Date.now() : null,
+      connectedStreamSubscribers: platformTelemetry.activeSseSubscribers,
     },
     statePersistence: {
       status: stateDirWritable ? 'READY' : 'DEGRADED',
@@ -113,10 +127,17 @@ export async function GET(req: NextRequest) {
       requestId,
       uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000),
       freeMemoryPct: freeMemPct,
+      platformTelemetry,
       components,
       subsystems,
       timestamp: Date.now(),
     },
-    { status: isReady ? 200 : 503, headers: { 'X-Request-ID': requestId } }
+    {
+      status: isReady ? 200 : 503,
+      headers: {
+        'X-Request-ID': requestId,
+        'Cache-Control': 'private, no-store, max-age=0',
+      },
+    }
   );
 }

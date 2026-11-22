@@ -1,0 +1,45 @@
+name: CI Security & Quality Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck-lint-build-security:
+    name: Typecheck, ESLint, Next Build & Security Isolation Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Production Dependency Audit
+        run: |
+          npm audit --omit=dev --audit-level=critical
+          npm audit --omit=dev --audit-level=high || true
+
+      - name: TypeScript Strict Check
+        run: npx tsc --noEmit
+
+      - name: ESLint Zero-Warning Check
+        run: npm run lint
+
+      - name: Production Next.js Build
+        run: npm run build
+
+      - name: Multi-Tenant Security & Isolation Suite
+        run: npm run test:security

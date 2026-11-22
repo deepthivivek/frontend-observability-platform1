@@ -47,6 +47,7 @@ import { neuromorphicMeshRouter } from './routes/neuromorphicMesh';
 import { syntheticDreamRouter } from './routes/syntheticDream';
 import { healthRouter, recordOtlpIngestionMetrics } from './routes/health';
 import { swarmRouter } from './routes/swarm';
+import { authAndTenantRouter } from './routes/authAndTenant';
 
 // Execute enterprise environment validation
 const enterpriseConfig = validateEnterpriseEnvironment();
@@ -518,6 +519,7 @@ app.use('/api/v1/dna', syntheticDreamRouter);
 app.use('/api/v1/dream', syntheticDreamRouter);
 app.use('/api/v1/resonance', syntheticDreamRouter);
 app.use('/api/v1/swarm', swarmRouter);
+app.use('/api/v1', authAndTenantRouter);
 
 // PromQL / LogQL Metric Query API
 app.post('/api/v1/metrics/query', validateBody(PromqlQuerySchema), (req: Request, res: Response) => {

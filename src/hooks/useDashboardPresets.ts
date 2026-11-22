@@ -119,33 +119,35 @@ const INITIAL_PRESETS: DashboardPreset[] = [
   },
 ];
 
-export function useDashboardPresets() {
+import { safeApiFetchJson } from '../utils/apiClient';
+
+export function useDashboardPresets(workspaceId: string = 'ws-default') {
   const [presets, setPresets] = useState<DashboardPreset[]>(() => INITIAL_PRESETS);
   const [activePresetId, setActivePresetId] = useState<string>('preset-sre-health');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [activeWidgets, setActiveWidgets] = useState<MetricWidget[]>(() => INITIAL_PRESETS[0].widgets);
 
-  // Sync with backend API
+  // Sync with tenant-isolated backend API
   useEffect(() => {
     let isMounted = true;
     const loadBackendPresets = async () => {
-      try {
-        const res = await fetch('/api/v1/dashboards/presets');
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted && Array.isArray(data.presets) && data.presets.length > 0) {
-            setPresets(data.presets);
-          }
-        }
-      } catch {
-        // Offline fallback to initial state
+      const res = await safeApiFetchJson<{ presets?: DashboardPreset[] }>('/api/v1/dashboards/presets');
+      if (isMounted && res.ok && res.data && Array.isArray(res.data.presets) && res.data.presets.length > 0) {
+        const merged = [...res.data.presets, ...INITIAL_PRESETS.filter((d) => !res.data!.presets!.some((p) => p.id === d.id))];
+        setPresets(merged);
+        setActivePresetId(merged[0].id);
+        setActiveWidgets(merged[0].widgets);
+      } else if (isMounted) {
+        setPresets(INITIAL_PRESETS);
+        setActivePresetId(INITIAL_PRESETS[0].id);
+        setActiveWidgets(INITIAL_PRESETS[0].widgets);
       }
     };
-    loadBackendPresets();
+    void loadBackendPresets();
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [workspaceId]);
 
   const selectPreset = useCallback(
     (presetId: string) => {
@@ -173,15 +175,11 @@ export function useDashboardPresets() {
       setPresets((prev) => [newPreset, ...prev]);
       setActivePresetId(newPreset.id);
 
-      try {
-        await fetch('/api/v1/dashboards/presets', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newPreset),
-        });
-      } catch {
-        // Ignored
-      }
+      await safeApiFetchJson('/api/v1/dashboards/presets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPreset),
+      });
     },
     []
   );
@@ -189,13 +187,9 @@ export function useDashboardPresets() {
   const deletePreset = useCallback(async (presetId: string) => {
     setPresets((prev) => prev.filter((p) => p.id !== presetId));
 
-    try {
-      await fetch(`/api/v1/dashboards/presets/${presetId}`, {
-        method: 'DELETE',
-      });
-    } catch {
-      // Ignored
-    }
+    await safeApiFetchJson(`/api/v1/dashboards/presets/${encodeURIComponent(presetId)}`, {
+      method: 'DELETE',
+    });
   }, []);
 
   const exportPresetsJSON = useCallback(() => {

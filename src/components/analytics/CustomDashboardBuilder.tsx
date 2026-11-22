@@ -39,7 +39,7 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({ 
     deletePreset,
     exportPresetsJSON,
     importPresetsJSON,
-  } = useDashboardPresets();
+  } = useDashboardPresets(workspaceId);
 
   const [refreshIntervalMs, setRefreshIntervalMs] = useState<number>(15000); // default 15s
   const [lastRefreshedAt, setLastRefreshedAt] = useState<number>(() => Date.now());

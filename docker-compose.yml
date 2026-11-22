@@ -1,66 +1,21 @@
 services:
-  neon-chasm-gateway:
+  neon-chasm:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: neon-chasm-gateway
-    command: ["npx", "tsx", "server/src/index.ts"]
-    ports:
-      - "4000:4000"
-    environment:
-      NODE_ENV: production
-      PORT: "4000"
-      NEON_CHASM_STATE_DIR: /var/lib/neon-chasm-state
-      JWT_SECRET: ${JWT_SECRET:-neon_chasm_jwt_enterprise_master_secret_key_32chars}
-      PQC_LATTICE_SEED: ${PQC_LATTICE_SEED:-pqc_ml_kem_1024_seed_key_64}
-      ENCRYPTION_MASTER_KEY: ${ENCRYPTION_MASTER_KEY:-fhe_aes256_gcm_master_vault_key_32bytes}
-      TENANT_AUTH_REQUIRED: ${TENANT_AUTH_REQUIRED:-false}
-      TENANT_API_KEYS: ${TENANT_API_KEYS:-}
-      RATE_LIMIT_BURST: ${RATE_LIMIT_BURST:-240}
-      RATE_LIMIT_RPS: ${RATE_LIMIT_RPS:-60}
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-    volumes:
-      - neon-chasm-state:/var/lib/neon-chasm-state
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    tmpfs:
-      - /tmp:rw,noexec,nosuid,size=256m
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 2048M
-        reservations:
-          cpus: "0.5"
-          memory: 512M
-    healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/readyz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
-      interval: 15s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
-    restart: unless-stopped
-
-  neon-chasm-web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: neon-chasm-web
+    container_name: neon-chasm
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
       PORT: "3000"
-      BACKEND_GATEWAY_URL: http://neon-chasm-gateway:4000
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
-      NEXT_PUBLIC_WS_URL: ws://localhost:4000/ws/telemetry
-    depends_on:
-      neon-chasm-gateway:
-        condition: service_healthy
-    read_only: true
+      HOSTNAME: "0.0.0.0"
+      DATA_DIR: /app/data
+      NEON_CHASM_STATE_DIR: /app/data
+      DEFAULT_TENANT_RATE_LIMIT_RPS: ${DEFAULT_TENANT_RATE_LIMIT_RPS:-1000}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET (>=32 chars) in .env before starting production containers}
+    volumes:
+      - ./data:/app/data
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -70,17 +25,17 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.5"
-          memory: 1536M
+          cpus: "2.0"
+          memory: 2048M
         reservations:
           cpus: "0.25"
           memory: 256M
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/readyz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 15s
       timeout: 3s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     restart: unless-stopped
 
   otel-collector:
@@ -107,10 +62,6 @@ services:
           cpus: "0.25"
           memory: 256M
     depends_on:
-      neon-chasm-gateway:
+      neon-chasm:
         condition: service_healthy
     restart: unless-stopped
-
-volumes:
-  neon-chasm-state:
-    driver: local

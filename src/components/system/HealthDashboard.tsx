@@ -20,17 +20,35 @@ interface LivenessPayload {
   timestamp: number;
 }
 
+interface PlatformTelemetryPayload {
+  activeSseSubscribers: number;
+  totalTenants: number;
+  totalUsers: number;
+  totalBufferedRecords: number;
+  estimatedBufferBytes: number;
+  authChecksTotal: number;
+  authChecksDenied: number;
+  totalIngestBatches: number;
+  totalIngestedRecords: number;
+  redactedSecretsTotal?: number;
+  ingestionEventsPerSec: number;
+  uptimeSeconds: number;
+}
+
 interface ReadinessPayload {
   status: string;
   requestId?: string;
   reason?: string;
   uptimeSeconds: number;
   freeMemoryPct: number;
+  platformTelemetry?: PlatformTelemetryPayload;
   components?: {
     otlpIngestion?: {
       status: string;
       batchesIngested: number;
       recordsIngested: number;
+      totalIngestedRecords?: number;
+      ingestionEventsPerSec?: number;
       lastIngestedAt: number | null;
       connectedStreamSubscribers: number;
     };
@@ -99,6 +117,7 @@ export const HealthDashboard: React.FC = () => {
   const otlp = readiness?.components?.otlpIngestion;
   const persistence = readiness?.components?.statePersistence;
   const akasha = readiness?.components?.akashaConvergence;
+  const selfTelemetry = readiness?.platformTelemetry;
 
   return (
     <section
@@ -118,7 +137,7 @@ export const HealthDashboard: React.FC = () => {
           </div>
           <div>
             <h2 className="text-sm font-semibold text-customText">
-              System Health &amp; Readiness Probes
+              System Health, Readiness &amp; Platform Self-Telemetry
             </h2>
             <p className="text-xs text-mutedText font-mono tabular-nums">
               {isLoading
@@ -175,10 +194,10 @@ export const HealthDashboard: React.FC = () => {
             </span>
           </div>
           <div className="text-lg font-semibold font-mono tabular-nums text-customText">
-            {(otlp?.recordsIngested ?? 0).toLocaleString()} records
+            {(otlp?.recordsIngested ?? 0).toLocaleString()} buffered
           </div>
           <p className="text-[11px] font-mono tabular-nums text-mutedText">
-            Batches: {otlp?.batchesIngested ?? 0} · Subscribers: {otlp?.connectedStreamSubscribers ?? 0}
+            Batches: {otlp?.batchesIngested ?? 0} · Rate: {selfTelemetry?.ingestionEventsPerSec ?? 0} EPS · SSE: {otlp?.connectedStreamSubscribers ?? 0} · Redacted: {selfTelemetry?.redactedSecretsTotal ?? 0}
           </p>
         </div>
 
@@ -186,7 +205,7 @@ export const HealthDashboard: React.FC = () => {
           <div className="flex items-center justify-between text-xs text-mutedText">
             <span className="font-medium text-customText flex items-center gap-1.5">
               <Database className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
-              Atomic WAL Persistence
+              Engine Buffer &amp; WAL Storage
             </span>
             <span
               className={`font-mono font-semibold ${
@@ -198,11 +217,11 @@ export const HealthDashboard: React.FC = () => {
               {persistence?.status || 'UNKNOWN'}
             </span>
           </div>
-          <div className="text-sm font-mono font-semibold text-customText truncate" title={persistence?.directory}>
-            {persistence?.directory || '/tmp/neon-chasm-state'}
+          <div className="text-lg font-semibold font-mono tabular-nums text-customText">
+            {((selfTelemetry?.estimatedBufferBytes ?? 0) / 1024).toFixed(1)} KB
           </div>
-          <p className="text-[11px] font-mono text-mutedText">
-            WAL Writable: {persistence?.writable ? 'Yes' : 'No'} · Akasha SHA-256: {persistence?.akashaChecksumValid ? 'Verified' : 'Genesis'}
+          <p className="text-[11px] font-mono text-mutedText truncate" title={persistence?.directory}>
+            Tenants: {selfTelemetry?.totalTenants ?? 0} · Auth Denials: {selfTelemetry?.authChecksDenied ?? 0}/{selfTelemetry?.authChecksTotal ?? 0}
           </p>
         </div>
 

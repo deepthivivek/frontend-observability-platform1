@@ -126,7 +126,9 @@ import {
   createW3cTraceId,
   installCorrelationFetchInterceptor,
   loadNeonChasmSettings,
+  safeApiFetchJson,
 } from '../../utils/apiClient';
+import { AuthSessionPayload } from '../../types/auth';
 import {
   UploadCloud,
   Layers,
@@ -300,10 +302,26 @@ const DEFAULT_ON_CALL: OnCallShift = {
   untilIso: '2026-12-31T23:59:59.000Z',
 };
 
-export const DashboardContainer: React.FC = () => {
+interface DashboardContainerProps {
+  authSession?: AuthSessionPayload;
+  onOpenWorkspaceSwitcher?: () => void;
+  onSwitchTenant?: (tenantId: string) => Promise<void>;
+  onSignOut?: () => void;
+}
+
+export const DashboardContainer: React.FC<DashboardContainerProps> = ({
+  authSession,
+  onOpenWorkspaceSwitcher,
+  onSwitchTenant,
+  onSignOut,
+}) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const currentRole = authSession?.role || 'admin';
+  const canOperateWrite = currentRole === 'admin' || currentRole === 'editor';
+  const canAdministerTenant = currentRole === 'admin';
 
   const urlViewParam = searchParams.get('view');
   const activeView: DashboardView =
@@ -329,6 +347,7 @@ export const DashboardContainer: React.FC = () => {
     DEFAULT_NEON_CHASM_SETTINGS
   );
   const [isSendingDiagnostic, setIsSendingDiagnostic] = useState(false);
+  const [isSimulatingTraffic, setIsSimulatingTraffic] = useState(false);
   const [copiedCurl, setCopiedCurl] = useState(false);
   const [clientOrigin, setClientOrigin] = useState('http://localhost:3000');
 
@@ -347,27 +366,44 @@ export const DashboardContainer: React.FC = () => {
 
   const [deepLinkedTraceId, setDeepLinkedTraceId] = useState<string | undefined>(undefined);
 
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([
-    {
-      id: 'ws-prod-us',
-      name: 'Production US-East Core',
-      region: 'US-East',
-      mTLSRequired: true,
-      encryptionAtRest: true,
-      idleTimeoutMinutes: 10,
-      activeEndpoint: '/api/v1/telemetry',
-    },
-    {
-      id: 'ws-staging-eu',
-      name: 'Staging EU-Central Privacy',
-      region: 'EU-Central',
-      mTLSRequired: true,
-      encryptionAtRest: true,
-      idleTimeoutMinutes: 15,
-      activeEndpoint: '/api/v1/telemetry',
-    },
-  ]);
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>(workspaces[0]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>(() => {
+    if (authSession?.tenants && authSession.tenants.length > 0) {
+      return authSession.tenants.map((t) => ({
+        id: t.tenantId,
+        name: t.name,
+        region: 'US-East',
+        mTLSRequired: true,
+        encryptionAtRest: true,
+        idleTimeoutMinutes: 15,
+        activeEndpoint: '/api/v1/telemetry',
+      }));
+    }
+    return [
+      {
+        id: authSession?.tenant?.tenantId || 'ws-default',
+        name: authSession?.tenant?.name || 'Active Organization Workspace',
+        region: 'US-East',
+        mTLSRequired: true,
+        encryptionAtRest: true,
+        idleTimeoutMinutes: 15,
+        activeEndpoint: '/api/v1/telemetry',
+      },
+    ];
+  });
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>(() => {
+    if (authSession?.tenant) {
+      return {
+        id: authSession.tenant.tenantId,
+        name: authSession.tenant.name,
+        region: 'US-East',
+        mTLSRequired: true,
+        encryptionAtRest: true,
+        idleTimeoutMinutes: 15,
+        activeEndpoint: '/api/v1/telemetry',
+      };
+    }
+    return workspaces[0];
+  });
 
   const [roles, setRoles] = useState<RoleDefinition[]>([
     {
@@ -517,30 +553,28 @@ export const DashboardContainer: React.FC = () => {
   );
 
   const syncFromTelemetryEndpoint = useCallback(async (limit: number = 500) => {
-    try {
-      const res = await fetch(`/api/v1/telemetry/recent?limit=${limit}`, {
+    const res = await safeApiFetchJson<{ records?: ApiRequestLog[]; error?: string }>(
+      `/api/v1/telemetry/recent?limit=${limit}`,
+      {
         cache: 'no-store',
         headers: buildCorrelationHeaders(),
-      });
-      if (!res.ok) {
-        setLiveAnnouncement(`Telemetry sync returned HTTP ${res.status}.`);
-        return;
       }
-      const data = (await res.json()) as { records?: ApiRequestLog[] };
-      const records = Array.isArray(data.records) ? data.records : [];
-      const w = workerRef.current;
-      await w.ingestLogsInChunks(records, Math.max(50, Math.min(400, records.length || 50)));
-      await w.refreshMetrics();
-      await w.computeBuckets(1);
-      await w.evaluateAnomalies(buildAnomalyRules(settingsRef.current));
-      setLiveAnnouncement(
-        records.length > 0
-          ? `Synchronized ${records.length} live OTLP production records.`
-          : 'Awaiting live OpenTelemetry (OTLP) stream...'
-      );
-    } catch {
-      setLiveAnnouncement('Unable to reach /api/v1/telemetry/recent; retrying on stream tick.');
+    );
+    if (!res.ok || !res.data) {
+      setLiveAnnouncement(res.error || `Telemetry sync returned HTTP ${res.status}.`);
+      return;
     }
+    const records = Array.isArray(res.data.records) ? res.data.records : [];
+    const w = workerRef.current;
+    await w.ingestLogsInChunks(records, Math.max(50, Math.min(400, records.length || 50)));
+    await w.refreshMetrics();
+    await w.computeBuckets(1);
+    await w.evaluateAnomalies(buildAnomalyRules(settingsRef.current));
+    setLiveAnnouncement(
+      records.length > 0
+        ? `Synchronized ${records.length} live OTLP production records.`
+        : 'Awaiting live OpenTelemetry (OTLP) stream...'
+    );
   }, []);
 
   // Install correlation fetch interceptor, hydrate settings, audit logs, and OTLP buffer once on mount
@@ -551,33 +585,68 @@ export const DashboardContainer: React.FC = () => {
         setClientOrigin(window.location.origin);
       }
       const saved = loadNeonChasmSettings();
-      setRuntimeSettings(saved);
+      const effectiveSettings: NeonChasmSettings = authSession?.tenant
+        ? {
+            ...saved,
+            tenantId: authSession.tenant.tenantId,
+            latencyWarnMs: authSession.tenant.latencyWarnMs,
+            latencyCritMs: authSession.tenant.latencyCritMs,
+            errorRateThresholdPct: authSession.tenant.errorRateThresholdPct,
+          }
+        : saved;
+      setRuntimeSettings(effectiveSettings);
       setAlertRules((prev) =>
         prev.map((rule) =>
           rule.id === 'rule-p99-latency'
-            ? { ...rule, threshold: saved.latencyCritMs, name: `P99 Latency SLA Breach (>${saved.latencyCritMs}ms)` }
+            ? {
+                ...rule,
+                threshold: effectiveSettings.latencyCritMs,
+                name: `P99 Latency SLA Breach (>${effectiveSettings.latencyCritMs}ms)`,
+              }
             : rule.id === 'rule-high-error-rate'
-            ? { ...rule, threshold: saved.errorRateThresholdPct, name: `Elevated 5xx Server Error Rate (>${saved.errorRateThresholdPct}%)` }
+            ? {
+                ...rule,
+                threshold: effectiveSettings.errorRateThresholdPct,
+                name: `Elevated 5xx Server Error Rate (>${effectiveSettings.errorRateThresholdPct}%)`,
+              }
             : rule
         )
       );
       void syncFromTelemetryEndpoint(500);
 
-      void fetch('/api/v1/audit/logs', { cache: 'no-store' })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((d: { logs?: AuditLogEvent[] } | null) => {
-          if (d && Array.isArray(d.logs) && d.logs.length > 0) {
-            setAuditLogs(d.logs);
-          }
-        })
-        .catch(() => {});
+      void safeApiFetchJson<{
+        logs?: Array<{
+          id: string;
+          timestamp: string;
+          actor: string;
+          action: string;
+          target: string;
+          prevHash: string;
+          entryHash: string;
+        }>;
+      }>('/api/v1/auth/audit').then((auditRes) => {
+        if (auditRes.ok && auditRes.data && Array.isArray(auditRes.data.logs) && auditRes.data.logs.length > 0) {
+          setAuditLogs(
+            auditRes.data.logs.map((entry) => ({
+              id: entry.id,
+              timestamp: new Date(entry.timestamp).getTime() || Date.now(),
+              actor: entry.actor,
+              action: entry.action,
+              targetResource: entry.target,
+              previousHash: entry.prevHash,
+              hash: entry.entryHash,
+              signature: 'sha256_chain_verified',
+            }))
+          );
+        }
+      });
     }, 0);
 
     return () => {
       window.clearTimeout(initTimer);
       uninstallInterceptor();
     };
-  }, [syncFromTelemetryEndpoint]);
+  }, [syncFromTelemetryEndpoint, authSession]);
 
   // Consume live WebSocket / SSE telemetry_tick records pushed from OTLP backend
   const lastProcessedEventTsRef = useRef<number>(0);
@@ -593,7 +662,15 @@ export const DashboardContainer: React.FC = () => {
     const payload = latestTickEvent.payload as { records?: ApiRequestLog[] } | undefined;
     if (payload && Array.isArray(payload.records) && payload.records.length > 0) {
       const existing = workerRef.current.getFilteredLogs(1500);
-      const merged = [...payload.records, ...existing].slice(0, 2000);
+      const seenIds = new Set<string>();
+      const merged: ApiRequestLog[] = [];
+      for (const rec of [...payload.records, ...existing]) {
+        if (!seenIds.has(rec.id)) {
+          seenIds.add(rec.id);
+          merged.push(rec);
+        }
+        if (merged.length >= 2000) break;
+      }
       const w = workerRef.current;
       void w.ingestLogsInChunks(merged, 200).then(() => {
         void w.refreshMetrics();
@@ -605,6 +682,110 @@ export const DashboardContainer: React.FC = () => {
       void syncFromTelemetryEndpoint(500);
     }
   }, [telemetryStream.recentEvents, syncFromTelemetryEndpoint]);
+
+  // Opt-in Live OTLP Microservice Traffic Simulator (Admin / Editor only; preserves 0 events on boot)
+  const activeTenantIdForSim = authSession?.tenant?.tenantId || '';
+  useEffect(() => {
+    const resetTimer = window.setTimeout(() => {
+      setIsSimulatingTraffic(false);
+    }, 0);
+    return () => window.clearTimeout(resetTimer);
+  }, [activeTenantIdForSim]);
+
+  useEffect(() => {
+    if (!isSimulatingTraffic || !canOperateWrite) {
+      return;
+    }
+
+    let cancelled = false;
+    const SERVICES = [
+      { service: 'api-gateway', endpoint: '/api/v1/orders', method: 'GET' },
+      { service: 'auth-service', endpoint: '/api/v1/auth/verify', method: 'POST' },
+      { service: 'checkout-engine', endpoint: '/api/v1/checkout/commit', method: 'POST' },
+      { service: 'inventory-db', endpoint: '/api/v1/inventory/reserve', method: 'PUT' },
+      { service: 'payment-relay', endpoint: '/api/v1/payments/authorize', method: 'POST' },
+    ];
+
+    const dispatchSimulatedBatch = async () => {
+      if (cancelled) return;
+      const endpoint = settingsRef.current.otlpEndpoint || '/api/v1/telemetry';
+      const batchSize = 4;
+      const traceId = createW3cTraceId();
+      const now = Date.now();
+      const spans = Array.from({ length: batchSize }, (_, idx) => {
+        const target = SERVICES[(Math.floor(now / 500) + idx) % SERVICES.length];
+        const isFault = Math.random() < 0.08;
+        const statusCode = isFault ? (Math.random() < 0.5 ? 503 : 500) : 200;
+        const durationMs = isFault
+          ? Math.round(260 + Math.random() * 240)
+          : Math.round(14 + Math.random() * 115);
+        return {
+          traceId,
+          spanId: createW3cTraceId().slice(0, 16),
+          name: `${target.method} ${target.endpoint}`,
+          method: target.method,
+          endpoint: target.endpoint,
+          statusCode,
+          durationMs,
+          service: target.service,
+          requestHeaders: {
+            authorization: 'Bearer sim_ephemeral_demo_token_001',
+            'x-api-key': 'nc_live_sim_demo_header_99',
+          },
+          timestamp: now + idx,
+        };
+      });
+
+      const res = await safeApiFetchJson<{ error?: string }>(endpoint, {
+        method: 'POST',
+        headers: buildCorrelationHeaders({
+          'Content-Type': 'application/json',
+          'X-Trace-ID': traceId,
+        }),
+        body: JSON.stringify({
+          source: 'live-microservice-simulator',
+          spans,
+        }),
+      });
+
+      if (cancelled) return;
+      if (!res.ok) {
+        setIsSimulatingTraffic(false);
+        setLiveAnnouncement(
+          res.error || `Live traffic simulator halted (HTTP ${res.status}).`
+        );
+        return;
+      }
+
+      await syncFromTelemetryEndpoint(500);
+    };
+
+    void dispatchSimulatedBatch();
+    const timer = window.setInterval(() => {
+      void dispatchSimulatedBatch();
+    }, 1500);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [isSimulatingTraffic, canOperateWrite, syncFromTelemetryEndpoint]);
+
+  const handleToggleTrafficSimulation = useCallback(() => {
+    if (!canOperateWrite) {
+      setLiveAnnouncement('Viewer role is read-only and cannot simulate OTLP traffic.');
+      return;
+    }
+    setIsSimulatingTraffic((prev) => {
+      const next = !prev;
+      setLiveAnnouncement(
+        next
+          ? 'Live Microservice OTLP traffic simulator started.'
+          : 'Live Microservice OTLP traffic simulator stopped.'
+      );
+      return next;
+    });
+  }, [canOperateWrite]);
 
   const handleSettingsApplied = useCallback(
     (next: NeonChasmSettings) => {
@@ -675,49 +856,48 @@ export const DashboardContainer: React.FC = () => {
   }, [syncFromTelemetryEndpoint]);
 
   const handleSendDiagnosticSpan = useCallback(async () => {
+    if (!canOperateWrite) {
+      setLiveAnnouncement('Viewer role cannot ingest telemetry spans.');
+      return;
+    }
     setIsSendingDiagnostic(true);
     const traceId = createW3cTraceId();
     const spanId = traceId.slice(0, 16);
     const endpoint = runtimeSettings.otlpEndpoint || '/api/v1/telemetry';
 
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: buildCorrelationHeaders({
-          'Content-Type': 'application/json',
-          'X-Trace-ID': traceId,
-        }),
-        body: JSON.stringify({
-          source: 'otlp-diagnostic-ping',
-          spans: [
-            {
-              traceId,
-              spanId,
-              name: 'GET /healthz (diagnostic-otlp-probe)',
-              method: 'GET',
-              endpoint: '/healthz',
-              statusCode: 200,
-              durationMs: 14,
-              service: 'neon-chasm-gateway',
-              timestamp: Date.now(),
-            },
-          ],
-        }),
-      });
+    const res = await safeApiFetchJson(endpoint, {
+      method: 'POST',
+      headers: buildCorrelationHeaders({
+        'Content-Type': 'application/json',
+        'X-Trace-ID': traceId,
+      }),
+      body: JSON.stringify({
+        source: 'otlp-diagnostic-ping',
+        spans: [
+          {
+            traceId,
+            spanId,
+            name: 'GET /healthz (diagnostic-otlp-probe)',
+            method: 'GET',
+            endpoint: '/healthz',
+            statusCode: 200,
+            durationMs: 14,
+            service: 'neon-chasm-gateway',
+            timestamp: Date.now(),
+          },
+        ],
+      }),
+    });
 
-      if (!res.ok) {
-        setLiveAnnouncement(`Diagnostic OTLP span rejected (HTTP ${res.status}).`);
-        return;
-      }
-
-      await syncFromTelemetryEndpoint(500);
-      setLiveAnnouncement(`Dispatched 1 real OTLP trace span (${traceId.slice(0, 12)}...).`);
-    } catch {
-      setLiveAnnouncement('Failed to dispatch diagnostic OTLP span.');
-    } finally {
-      setIsSendingDiagnostic(false);
+    setIsSendingDiagnostic(false);
+    if (!res.ok) {
+      setLiveAnnouncement(res.error || `Diagnostic OTLP span rejected (HTTP ${res.status}).`);
+      return;
     }
-  }, [runtimeSettings.otlpEndpoint, syncFromTelemetryEndpoint]);
+
+    await syncFromTelemetryEndpoint(500);
+    setLiveAnnouncement(`Dispatched 1 real OTLP trace span (${traceId.slice(0, 12)}...).`);
+  }, [canOperateWrite, runtimeSettings.otlpEndpoint, syncFromTelemetryEndpoint]);
 
   const otlpCurlSnippet = useMemo(() => {
     const targetUrl = runtimeSettings.otlpEndpoint.startsWith('http')
@@ -759,6 +939,14 @@ export const DashboardContainer: React.FC = () => {
       streamStatus={telemetryStream.status}
       streamTransport={telemetryStream.transport}
       onReconnectStream={telemetryStream.reconnect}
+      activeTenantName={authSession?.tenant?.name || activeWorkspace.name}
+      activeUserEmail={authSession?.user?.email}
+      activeRole={currentRole}
+      onOpenWorkspaceSwitcher={onOpenWorkspaceSwitcher}
+      onSignOut={onSignOut}
+      isSimulatingTraffic={isSimulatingTraffic}
+      canSimulateTraffic={canOperateWrite}
+      onToggleTrafficSimulation={handleToggleTrafficSimulation}
     >
       {/* Active View Switching: Overview KPIs & Telemetry Banner isolated exclusively to 'dashboard' */}
       {activeView === 'dashboard' ? (
@@ -1098,8 +1286,18 @@ export const DashboardContainer: React.FC = () => {
             <WorkspaceSelector
               workspaces={workspaces}
               activeWorkspace={activeWorkspace}
-              onSelectWorkspace={setActiveWorkspace}
+              onSelectWorkspace={(ws) => {
+                worker.resetAll();
+                setActiveWorkspace(ws);
+                if (onSwitchTenant) {
+                  void onSwitchTenant(ws.id);
+                }
+              }}
               onUpdateConfig={(wsId, updates) => {
+                if (!canAdministerTenant) {
+                  setLiveAnnouncement('Administrator role required to update tenant sovereignty settings.');
+                  return;
+                }
                 setWorkspaces((prev) =>
                   prev.map((w) => (w.id === wsId ? { ...w, ...updates } : w))
                 );
@@ -1117,9 +1315,13 @@ export const DashboardContainer: React.FC = () => {
               }}
               breakGlassRequests={breakGlassRequests}
               onRequestBreakGlass={(reason, scope) => {
+                if (!canOperateWrite) {
+                  setLiveAnnouncement('Viewer role cannot request JIT Break-Glass escalation.');
+                  return;
+                }
                 const newReq: BreakGlassRequest = {
                   id: `bg-${Date.now()}`,
-                  requesterEmail: 'admin@neonchasm.io',
+                  requesterEmail: authSession?.user?.email || 'operator@workspace',
                   reason,
                   requestedScope: scope,
                   status: 'pending',
@@ -1296,6 +1498,9 @@ export const DashboardContainer: React.FC = () => {
             timezone={preferences.timezone}
             onTimezoneChange={(tz) => updatePreference('timezone', tz)}
             onSettingsApplied={handleSettingsApplied}
+            authRole={currentRole}
+            activeTenant={authSession?.tenant || null}
+            onTelemetryPurged={handleResetMetrics}
           />
         </ErrorBoundary>
       )}
