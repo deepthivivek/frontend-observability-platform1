@@ -43,6 +43,6 @@ export async function GET(req: NextRequest) {
       freeMemoryPct: totalMem > 0 ? Number(((freeMem / totalMem) * 100).toFixed(2)) : 100,
       timestamp: Date.now(),
     },
-    { status: 200, headers: { 'X-Request-ID': requestId } }
+    { status: 200, headers: { 'X-Request-ID': requestId, 'Cache-Control': 'no-store' } }
   );
 }

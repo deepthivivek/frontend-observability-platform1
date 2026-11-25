@@ -71,6 +71,30 @@ interface ReadinessPayload {
   timestamp: number;
 }
 
+async function fetchProbeJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, {
+    credentials: 'include',
+    cache: 'no-store',
+  });
+
+  const contentType = res.headers.get('content-type') || '';
+  const isJson = contentType.toLowerCase().includes('application/json');
+
+  if (!res.ok || !isJson) {
+    const rawText = await res.text().catch(() => '');
+    const cleanSnippet = rawText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+    throw new Error(
+      `Probe failed for ${url} (HTTP ${res.status}, Content-Type: ${contentType || 'none'})${cleanSnippet ? `: ${cleanSnippet}` : ''}`
+    );
+  }
+
+  try {
+    return (await res.json()) as T;
+  } catch {
+    throw new Error(`Failed to parse JSON response from ${url} (HTTP ${res.status})`);
+  }
+}
+
 export const HealthDashboard: React.FC = () => {
   const [liveness, setLiveness] = useState<LivenessPayload | null>(null);
   const [readiness, setReadiness] = useState<ReadinessPayload | null>(null);
@@ -78,23 +102,18 @@ export const HealthDashboard: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchProbes = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const [healthRes, readyRes] = await Promise.all([
-        fetch('/healthz', { cache: 'no-store' }),
-        fetch('/readyz', { cache: 'no-store' }),
+      const [healthData, readyData] = await Promise.all([
+        fetchProbeJson<LivenessPayload>('/api/healthz'),
+        fetchProbeJson<ReadinessPayload>('/api/readyz'),
       ]);
 
-      if (!healthRes.ok && healthRes.status >= 500) {
-        throw new Error(`Liveness probe returned HTTP ${healthRes.status}`);
-      }
-
-      const healthData = (await healthRes.json()) as LivenessPayload;
-      const readyData = (await readyRes.json()) as ReadinessPayload;
       setLiveness(healthData);
       setReadiness(readyData);
       setErrorMessage(null);
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Unable to reach /healthz or /readyz');
+      setErrorMessage(err instanceof Error ? err.message : 'Unable to reach /api/healthz or /api/readyz');
     } finally {
       setIsLoading(false);
     }

@@ -1,98 +1,63 @@
-# The Neon Chasm — Multi-Tenant Observability & Autonomous SRE Platform
+# The Neon Chasm — API Monitoring & Telemetry Dashboard
 
-**The Neon Chasm** is a production-hardened, dual-theme full-stack observability, security, and autonomous SRE platform combining OpenTelemetry (OTLP) HTTP ingestion, WebGL/Three.js topological & omnitemporal visualizers, PromQL/LogQL query engines, tenant-scoped real-time SSE telemetry streaming, tamper-evident SHA-256 hash-chained audit logging, and the **Akasha-Omega Omnitemporal Core**.
-
----
-
-## Architecture & Security Model
-
-### Zero-Mock Clean Boot (`0` Events)
-- Newly booted instances and newly created company workspaces initialize cleanly with **`0` telemetry records**.
-- Data arrives strictly from real OTLP HTTP ingestion (`POST /api/v1/telemetry`), `scripts/emit-otlp.mjs`, an upstream OpenTelemetry Collector, or the opt-in **"Simulate Live Microservice Traffic"** toggle in the dashboard header (restricted to `admin` and `editor` roles).
-
-### Multi-Tenant Authentication, MFA & Isolation
-- **Strong Password Policy & Hashing**: Passwords require at least 12 characters with common/predictable pattern checks, hashed with Node `crypto.scryptSync` + per-user 16-byte random salts and verified via constant-time `crypto.timingSafeEqual`. Rotating a password revokes all other active sessions for that user. API keys (`nc_live_...`) are stored exclusively as SHA-256 hashes at rest.
-- **RFC 6238 TOTP MFA & Single-Use Recovery Codes**: Native Node `crypto` TOTP enrollment supports `±1` step clock skew, replay prevention (`lastTotpStepUsed`), and 8 single-use SHA-256 hashed backup recovery codes.
-- **Server-Enforced Step-Up Re-Authentication**: Destructive or high-privilege operations (API key rotation/revocation, promoting/removing an `admin`, purging tenant telemetry, disabling MFA, or deactivating a workspace) require fresh step-up verification via password or TOTP/recovery code (`403 STEP_UP_REQUIRED` until verified for the short 5-minute step-up window).
-- **Session Cookies & Lifetimes**: Server-signed (`HMAC-SHA256`) `httpOnly` session cookies enforce sliding idle timeouts (`30m` default) and absolute lifetimes (`24h` default), automatically adapting to HTTPS embedded frames (`SameSite=None; Secure; Partitioned`) and local HTTP (`SameSite=Lax`). Production (`NODE_ENV=production`) requires `SESSION_SECRET` (`>= 32` chars) with no hardcoded fallback.
-- **AES-256-GCM Field Encryption & Atomic Persistence**: Sensitive recoverable fields (TOTP secrets and SSRF-validated outbound webhook URLs) are encrypted at rest with `AES-256-GCM` keys derived via HKDF from `SESSION_SECRET`, persisted with `fs.fsyncSync` atomic temp writes (`0o750` directory / `0o600` file permissions).
-- **RBAC Enforcement**:
-  - `admin`: Full workspace governance, ingestion pause/resume kill-switch, per-tenant rate limits, member invitations, role updates (with `409 LAST_ADMIN_LOCKOUT` protection), and zero-downtime API key lifecycle management.
-  - `editor`: Telemetry ingestion, live traffic simulation, dashboard presets, and SLO threshold updates.
-  - `viewer`: Strictly read-only access across dashboards, logs, traces, and audit views (`403 ROLE_FORBIDDEN` on write/mutation endpoints).
-- **OTLP Secret & PII Redaction + Bounded SSE**: `/api/v1/telemetry` recursively scrubs credentials, bearer tokens, API keys, cookies, and sensitive fields (`authorization`, `x-api-key`, `password`, `token`, `nc_live_...`) to `"[REDACTED]"` before storing, broadcasting, or auditing, while `/api/v1/stream/telemetry` enforces per-tenant/global subscriber caps (`429 TOO_MANY_STREAMS`) and request abort cleanup.
-- **Zero-Downtime Key Rotation**: Rotating an API key preserves the previous key during a configurable grace period (default 60 minutes) before expiration, while immediate revocation invalidates the key instantly.
-- **Defense-in-Depth Headers & DAL Guards**:
-  - `poweredByHeader: false`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`, and a WebGL/Worker/AI-Studio-compatible `Content-Security-Policy`.
-  - Strict `Cache-Control: private, no-store, max-age=0` + `Vary: Cookie, Authorization, X-Tenant-ID` on authenticated endpoints.
-  - Rejection of spoofed `x-middleware-subrequest` headers (`403 FORBIDDEN_INTERNAL_HEADER`), cross-tenant `X-Tenant-ID` mismatches (`403 TENANT_FORBIDDEN`), invalid CSRF `Origin` headers (`403 CSRF_FORBIDDEN`), and brute-force login attempts (`429 RATE_LIMITED` + `Retry-After`).
-- **Hash-Chained Audit Trail**: Sensitive tenant actions append immutable entries linked via `SHA-256(timestamp | tenantId | actor | action | target | requestId | prevHash)` and expose live chain verification via `GET /api/v1/auth/audit`.
+**The Neon Chasm** is an interactive Next.js 15 App Router observability dashboard for API endpoint monitoring, rolling latency/error analytics, request logs, and anomaly triage—paired with hardened multi-tenant authentication (`/login`) and OTLP ingestion routes (`/api/v1/*`).
 
 ---
 
-## Quickstart (Local)
+## Quickstart & Commands
 
 ```bash
-cp .env.example .env
-npm ci
-npm run dev
+npm install
+npm run dev        # Start Next.js dev server on http://127.0.0.1:3000
+npm test           # Run Vitest + React Testing Library unit & component tests
+npm run lint       # Run ESLint across the repository
+npm run build      # Build production Next.js standalone bundle
+npm run test:security  # Run multi-tenant isolation, RBAC, key rotation & audit checks
 ```
 
-Open `http://127.0.0.1:3000`:
-1. Register your initial company workspace (or accept a single-use invite token).
-2. Create a scoped API key (`ingest:write`, `telemetry:read`) in **Settings & Access Control**.
-3. Stream real OTLP payloads or toggle **Simulate Live Microservice Traffic** in the header.
-
-### Emit Live OTLP Telemetry from CLI
+Type-checking:
 
 ```bash
-node scripts/emit-otlp.mjs \
-  --key nc_live_your_generated_key \
-  --url http://127.0.0.1:3000/api/v1/telemetry \
-  --interval 1500
-```
-
-### OpenTelemetry Collector Configuration Snippet
-
-```yaml
-exporters:
-  otlphttp/neon_chasm:
-    endpoint: http://127.0.0.1:3000/api/v1/telemetry
-    headers:
-      Authorization: "Bearer ${NEON_CHASM_API_KEY}"
-
-service:
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp/neon_chasm]
-    logs:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp/neon_chasm]
+npx tsc --noEmit
 ```
 
 ---
 
-## Verification & Quality Gates
+## Dashboard Architecture & Data Layer
 
-```bash
-npx tsc --noEmit        # Strict TypeScript check
-npm run lint            # ESLint zero-warning check
-npm run build           # Production Next.js standalone build
-npm run test:security   # Automated multi-tenant isolation, RBAC, rotation & audit suite
-```
+- **TanStack Query + Zod Validation (`src/lib/metrics.ts`, `app/providers.tsx`)**:
+  - The root layout mounts a client `QueryClientProvider` configured with `retry: 1`.
+  - Every query fetches from `/api/metrics` and parses the JSON response through strict **Zod** schemas (`DashboardMetricsSchema`, `StatMetricSchema`, `PerformancePointSchema`, `EndpointRowSchema`), ensuring both HTTP errors and malformed responses trigger TanStack Query's `isError` state.
+  - Query flags `?simulateError=1` and `?empty=1` on any dashboard route are forwarded directly to `/api/metrics` so loading skeletons (`role="status"`), error recovery (`role="alert"` + **Retry** button), and empty states (`"No telemetry data available"`) can be verified live.
+  - Whenever synthetic telemetry is active, an explicit **Demo data** badge is displayed in the header.
+- **6-Section Multi-Route Navigation (`src/components/layout/AppShell.tsx`)**:
+  - `Overview` (`/`)
+  - `Endpoints` (`/endpoints`)
+  - `Analytics` (`/analytics`)
+  - `Request Logs` (`/logs`)
+  - `Anomalies` (`/anomalies`)
+  - `Settings` (`/settings`, including `/api/healthz` and `/api/readyz` probe panels)
+  - Workspace multi-tenant authentication remains accessible at `/login`.
 
 ---
 
-## Docker Production Deployment
+## Filtering, URL Synchronization & Trend Polarity
 
-```bash
-docker compose up --build
-```
+- **Pure Filtering & Derived Summaries (`src/lib/filterEndpoints.ts`)**:
+  - `filterAndSortEndpoints(endpoints, { query, status, sort })` performs case-insensitive substring matching across `name`, `path`, and `method`, filters by `All | Healthy | Warning | Failed`, and sorts by `responseTimeMs` (`none`, `asc`, `desc`) without mutating input arrays.
+  - `calculateDashboardSummary(endpoints)` derives `totalEndpoints`, `healthyCount`, `warningCount`, `failedCount`, `healthyRatePercent` (rounded to 1 decimal place), and `averageResponseTimeMs`.
+- **URL Query Sync (`src/components/UrlSyncedEndpointTable.tsx`)**:
+  - Search (`q`), status (`status`), and sort order (`sort`) synchronize via `useSearchParams()`, `usePathname()`, and `useRouter().replace(..., { scroll: false })` inside `<Suspense>` boundaries, sanitizing invalid query parameters and preserving unrelated flags (`simulateError`, `empty`).
+- **Direction-Aware Trend Polarity (`getDeltaPresentation`)**:
+  - Metrics marked `higherIsBetter: true` (throughput, uptime) render positive changes in emerald (`↑`) and negative changes in rose (`↓`).
+  - Metrics marked `higherIsBetter: false` (response latency, error rate) invert color polarity so reductions (`↓`) render in emerald and increases (`↑`) render in rose; `0%` renders neutral slate (`→`).
 
-- Persistent workspace auth state, API key hashes, audit chains, and buffered tenant telemetry persist under `./data` mounted to `/app/data` (`DATA_DIR=/app/data`).
-- Health & self-telemetry readiness endpoints:
-  - `GET /healthz` — Liveness probe
-  - `GET /readyz` — Readiness + platform self-telemetry (`activeSseSubscribers`, `estimatedBufferBytes`, `ingestionEventsPerSec`, `authChecksDenied`)
+---
+
+## Accessibility (`a11y`) & Testing
+
+- Semantic landmarks (`<nav aria-label="Primary navigation">`, `<main>`), `<Link>` navigation with `aria-current="page"`, visible `:focus-visible` focus rings, native `<button>` controls with `aria-pressed`, accessible notification popover (`aria-label="Notifications"`), and semantic `<table>` headers with dynamic `aria-sort="ascending" | "descending" | "none"`.
+- Automated test suite (`vitest.config.ts`, `src/test/setup.ts`):
+  - `src/lib/filterEndpoints.test.ts` — pure filtering, sorting, summary calculations, and URL param sanitization.
+  - `src/lib/metrics.test.ts` — direction-aware polarity helper, Zod schema validation, and error handling.
+  - `src/components/EndpointTable.test.tsx` — interactive React Testing Library + `userEvent` tests for search, clear, status filters, sorting, `aria-sort`, and filter reset.

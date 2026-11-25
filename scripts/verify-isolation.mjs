@@ -159,10 +159,23 @@ async function runSuite() {
       const vary = (sessRes.headers.get('vary') || '').toLowerCase();
       assert.ok(vary.includes('cookie') && vary.includes('authorization') && vary.includes('x-tenant-id'));
 
+      const { res: healthRes, body: healthBody } = await reqJson(baseUrl, '/healthz');
+      assert.equal(healthRes.status, 200);
+      assert.equal(healthBody.status, 'healthy');
+
+      const { res: apiHealthRes, body: apiHealthBody } = await reqJson(baseUrl, '/api/healthz');
+      assert.equal(apiHealthRes.status, 200);
+      assert.equal(apiHealthBody.status, 'healthy');
+
       const { res: readyRes, body: readyBody } = await reqJson(baseUrl, '/readyz');
       assert.equal(readyRes.status, 200);
+      assert.equal(readyBody.status, 'READY');
       assert.equal(readyBody.platformTelemetry.totalBufferedRecords, 0);
-      logStep('Security headers, anti-cache Vary, and 0-event clean boot');
+
+      const { res: apiReadyRes, body: apiReadyBody } = await reqJson(baseUrl, '/api/readyz');
+      assert.equal(apiReadyRes.status, 200);
+      assert.equal(apiReadyBody.status, 'READY');
+      logStep('Security headers, anti-cache Vary, probe endpoints (/healthz, /api/healthz, /readyz, /api/readyz), and 0-event clean boot');
     }
 
     // 2. Unauthenticated 401 & Spoofed Internal Header 403 Checks
